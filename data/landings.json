@@ -1,6 +1,6 @@
 {
  "v": 1,
- "updated": "2026-10-24T13:18:46.897Z",
+ "updated": "2026-10-24T13:25:08.647Z",
  "visited": {
   "LKSU": {
    "date": "2026-09-10",
@@ -84,6 +84,11 @@
    "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/hodkovice-mvmfd2qn.jpg",
    "photoPath": "photos/hodkovice-mvmfd2qn.jpg",
    "ts": 1792847925027
+  },
+  "LKLB": {
+   "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/liberec-mvmfl8fe.jpg",
+   "photoPath": "photos/liberec-mvmfl8fe.jpg",
+   "ts": 1792848306801
   }
  },
  "tomb": {
