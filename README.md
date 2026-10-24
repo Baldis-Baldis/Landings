@@ -10,4 +10,5 @@ Interaktivní mapa letišť a SLZ ploch v ČR s odškrtáváním, kde jsem přis
 ## Na telefon
 iPhone: Safari → Sdílet → Přidat na plochu. Android: Chrome → menu → Přidat na plochu / Instalovat.
 
-Data: seznam letišť a ploch SLZ z VFR příručky ŘLP ČR (aim.rlp.cz, WEF 03 SEP 2026), souřadnice OurAirports (CC0). Aktualizace: porovnat seznam s aktuální VFR příručkou po každém AIRAC cyklu. Odškrtnutí se ukládají v prohlížeči (localStorage) – použij Export zálohy před změnou zařízení.
+Data: seznam letišť a ploch SLZ z VFR příručky ŘLP ČR (aim.rlp.cz, WEF 03 SEP 2026), souřadnice OurAirports (CC0). Aktualizace: porovnat seznam s aktuální VFR příručkou po každém AIRAC cyklu. ## Synchronizace mezi zařízeními
+Záznamy se ukládají do `data/landings.json` v tomto repozitáři. Na každém zařízení jednou klepni na **GitHub sync** a vlož fine-grained token (jen tento repozitář, Contents: Read and write). Bez tokenu aplikace data jen zobrazí (čtení), změny zůstanou v zařízení. Synchronizace proběhne při otevření, po každé změně a po návratu do aplikace; ručně tlačítkem ⟳.
