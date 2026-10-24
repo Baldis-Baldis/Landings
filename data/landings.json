@@ -1,6 +1,6 @@
 {
  "v": 1,
- "updated": "2026-10-24T11:34:19.646Z",
+ "updated": "2026-10-24T11:35:29.467Z",
  "visited": {
   "LKSU": {
    "date": "2026-09-10",
@@ -60,7 +60,20 @@
    "ts": 1792841657683
   }
  },
- "custom": {},
+ "custom": {
+  "CMVMBOAGA": {
+   "code": "CMVMBOAGA",
+   "name": "New strip",
+   "lat": 49.52521,
+   "lon": 14.41956,
+   "elev": "",
+   "town": "",
+   "custom": true,
+   "desc": "",
+   "photo": "",
+   "ts": 1792841727467
+  }
+ },
  "tomb": {
   "c:CMTVXY930": 1792841620453,
   "v:CMTVXY930": 1792841620453
