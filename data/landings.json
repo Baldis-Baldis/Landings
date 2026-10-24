@@ -1,7 +1,11 @@
 {
  "v": 1,
- "updated": "2026-10-24T11:27:37.048Z",
+ "updated": "2026-10-24T11:28:51.782Z",
  "visited": {
+  "CMTVXY930": {
+   "date": "2026-09-10",
+   "note": ""
+  },
   "LKSU": {
    "date": "2026-09-10",
    "note": ""
@@ -55,6 +59,20 @@
    "note": ""
   }
  },
- "custom": {},
+ "custom": {
+  "CMTVXY930": {
+   "code": "CMTVXY930",
+   "name": "TEST",
+   "lat": 50.407,
+   "lon": 14.32388,
+   "elev": "",
+   "town": "",
+   "custom": true,
+   "desc": "",
+   "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/test-mvmbfr12.jpg",
+   "photoPath": "photos/test-mvmbfr12.jpg",
+   "ts": 1792841331782
+  }
+ },
  "tomb": {}
 }
