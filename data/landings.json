@@ -1,6 +1,6 @@
 {
  "v": 1,
- "updated": "2026-10-25T09:59:38.100Z",
+ "updated": "2026-10-25T12:31:01.928Z",
  "visited": {
   "LKSU": {
    "date": "2026-09-10",
@@ -71,27 +71,40 @@
    "town": "",
    "custom": true,
    "desc": "",
-   "photo": "",
-   "ts": 1792844466175
+   "ts": 1792844466175,
+   "pics": []
   }
  },
  "photos": {
   "LKHK": {
-   "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/hradec-kr-lov-mvme2buc.jpg",
-   "photoPath": "photos/hradec-kr-lov-mvme2buc.jpg",
+   "pics": [
+    {
+     "url": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/hradec-kr-lov-mvme2buc.jpg",
+     "path": "photos/hradec-kr-lov-mvme2buc.jpg"
+    }
+   ],
    "ts": 1792845743745
   },
   "LKHD": {
-   "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/hodkovice-mvmfd2qn.jpg",
-   "photoPath": "photos/hodkovice-mvmfd2qn.jpg",
+   "pics": [
+    {
+     "url": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/hodkovice-mvmfd2qn.jpg",
+     "path": "photos/hodkovice-mvmfd2qn.jpg"
+    }
+   ],
    "ts": 1792847925027
   },
   "LKLB": {
-   "photo": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/liberec-mvmfl8fe.jpg",
-   "photoPath": "photos/liberec-mvmfl8fe.jpg",
+   "pics": [
+    {
+     "url": "https://raw.githubusercontent.com/Baldis-Baldis/Landings/main/photos/liberec-mvmfl8fe.jpg",
+     "path": "photos/liberec-mvmfl8fe.jpg"
+    }
+   ],
    "ts": 1792848306801
   }
  },
+ "flags": {},
  "tomb": {
   "c:CMTVXY930": 1792841620453,
   "v:CMTVXY930": 1792841620453,
