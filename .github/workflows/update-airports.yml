@@ -1,0 +1,45 @@
+# Monthly refresh of foreign airfields, runways and frequencies from OurAirports.
+# Runs on the 2nd of every month and can be started by hand (Actions -> Update airfield data -> Run workflow).
+name: Update airfield data
+ 
+on:
+  schedule:
+    - cron: "23 4 2 * *"
+  workflow_dispatch:
+ 
+permissions:
+  contents: write
+ 
+concurrency:
+  group: update-airfield-data
+  cancel-in-progress: false
+ 
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+ 
+      - name: Download and rebuild data
+        run: python update_airports.py
+ 
+      - name: Commit if something changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/airports-eu.json data/airport-info.json
+          if git diff --cached --quiet; then
+            echo "No changes in OurAirports data."
+            exit 0
+          fi
+          git commit -m "Monthly airfield data update (OurAirports)"
+          # the app may have synced landings meanwhile - rebase onto it and retry a few times
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push && exit 0
+            sleep 10
+          done
+          exit 1
