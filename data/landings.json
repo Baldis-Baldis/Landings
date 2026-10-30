@@ -1,6 +1,6 @@
 {
  "v": 1,
- "updated": "2026-10-30T12:55:46.967Z",
+ "updated": "2026-10-30T12:58:36.738Z",
  "visited": {
   "LKSU": {
    "date": "2026-09-10",
@@ -73,20 +73,7 @@
    "ts": 1793364302183
   }
  },
- "custom": {
-  "CMVMDAZNJ": {
-   "code": "CMVMDAZNJ",
-   "name": "Nová plocha",
-   "lat": 50.31842,
-   "lon": 15.91679,
-   "elev": "",
-   "town": "",
-   "custom": true,
-   "desc": "",
-   "ts": 1793364302183,
-   "pics": []
-  }
- },
+ "custom": {},
  "photos": {
   "LKHK": {
    "pics": [
@@ -167,6 +154,7 @@
   "v:CMTVXY930": 1792841620453,
   "c:CMVMBOAGA": 1792841741318,
   "v:LKKO": 1792849342356,
-  "f:LKBE": 1792931509931
+  "f:LKBE": 1792931509931,
+  "c:CMVMDAZNJ": 1793365114736
  }
 }
