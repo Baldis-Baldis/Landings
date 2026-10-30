@@ -397,7 +397,7 @@ function clusterLayer(){
 }
 function addMarker(a,batch){
   const m=L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2});
-  m._code=a.code;
+  m._code=a.code; m._hidden=false;
   if(a.cc&&a.cc!=='CZ'){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
   m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]}); markers[a.code]=m; style(a);
 }
@@ -549,6 +549,7 @@ function placeCustom(lat,lon){
   const code='C'+Date.now().toString(36).toUpperCase();
   const a={code,name:t('newStripDefault'),lat:Math.round(lat*100000)/100000,lon:Math.round(lon*100000)/100000,elev:'',town:'',custom:true,desc:'',pics:[]};
   custom[code]=a; saveCustom(a); refreshTotal();
+  if(!['all','custom','todo'].includes(f.value)) f.value='all'; // a new strip must stay visible on the map
   if(map){ addMarker(a); map.setView([lat,lon],13); markers[code].openPopup(); }
   addMode=false; addBtn.classList.remove('on'); addHint.style.display='none';
   document.getElementById('map').classList.remove('addmode');
@@ -565,19 +566,46 @@ function deleteCustom(a){
 }
 
 const list=document.getElementById('list'), q=document.getElementById('q'), f=document.getElementById('f');
-q.oninput=render; f.onchange=render;
+q.oninput=render;
+f.onchange=()=>{
+  render();
+  // zoom the map to what the filter shows
+  if(!map||f.value==='all') return;
+  const pts=allData().filter(a=>matchesFilter(a,f.value)).map(a=>[a.lat,a.lon]);
+  if(pts.length) map.fitBounds(pts,{padding:[30,30],maxZoom:10});
+};
+function matchesFilter(a,mode){
+  const k=kind(a);
+  if(mode==='icao')return k==='icao'; if(mode==='slz')return k==='slz'; if(mode==='custom')return k==='custom';
+  if(mode==='done')return !!visited[a.code]; if(mode==='todo')return !visited[a.code];
+  if(mode==='fav')return !!(flags[a.code]||{}).fav; if(mode==='want')return !!(flags[a.code]||{}).want; return true;
+}
+// the map shows only what the filter selects (search text filters just the list)
+function applyMapFilter(data,mode){
+  if(!map) return;
+  const addC=[], remC=[];
+  data.forEach(a=>{
+    const m=markers[a.code]; if(!m) return;
+    const show=matchesFilter(a,mode); if(m._hidden===!show) return;
+    m._hidden=!show;
+    if(a.cc&&a.cc!=='CZ'){ (show?addC:remC).push(m); }
+    else if(show) m.addTo(map); else map.removeLayer(m);
+  });
+  if(cluster){
+    if(remC.length) cluster.removeLayers?cluster.removeLayers(remC):remC.forEach(m=>cluster.removeLayer(m));
+    if(addC.length) cluster.addLayers?cluster.addLayers(addC):addC.forEach(m=>cluster.addLayer(m));
+  }
+}
 function render(){
   const data=allData();
   document.getElementById('cnt').textContent=data.filter(a=>visited[a.code]).length;
   const s=q.value.trim().toLowerCase(), mode=f.value;
   list.innerHTML='';
   const frag=document.createDocumentFragment();
+  applyMapFilter(data,mode);
   data.filter(a=>{
     if(s&&!(a.name.toLowerCase().includes(s)||(a.custom?(a.short||''):a.code).toLowerCase().includes(s)||(a.town||'').toLowerCase().includes(s))) return false;
-    const k=kind(a);
-    if(mode==='icao')return k==='icao'; if(mode==='slz')return k==='slz'; if(mode==='custom')return k==='custom';
-    if(mode==='done')return !!visited[a.code]; if(mode==='todo')return !visited[a.code];
-    if(mode==='fav')return !!(flags[a.code]||{}).fav; if(mode==='want')return !!(flags[a.code]||{}).want; return true;
+    return matchesFilter(a,mode);
   }).forEach(a=>{
     const v=visited[a.code], k=kind(a);
     const r=document.createElement('div');r.className='row'+(v?' done':'');
