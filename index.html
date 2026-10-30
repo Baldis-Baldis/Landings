@@ -48,6 +48,9 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .legend{display:flex;gap:14px;padding:6px 14px;font-size:12px;color:var(--ink2);background:var(--paper);border-bottom:1px solid var(--line);flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .legend::-webkit-scrollbar{display:none}
 .legend>span{flex:0 0 auto}
+.pin{filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.pin svg{display:block}
+.legend .lpin{display:inline-block;width:10px;height:14px;margin-right:5px;vertical-align:-2px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
 .addbtn{font:600 20px/1 Barlow,sans-serif;width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;flex:0 0 auto}
 .addbtn.on{background:var(--custom);color:#fff;border-color:var(--custom)}
@@ -145,12 +148,13 @@ footer .status:empty{display:none}
 <button id="addbtn" class="addbtn" title="">+</button>
 </div>
 <div id="ccpanel"></div>
-<div class="legend"><span><i style="background:var(--icao)"></i><span data-i data-t="icao"></span></span><span><i style="background:var(--slz)"></i><span data-i data-t="slz"></span></span><span><i style="background:var(--custom)"></i><span data-i data-t="custom"></span></span><span><i style="background:var(--done)"></i><span data-i data-t="landed"></span></span><span><i style="background:var(--want)"></i><span data-i data-t="want"></span></span><span><i style="background:#fff;box-shadow:0 0 0 2px var(--fav) inset"></i><span data-i data-t="fav"></span></span></div>
+<div class="legend"><span><i style="background:var(--icao)"></i><span data-i data-t="icao"></span></span><span><i style="background:var(--slz)"></i><span data-i data-t="slz"></span></span><span><i style="background:var(--custom)"></i><span data-i data-t="custom"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinG)" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg><span data-i data-t="landed"></span></span><span><i style="background:var(--want)"></i><span data-i data-t="want"></span></span><span><i style="background:#fff;box-shadow:0 0 0 2px var(--fav) inset"></i><span data-i data-t="fav"></span></span></div>
 <p id="addhint" style="display:none;margin:0;padding:6px 14px;font-size:12.5px;background:#FFF3E0;color:var(--ink)" data-i data-t="addHint"></p>
 <div id="list"></div>
 <footer><button id="syncbtn" class="sync">⟳ <span id="syncst"></span></button><span class="status" id="st"></span><button id="morebtn" type="button" aria-haspopup="true">⋯</button><div id="menu" role="menu"><button id="gh" type="button" data-i data-t="ghBtn"></button><button id="exp" type="button" data-i data-t="export"></button><button id="imp" type="button" data-i data-t="import"></button><div class="src" data-i data-t="src"></div></div><input id="file" type="file" accept=".json" hidden></footer>
 </div>
 </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="pinG" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#5fd39a"/><stop offset=".45" stop-color="#22955c"/><stop offset="1" stop-color="#0d4f2f"/></radialGradient><radialGradient id="pinGold" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".5" stop-color="#d9a514"/><stop offset="1" stop-color="#7a5600"/></radialGradient></defs></svg>
 <div id="lightbox"><img alt=""><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
@@ -472,11 +476,33 @@ function infoHtml(a){
   if(fq.length) h+=`<h4>${t('freqs')}</h4>`+fq.map(f=>`<div><span class="mhz">${esc(f[2])}</span><span>${esc(f[0])}${f[1]&&f[1].toUpperCase()!==f[0]?` <span class="d">${esc(f[1])}</span>`:''}</span></div>`).join('');
   return h+`<p>${t('aiNote')}</p></div></details>`;
 }
+// landed airfields get a small green pin, the others a ring
+function pinIcon(fav){
+  // 3D green pin with a white aircraft; favourites are gold
+  return L.divIcon({className:'pin',iconSize:[22,30],iconAnchor:[11,26],popupAnchor:[0,-24],
+    html:`<svg width="22" height="30" viewBox="0 0 24 34"><ellipse cx="12" cy="31.5" rx="5" ry="1.9" fill="rgba(0,0,0,.28)"/><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#${fav?'pinGold':'pinG'})" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg>`});
+}
+function newMarker(a){
+  const landed=!!visited[a.code];
+  const m=landed?L.marker([a.lat,a.lon],{icon:pinIcon(!!(flags[a.code]||{}).fav),keyboard:false,riseOnHover:true})
+                :L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2});
+  m._code=a.code; m._hidden=false; m._pin=landed; m._fav=!!(flags[a.code]||{}).fav;
+  m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]});
+  return m;
+}
+function isForeign(a){ return !!(a.cc&&a.cc!=='CZ'); }
 function addMarker(a,batch){
-  const m=L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2});
-  m._code=a.code; m._hidden=false;
-  if(a.cc&&a.cc!=='CZ'){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
-  m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]}); markers[a.code]=m; style(a);
+  const m=newMarker(a);
+  if(isForeign(a)){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
+  markers[a.code]=m; style(a);
+}
+function swapMarker(a){
+  const old=markers[a.code]; if(!old) return;
+  const wasOpen=old.isPopupOpen&&old.isPopupOpen(), hidden=old._hidden;
+  const m=newMarker(a); m._hidden=hidden; markers[a.code]=m;
+  if(isForeign(a)){ const c=clusterLayer(); if(c.hasLayer(old)) c.removeLayer(old); if(!hidden) c.addLayer(m); }
+  else { if(old._map) map.removeLayer(old); if(!hidden) m.addTo(map); }
+  if(wasOpen&&!hidden) setTimeout(()=>{ if(m._map) m.openPopup(); },0);
 }
 function showOnMap(a){
   const m=markers[a.code]; if(!map||!m) return;
@@ -524,14 +550,16 @@ function renderCC(){
 }
 ccBtn.onclick=()=>ccPanel.classList.toggle('on');
 function style(a){
-  if(!markers[a.code]) return;
+  let m=markers[a.code]; if(!m) return;
   const v=visited[a.code], colors={icao:'#C4177C',slz:'#2C64B5',custom:'#8A5A2B'};
   const fl=flags[a.code]||{};
+  if(m._pin!==!!v){ swapMarker(a); m=markers[a.code]; }
+  if(m._pin){ if(m._fav!==!!fl.fav){ m._fav=!!fl.fav; m.setIcon(pinIcon(m._fav)); } return; }
   const st=v?{color:'#1E7B4B',fillColor:'#1E7B4B',fillOpacity:1,weight:2}
             :fl.want?{color:colors[kind(a)],fillColor:'#E07B00',fillOpacity:1,weight:2}
             :{color:colors[kind(a)],fillColor:'#fff',fillOpacity:.9,weight:2};
   if(fl.fav){ st.color='#D4A017'; st.weight=4; }
-  markers[a.code].setStyle(st);
+  m.setStyle(st);
 }
 // cluster bubbles turn green when they contain a landed airfield – recompute after changes
 function refreshClusters(){ if(cluster&&cluster.refreshClusters) cluster.refreshClusters(); }
