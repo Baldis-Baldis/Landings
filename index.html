@@ -261,8 +261,8 @@ function refreshMarkerPopup(a){ setTimeout(()=>{ const m=markers[a.code]; if(m) 
 // --- GitHub photo storage ---
 const GHKEY='gh-token';
 function ghRepo(){
-  const owner=location.hostname.split('.')[0], repo=location.pathname.split('/').filter(Boolean)[0]||'';
-  return {owner,repo};
+  // fixed repo – the app runs on its own domain (mylandings.net), so it can't be derived from the URL
+  return {owner:'Baldis-Baldis',repo:'Landings'};
 }
 function ghToken(){ return localStorage.getItem(GHKEY)||''; }
 document.getElementById('gh').onclick=()=>{
@@ -371,7 +371,7 @@ function syncLabel(){
 }
 function schedulePush(){ if(!ghToken()) return; clearTimeout(pushTimer); pushTimer=setTimeout(syncNow,1500); }
 async function syncNow(){
-  if(!/^https?:/.test(location.protocol)||!location.hostname.endsWith('github.io')) return;
+  if(!/^https?:/.test(location.protocol)) return;
   if(syncBusy){ syncAgain=true; return; }
   syncBusy=true; clearTimeout(pushTimer); setSync('busy',t('syncing'));
   try{
