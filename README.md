@@ -12,3 +12,7 @@ iPhone: Safari → Sdílet → Přidat na plochu. Android: Chrome → menu → P
 
 Data: seznam letišť a ploch SLZ z VFR příručky ŘLP ČR (aim.rlp.cz, WEF 03 SEP 2026), souřadnice OurAirports (CC0). Aktualizace: porovnat seznam s aktuální VFR příručkou po každém AIRAC cyklu. ## Synchronizace mezi zařízeními
 Záznamy se ukládají do `data/landings.json` v tomto repozitáři. Na každém zařízení jednou klepni na **GitHub sync** a vlož fine-grained token (jen tento repozitář, Contents: Read and write). Bez tokenu aplikace data jen zobrazí (čtení), změny zůstanou v zařízení. Synchronizace proběhne při otevření, po každé změně a po návratu do aplikace; ručně tlačítkem ⟳.
+
+## Okolní státy
+Tlačítko 🌍 vedle filtru přidá nebo skryje Slovensko, Německo, Polsko a Rakousko. Česko je zobrazené vždy. Zahraniční letiště jsou v `data/airports-eu.json` – výběr z databáze OurAirports (public domain, https://ourairports.com/data/), stav k 30. 10. 2026. U malých ploch může být neúplná. Výběr zemí si pamatuje každé zařízení zvlášť; přistání, fotky a značky se synchronizují vždy.
+
