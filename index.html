@@ -243,7 +243,10 @@ function compressImage(file,maxW=900,quality=0.72){
     reader.readAsDataURL(file);
   });
 }
-function refreshMarkerPopup(a){ if(markers[a.code]) markers[a.code].setPopupContent(popup(a)); }
+// keep the card as a builder function, so it is always rebuilt in the current language.
+// Rebuild only after the current tap has finished: replacing the tapped button mid-click
+// makes Leaflet treat it as a click on the map and close the card.
+function refreshMarkerPopup(a){ setTimeout(()=>{ const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); },0); }
 
 // --- GitHub photo storage ---
 const GHKEY='gh-token';
