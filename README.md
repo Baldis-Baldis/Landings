@@ -16,3 +16,8 @@ Záznamy se ukládají do `data/landings.json` v tomto repozitáři. Na každém
 ## Okolní státy
 Tlačítko 🌍 vedle filtru přidá nebo skryje Slovensko, Německo, Polsko a Rakousko. Česko je zobrazené vždy. Zahraniční letiště jsou v `data/airports-eu.json` – výběr z databáze OurAirports (public domain, https://ourairports.com/data/), stav k 30. 10. 2026. U malých ploch může být neúplná. Výběr zemí si pamatuje každé zařízení zvlášť; přistání, fotky a značky se synchronizují vždy.
 
+## Dráhy a frekvence + měsíční aktualizace
+V okně letiště je sekce „Dráhy a frekvence“ (jen informativní) z `data/airport-info.json`.
+Soubory `data/airports-eu.json` a `data/airport-info.json` vytváří skript `update_airports.py` z dat OurAirports.
+GitHub Action `.github/workflows/update-airports.yml` ho spouští automaticky 2. den v měsíci a změny sám commitne; ručně: Actions → Update airfield data → Run workflow.
+
