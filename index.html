@@ -100,7 +100,7 @@ footer .sync.busy{opacity:.6}
 #app.maponly #map{height:auto;flex:1 1 auto;margin-bottom:env(safe-area-inset-bottom)}
 .mapbtn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:#fff;border:0;cursor:pointer;color:var(--ink);padding:0}
 .mapbtn svg{width:18px;height:18px}
-@media (min-width:900px){#app{flex-direction:row;flex-wrap:wrap}header{width:100%}#map{height:auto;flex:1 1 55%}#app.maponly #map{flex:1 1 100%}.side{flex:1 1 45%;max-width:520px;height:calc(100dvh - 55px)}}
+@media (min-width:900px){#app{flex-direction:row;flex-wrap:wrap;align-content:flex-start}header{flex:0 0 100%;width:100%}#map{height:calc(100dvh - var(--hh,55px));flex:1 1 300px;min-width:0}.side{flex:0 0 min(45%,520px);height:calc(100dvh - var(--hh,55px))}#app.maponly{flex-direction:column;flex-wrap:nowrap}#app.maponly header{flex:0 0 auto}#app.maponly #map{flex:1 1 auto;width:100%;height:auto;min-height:0}}
 </style>
 </head>
 <body>
@@ -408,6 +408,9 @@ function clusterLayer(){
 }
 const ICON_EXPAND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 const ICON_LIST='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>';
+// keep the wide (tablet/PC) layout exact: the panels fill the height under the header
+function measureHeader(){ document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px'); if(map) map.invalidateSize(); }
+window.addEventListener('resize',measureHeader); window.addEventListener('orientationchange',()=>setTimeout(measureHeader,300));
 function setMapOnly(on,quiet){
   const app=document.getElementById('app'); app.classList.toggle('maponly',on);
   const b=document.getElementById('maponlybtn');
@@ -657,6 +660,7 @@ document.getElementById('file').onchange=async e=>{
   }catch(err){ status(t('bad')); }
 };
 applyLang();
+measureHeader();
 setMapOnly((()=>{ try{ return localStorage.getItem('maponly')==='1'; }catch(e){ return false; } })(),true);
 applyCountries();
 document.getElementById('syncbtn').title=t('syncTitle');
