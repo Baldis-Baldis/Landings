@@ -1,0 +1,36 @@
+# The repo is public and GitHub Pages serves every file in it.
+# Keep this list in sync with BLOCKED_FILES in tools/check-secrets.mjs.
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+
+# Backups and database dumps
+backups/
+*.dump
+*.backup
+*.sql.gz
+*.age
+
+# Private notes: infrastructure and risks, kept in the private backup repository
+CLAUDE.md
+*.local.md
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+
+# Local tooling
+node_modules/
+.claude/settings.local.json
+
+# System files
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -4,7 +4,7 @@
 Downloads airports.csv, runways.csv and airport-frequencies.csv from
 https://github.com/davidmegginson/ourairports-data and writes:
 
-  data/airports-eu.json   - airfields in SK, DE, PL, AT (Czech list stays from the VFR manual in index.html)
+  data/airports-eu.json   - airfields in SK, DE, PL, AT (Czech list stays from the VFR manual in app.js)
   data/airport-info.json  - runways and radio frequencies for Czech and neighbouring airfields (informative only)
 
 A file is only rewritten when its content really changed, so the monthly
@@ -31,11 +31,11 @@ def fetch_csv(name):
 
 
 def czech_codes():
-    """Codes of the Czech airfields defined in index.html (from the VFR manual)."""
-    html = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
-    m = re.search(r"const DATA = (\[.*?\]);", html, re.S)
+    """Codes of the Czech airfields defined in app.js (from the VFR manual)."""
+    code = open(os.path.join(ROOT, "app.js"), encoding="utf-8").read()
+    m = re.search(r"const DATA = (\[.*?\]);", code, re.S)
     if not m:
-        sys.exit("could not find the Czech airfield list (const DATA) in index.html")
+        sys.exit("could not find the Czech airfield list (const DATA) in app.js")
     return [a["code"] for a in json.loads(m.group(1))]
 
 

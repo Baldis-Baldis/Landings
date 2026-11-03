@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://bgxzlirvbuxjjawqkkyw.supabase.co; font-src 'self'; connect-src 'self' https://bgxzlirvbuxjjawqkkyw.supabase.co; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MyLandings · Správa</title>
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<style>
+:root{--ink:#1B2740;--ink2:#5B657A;--line:#D5DAE3;--paper:#F3F5F8}
+body{margin:0;padding:16px;font:500 14px/1.45 Barlow,sans-serif;color:var(--ink);background:var(--paper)}
+main{max-width:860px;margin:0 auto}
+h1,h2{font-family:"Barlow Condensed",sans-serif;margin:16px 0 8px}
+section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.stat b{display:block;font-size:22px}
+.stat span,.meta{color:var(--ink2);font-size:12px}
+.item{border-top:1px solid var(--line);padding:8px 0}
+.item:first-child{border-top:0}
+.body{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0}
+.item img{max-width:200px;max-height:200px;display:block;border-radius:4px;cursor:zoom-in}
+button{font:600 13px Barlow,sans-serif;padding:6px 10px;margin:4px 6px 0 0;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer}
+button.danger{background:var(--ink);border-color:var(--ink);color:#fff}
+button:disabled{opacity:.6}
+.days{display:flex;align-items:flex-end;gap:2px;height:60px;margin-top:8px}
+.days div{flex:1;background:var(--ink);min-height:1px}
+a{color:var(--ink)}
+</style>
+</head>
+<body>
+<main id="admin"><p>Načítám…</p></main>
+<script src="vendor/supabase.js"></script>
+<script src="config.js"></script>
+<script src="backend.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

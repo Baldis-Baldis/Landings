@@ -1,0 +1,794 @@
+const DATA = [{"code":"LKBE","name":"Benešov","lat":49.7408,"lon":14.6447,"elev":"1319","town":"Benešov","slz":false},{"code":"LKBO","name":"Bohuňovice","lat":49.6706,"lon":17.295,"elev":"771","town":"Bohuňovice","slz":false},{"code":"LKBOLE","name":"Boleradice","lat":48.96194,"lon":16.83167,"elev":"649","town":"","slz":true},{"code":"LKBORE","name":"Borek","lat":50.21086,"lon":14.65769,"elev":"557","town":"Borek","slz":true},{"code":"LKTB","name":"BRNO/Tuřany","lat":49.15128,"lon":16.69397,"elev":"778","town":"Brno","slz":false},{"code":"LKBR","name":"Broumov","lat":50.5619,"lon":16.3428,"elev":"1342","town":"Broumov","slz":false},{"code":"LKBRUS","name":"Brusné","lat":49.36788,"lon":17.65228,"elev":"1033","town":"Brusné","slz":true},{"code":"LKBRTO","name":"Brťov","lat":49.41086,"lon":16.49944,"elev":"","town":"Brťov-Jeneč","slz":true},{"code":"LKBU","name":"Bubovice","lat":49.9744,"lon":14.1781,"elev":"1401","town":"Bubovice","slz":false},{"code":"LKBUDK","name":"Budkovice","lat":49.07869,"lon":16.35562,"elev":"","town":"Ivančice","slz":true},{"code":"LKBYNO","name":"Bynovec","lat":50.8219,"lon":14.27174,"elev":"","town":"Bynovec","slz":true},{"code":"LKBYST","name":"Bystřice nad Pernštejnem","lat":49.52278,"lon":16.23222,"elev":"1942","town":"Bystřice nad Pernštejnem","slz":true},{"code":"LKBA","name":"Břeclav","lat":48.79044,"lon":16.89253,"elev":"531","town":"Břeclav","slz":false},{"code":"LKBREZ","name":"Březí Falcon","lat":49.33889,"lon":16.23137,"elev":"1680","town":"Březí","slz":true},{"code":"LKCHAR","name":"Charvátce","lat":50.43343,"lon":13.81111,"elev":"915","town":"Libčeves","slz":true},{"code":"LKCB","name":"Cheb","lat":50.0661,"lon":12.4117,"elev":"1585","town":"Cheb","slz":false},{"code":"LKCHOC","name":"Choceň","lat":49.97728,"lon":16.18492,"elev":"873","town":"Choceň","slz":true},{"code":"LKCH","name":"Chomutov","lat":50.4689,"lon":13.4681,"elev":"1132","town":"Otvice","slz":false},{"code":"LKCHOR","name":"Chornice","lat":49.6861,"lon":16.73091,"elev":"1129","town":"Chornice","slz":true},{"code":"LKCHOT","name":"Choteč","lat":50.43389,"lon":15.53056,"elev":"1076","town":"Choteč","slz":true},{"code":"LKCT","name":"Chotěboř","lat":49.6858,"lon":15.6761,"elev":"1949","town":"Chotěboř","slz":false},{"code":"LKCHOV","name":"Chotěšov","lat":49.65167,"lon":13.18972,"elev":"1181","town":"Chotěšov","slz":true},{"code":"LKCR","name":"Chrudim","lat":49.9364,"lon":15.7806,"elev":"981","town":"Chrudim","slz":false},{"code":"LKCHRA","name":"Chrášťany","lat":50.05872,"lon":14.92307,"elev":"876","town":"Chrášťany","slz":true},{"code":"LKCHVO","name":"Chvojenec","lat":50.10863,"lon":15.92674,"elev":"","town":"Chvojenec","slz":true},{"code":"LKCHRI","name":"Chřibská","lat":50.85819,"lon":14.46569,"elev":"1260","town":"Chřibská","slz":true},{"code":"LKDOUD","name":"Doudleby","lat":48.88504,"lon":14.48638,"elev":"1542","town":"Doudleby","slz":true},{"code":"LKDRUZ","name":"Druzcov u Lípy","lat":50.72779,"lon":14.92524,"elev":"1509","town":"Osečná","slz":true},{"code":"LKDUSN","name":"Dušníky","lat":50.41278,"lon":14.19806,"elev":"728","town":"Dušníky","slz":true},{"code":"LKDK","name":"Dvůr Králové","lat":50.4142,"lon":15.8369,"elev":"932","town":"Dvůr Králové nad Labem","slz":false},{"code":"LKDETR","name":"Dětřichov Oáza","lat":49.72917,"lon":17.11806,"elev":"751","town":"Uničov","slz":true},{"code":"LKER","name":"Erpužice","lat":49.8028,"lon":13.0381,"elev":"1572","town":"Erpužice","slz":false},{"code":"LKFR","name":"Frýdlant","lat":49.5894,"lon":18.3792,"elev":"1440","town":"Frýdlant","slz":false},{"code":"LKEXCA","name":"Hatě Excalibur","lat":48.76155,"lon":16.05541,"elev":"778","town":"Chvalovice","slz":true},{"code":"LKHB","name":"Havlíčkův Brod","lat":49.5972,"lon":15.5492,"elev":"1519","town":"Havlíčkův Brod","slz":false},{"code":"LKHATH","name":"Hať u Hlučína","lat":49.95181,"lon":18.26516,"elev":"","town":"Hať","slz":true},{"code":"LKHLAS","name":"Hláska","lat":49.06694,"lon":14.24139,"elev":"1430","town":"","slz":true},{"code":"LKHD","name":"Hodkovice","lat":50.6572,"lon":15.0778,"elev":"1480","town":"Hodkovice nad Mohelkou","slz":false},{"code":"LKPOCA","name":"Horní Počaply","lat":50.41812,"lon":14.38427,"elev":"524","town":"Horní Počáply","slz":true},{"code":"LKPRIM","name":"Horní Přím","lat":50.22931,"lon":15.70205,"elev":"919","town":"Horní Priam","slz":true},{"code":"LKHS","name":"Hosín","lat":49.04,"lon":14.495,"elev":"1621","town":"Hluboká nad Vltavou","slz":false},{"code":"LKHC","name":"Hořice","lat":50.3576,"lon":15.57698,"elev":"922","town":"Holovousy","slz":false},{"code":"LKHV","name":"Hořovice","lat":49.8481,"lon":13.8935,"elev":"1214","town":"Hořovice","slz":false},{"code":"LKHK","name":"Hradec Králové","lat":50.2532,"lon":15.8452,"elev":"791","town":"Hradec Králové","slz":false},{"code":"LKHRAD","name":"Hradčany","lat":50.61925,"lon":14.73275,"elev":"912","town":"Kuřívody","slz":true},{"code":"LKHN","name":"Hranice","lat":49.5461,"lon":17.7044,"elev":"797","town":"Hranice","slz":false},{"code":"LKJA","name":"Jaroměř","lat":50.3314,"lon":15.9539,"elev":"889","town":"Jaroměř","slz":false},{"code":"LKJI","name":"Jihlava","lat":49.4194,"lon":15.6353,"elev":"1821","town":"Jihlava","slz":false},{"code":"LKJH","name":"Jindřichův Hradec","lat":49.15068,"lon":14.97241,"elev":"1667","town":"Jindřichův Hradec","slz":false},{"code":"LKJC","name":"Jičín","lat":50.43,"lon":15.3331,"elev":"863","town":"Jičín","slz":false},{"code":"LKKAPL","name":"Kaplice","lat":48.71861,"lon":14.45056,"elev":"2100","town":"Kaplice","slz":true},{"code":"LKKV","name":"Karlovy Vary","lat":50.203,"lon":12.915,"elev":"1989","town":"Karlovy Vary","slz":false},{"code":"LKKEJZ","name":"Kejžlice","lat":49.5919,"lon":15.40137,"elev":"1588","town":"Kejžlice","slz":true},{"code":"LKKL","name":"Kladno","lat":50.1128,"lon":14.0897,"elev":"1421","town":"Kladno","slz":false},{"code":"LKKT","name":"Klatovy","lat":49.4183,"lon":13.3219,"elev":"1299","town":"Klatovy","slz":false},{"code":"LKKO","name":"Kolín","lat":50.0019,"lon":15.1733,"elev":"932","town":"Kolín","slz":false},{"code":"LKKOST","name":"Kostomlaty","lat":50.20843,"lon":14.92585,"elev":"","town":"","slz":true},{"code":"LKKOTV","name":"Kotvrdovice","lat":49.36399,"lon":16.7849,"elev":"1860","town":"Kotvrdovice","slz":true},{"code":"LKKOZY","name":"Kozmice","lat":49.91333,"lon":18.1643,"elev":"885","town":"Kozmice","slz":true},{"code":"LKKRAM","name":"Kramolín","lat":48.915,"lon":14.72639,"elev":"1650","town":"Kramolín","slz":true},{"code":"LKKR","name":"Krnov","lat":50.07441,"lon":17.69522,"elev":"1230","town":"Krnov","slz":false},{"code":"LKKM","name":"Kroměříž","lat":49.2856,"lon":17.4158,"elev":"620","town":"Kroměříž","slz":false},{"code":"LKKRPY","name":"Krpy","lat":50.32592,"lon":14.66553,"elev":"803","town":"","slz":true},{"code":"LKKU","name":"Kunovice","lat":49.0294,"lon":17.4397,"elev":"581","town":"Uherské Hradiště","slz":false},{"code":"LKKUNE","name":"Kunětice","lat":50.06833,"lon":15.8125,"elev":"728","town":"Kunětice","slz":true},{"code":"LKKY","name":"Kyjov","lat":48.98,"lon":17.1247,"elev":"689","town":"Svatobořice","slz":false},{"code":"LKJIRI","name":"Křelovice - Jiřičky","lat":49.55222,"lon":15.15556,"elev":"1683","town":"Křelovice","slz":true},{"code":"LKKA","name":"Křižanov","lat":49.3683,"lon":16.1161,"elev":"1831","town":"Křižanov","slz":false},{"code":"LKKRIZ","name":"Kříženec","lat":49.8706,"lon":12.7725,"elev":"2076","town":"Planá","slz":true},{"code":"LKPL","name":"Letkov","lat":49.7231,"lon":13.4522,"elev":"1371","town":"Letkov","slz":false},{"code":"LKLETO","name":"Letovice","lat":49.54667,"lon":16.59861,"elev":"","town":"Letovice","slz":true},{"code":"LKLT","name":"Letňany","lat":50.1314,"lon":14.5256,"elev":"909","town":"Letňany","slz":false},{"code":"LKLB","name":"Liberec","lat":50.76705,"lon":15.02307,"elev":"1329","town":"Liberec","slz":false},{"code":"LKLIBA","name":"Libáň","lat":50.37044,"lon":15.20104,"elev":"738","town":"","slz":true},{"code":"LKLOMN","name":"Lomnice nad Popelkou","lat":50.54,"lon":15.38806,"elev":"","town":"Lomnice nad Popelkou","slz":true},{"code":"LKLOUC","name":"Loučeň","lat":50.27874,"lon":15.06101,"elev":"636","town":"Loučeň","slz":true},{"code":"LKLU","name":"Luhačovice","lat":49.08819,"lon":17.71877,"elev":"","town":"Luhačovice","slz":false},{"code":"LKLUKL","name":"Lukla","lat":50.51102,"lon":13.33914,"elev":"2172","town":"Blatno","slz":true},{"code":"LKCM","name":"Medlánky","lat":49.2367,"lon":16.555,"elev":"853","town":"Medlánky","slz":false},{"code":"LKMI","name":"Mikulovice","lat":50.3017,"lon":17.2975,"elev":"1381","town":"Mikulovice","slz":false},{"code":"LKMILO","name":"Milovice","lat":50.23743,"lon":14.90999,"elev":"650","town":"","slz":true},{"code":"LKMIRO","name":"Miroslav","lat":48.93139,"lon":16.29861,"elev":"781","town":"Miroslav","slz":true},{"code":"LKMIRA","name":"Miroslav AirCon","lat":48.93167,"lon":16.33972,"elev":"715","town":"Miroslav","slz":true},{"code":"LKMLAD","name":"Mladá","lat":50.24359,"lon":14.85586,"elev":"","town":"Milovice","slz":true},{"code":"LKMB","name":"Mladá Boleslav","lat":50.3983,"lon":14.8983,"elev":"781","town":"Mladá Boleslav","slz":false},{"code":"LKMH","name":"Mnichovo Hradiště","lat":50.5402,"lon":15.0066,"elev":"800","town":"Mnichovo Hradiště","slz":false},{"code":"LKMK","name":"Moravská Třebová","lat":49.7983,"lon":16.6878,"elev":"1322","town":"Moravská Třebová","slz":false},{"code":"LKMO","name":"Most","lat":50.525,"lon":13.6831,"elev":"1089","town":"Most","slz":false},{"code":"LKMIST","name":"Místek","lat":49.65278,"lon":18.34583,"elev":"1066","town":"Místek","slz":true},{"code":"LKNABO","name":"Nabočany","lat":49.94611,"lon":15.89556,"elev":896,"town":"2 km SW Hrochův Týnec","slz":true},{"code":"LKNAPA","name":"Napajedla","lat":49.19889,"lon":13.6,"elev":"1761","town":"","slz":true},{"code":"LKNEPL","name":"Neplachov","lat":49.14194,"lon":14.60972,"elev":1417,"town":"8,5 km SW Veselí nad Lužnicí","slz":true},{"code":"LKNVCE","name":"Nová Včelnice","lat":49.26722,"lon":15.07778,"elev":"1765","town":"Nová Včelnice","slz":true},{"code":"LKNM","name":"Nové Město","lat":50.3642,"lon":16.1136,"elev":"1001","town":"Nové Město nad Metují","slz":false},{"code":"LKNUCI","name":"Nučice","lat":49.9511,"lon":14.86994,"elev":"","town":"Nučice","slz":true},{"code":"LKNYMB","name":"Nymburk","lat":50.1691,"lon":15.05245,"elev":"607","town":"Nymburk","slz":true},{"code":"LKNACH","name":"Náchod","lat":50.41296,"lon":16.12185,"elev":"1443","town":"Vysokov","slz":true},{"code":"LKOL","name":"Olomouc","lat":49.58771,"lon":17.20928,"elev":"869","town":"Olomouc","slz":false},{"code":"LKOPAV","name":"Opava","lat":49.94056,"lon":17.98611,"elev":"850","town":"Velké Hoštice","slz":true},{"code":"LKOSIC","name":"Osičiny","lat":50.01647,"lon":14.77221,"elev":"1280","town":"Osičiny","slz":true},{"code":"LKMT","name":"OSTRAVA/Mošnov","lat":49.6963,"lon":18.1111,"elev":"844","town":"Mošnov","slz":false},{"code":"LKOSTR","name":"Ostrov","lat":50.33628,"lon":12.96915,"elev":"1680","town":"Ostrov","slz":true},{"code":"LKPC","name":"Panenský Týnec","lat":50.3061,"lon":13.9342,"elev":"1207","town":"Panensky Tynec","slz":false},{"code":"LKPANO","name":"Panoší Újezd","lat":50.03867,"lon":13.69681,"elev":"1558","town":"Panoší Újezd","slz":true},{"code":"LKPD","name":"Pardubice","lat":50.01505,"lon":15.73981,"elev":"741","town":"Pardubice","slz":false},{"code":"LKPS","name":"Plasy","lat":49.9203,"lon":13.3769,"elev":"1430","town":"Plasy","slz":false},{"code":"LKLN","name":"Plzeň/Líně","lat":49.6752,"lon":13.2746,"elev":"1188","town":"Plzen","slz":false},{"code":"LKPN","name":"Podhořany","lat":49.9392,"lon":15.5497,"elev":"1250","town":"Podhořany u Ronova","slz":false},{"code":"LKPOLE","name":"Polepy","lat":50.52027,"lon":14.27224,"elev":"692","town":"Polepy","slz":true},{"code":"LKPA","name":"Polička","lat":49.7394,"lon":16.2589,"elev":"1982","town":"Polička","slz":false},{"code":"LKPR","name":"PRAHA/Ruzyně","lat":50.10087,"lon":14.25991,"elev":"1247","town":"Prague","slz":false},{"code":"LKVO","name":"PRAHA/Vodochody","lat":50.2166,"lon":14.3958,"elev":"919","town":"Vodochody","slz":false},{"code":"LKPJ","name":"Prostějov","lat":49.4478,"lon":17.1339,"elev":"699","town":"Prostějov","slz":false},{"code":"LKPISK","name":"Písek - Krašovice","lat":49.33944,"lon":14.11389,"elev":"1351","town":"Písek","slz":true},{"code":"LKPO","name":"Přerov","lat":49.4258,"lon":17.4047,"elev":"676","town":"Přerov","slz":false},{"code":"LKPI","name":"Přibyslav","lat":49.5808,"lon":15.7628,"elev":"1739","town":"Přibyslav","slz":false},{"code":"LKPM","name":"Příbram","lat":49.7201,"lon":14.1006,"elev":"1529","town":"Drásov","slz":false},{"code":"LKRK","name":"Rakovník","lat":50.0942,"lon":13.6889,"elev":"1270","town":"Rakovnik","slz":false},{"code":"LKRAMS","name":"Ramš","lat":50.64167,"lon":14.54139,"elev":"","town":"Sosnová","slz":true},{"code":"LKRA","name":"Raná","lat":50.4039,"lon":13.7519,"elev":"879","town":"Raná","slz":false},{"code":"LKRY","name":"Rokycany","lat":49.75194,"lon":13.58972,"elev":"1329","town":"Rokycany","slz":false},{"code":"LKRO","name":"Roudnice","lat":50.41019,"lon":14.22708,"elev":"732","town":"Roudnice nad Labem","slz":false},{"code":"LKSZ","name":"Sazená","lat":50.3247,"lon":14.2589,"elev":"761","town":"Sazená","slz":false},{"code":"LKSK","name":"Skuteč","lat":49.8278,"lon":16.0058,"elev":"1601","town":"Skuteč","slz":false},{"code":"LKSN","name":"Slaný","lat":50.21639,"lon":14.08784,"elev":"1079","town":"Slaný","slz":false},{"code":"LKSLUS","name":"Slušovice","lat":49.25903,"lon":17.81334,"elev":"1155","town":"Slušovice","slz":true},{"code":"LKSO","name":"Soběslav","lat":49.2455,"lon":14.71299,"elev":"1342","town":"Soběslav","slz":false},{"code":"LKSPAK","name":"Stará Paka","lat":50.501389,"lon":15.483056,"elev":1588,"town":"Stará Paka","slz":true},{"code":"LKSA","name":"Staňkov","lat":49.56652,"lon":13.04867,"elev":"1404","town":"Staňkov","slz":false},{"code":"LKSB","name":"Stichovice","lat":49.48739,"lon":17.05261,"elev":"840","town":"Mostkovice","slz":false},{"code":"LKST","name":"Strakonice","lat":49.2517,"lon":13.8928,"elev":"1381","town":"Strakonice","slz":false},{"code":"LKSR","name":"Strunkovice","lat":49.0825,"lon":14.0758,"elev":"1572","town":"Prachatice","slz":false},{"code":"LKSTRZ","name":"Strážnice","lat":48.88778,"lon":17.29444,"elev":"614","town":"","slz":true},{"code":"LKTD","name":"Tachov","lat":49.79722,"lon":12.70717,"elev":"1640","town":"Tachov","slz":false},{"code":"LKTEPL","name":"Teplice","lat":50.62083,"lon":13.80977,"elev":"1148","town":"Zabrušany","slz":true},{"code":"LKTERE","name":"Terezín","lat":50.51944,"lon":14.15583,"elev":"482","town":"Terezín","slz":true},{"code":"LKTO","name":"Toužim","lat":50.0864,"lon":12.9528,"elev":"2139","town":"Toužim","slz":false},{"code":"LKTC","name":"Točná","lat":49.98544,"lon":14.42647,"elev":"1027","town":"Prague","slz":false},{"code":"LKTRUT","name":"Trutnov","lat":50.5675,"lon":15.86528,"elev":"1486","town":"Trutnov","slz":true},{"code":"LKTA","name":"Tábor","lat":49.3911,"lon":14.7083,"elev":"1440","town":"Tábor","slz":false},{"code":"LKTRBH","name":"Třebihošť","lat":50.43546,"lon":15.69312,"elev":"1640","town":"Třebihošť","slz":true},{"code":"LKPAVL","name":"Velké Pavlovice","lat":48.88056,"lon":16.825,"elev":"561","town":"Velké Pavlovice","slz":true},{"code":"LKVP","name":"Velké Poříčí","lat":50.4678,"lon":16.2056,"elev":"1322","town":"Velke Porici","slz":false},{"code":"LKVL","name":"Vlašim","lat":49.7289,"lon":14.8789,"elev":"1421","town":"Vlašim","slz":false},{"code":"LKVR","name":"Vrchlabí","lat":50.6242,"lon":15.6464,"elev":"1611","town":"Lánov","slz":false},{"code":"LKVRAT","name":"Vrátkov","lat":50.03954,"lon":14.82274,"elev":"1033","town":"Vrátkov","slz":true},{"code":"LKVM","name":"Vysoké Mýto","lat":49.9281,"lon":16.18503,"elev":"991","town":"Vysoké Mýto","slz":false},{"code":"LKVY","name":"Vyškov","lat":49.3003,"lon":17.0253,"elev":"922","town":"Vyskov","slz":false},{"code":"LKZB","name":"Zbraslavice","lat":49.8142,"lon":15.2017,"elev":"1621","town":"Zbraslavice","slz":false},{"code":"LKZL","name":"Zlín","lat":49.1983,"lon":17.5178,"elev":"600","town":"Otrokovice","slz":false},{"code":"LKSTIP","name":"Zlín - Štípa","lat":49.27278,"lon":17.74639,"elev":"1086","town":"Zlín","slz":true},{"code":"LKZN","name":"Znojmo","lat":48.81774,"lon":16.06583,"elev":"830","town":"Znojmo","slz":false},{"code":"LKZA","name":"Zábřeh","lat":49.92826,"lon":18.07556,"elev":"791","town":"Dolní Benešov","slz":false},{"code":"LKZAHO","name":"Záhoří","lat":49.46611,"lon":17.66528,"elev":1040,"town":"7 km N Bystřice pod Hostýnem","slz":true},{"code":"LKUL","name":"Ústí nad Labem","lat":50.6997,"lon":13.9697,"elev":"791","town":"Usti Nad Labem","slz":false},{"code":"LKUO","name":"Ústí nad Orlicí","lat":49.9786,"lon":16.4264,"elev":"1342","town":"Ústí nad Orlicí","slz":false},{"code":"LKCEBI","name":"Čebín","lat":49.31868,"lon":16.49682,"elev":"1004","town":"Kuřim","slz":true},{"code":"LKCE","name":"Česká Lípa","lat":50.7094,"lon":14.5667,"elev":"932","town":"Česká Lípa","slz":false},{"code":"LKCS","name":"České Budějovice","lat":48.94817,"lon":14.42832,"elev":"1417","town":"České Budějovice","slz":false},{"code":"LKCDUB","name":"Český Dub","lat":50.67806,"lon":14.99972,"elev":"1283","town":"Český Dub","slz":true},{"code":"LKCAST","name":"Částkovice","lat":49.40935,"lon":15.14369,"elev":"1926","town":"Nová Cerekev","slz":true},{"code":"LKSTET","name":"Štětí","lat":50.465,"lon":14.40611,"elev":"787","town":"Štětí","slz":true},{"code":"LKSU","name":"Šumperk","lat":49.9606,"lon":17.0178,"elev":"1099","town":"Nový Malín","slz":false},{"code":"LKZM","name":"Žamberk","lat":50.0839,"lon":16.4439,"elev":"1411","town":"Žamberk","slz":false},{"code":"LKZD","name":"Žatec/Macerka","lat":50.3175,"lon":13.5128,"elev":"879","town":"Žatec","slz":false}];
+const T={
+ cs:{title:'Kde jsem přistál',of:'z',all:'Vše',icaoOnly:'Jen ICAO letiště',slzOnly:'Jen SLZ plochy',customOnly:'Jen vlastní plochy',doneOnly:'Přistál jsem',todoOnly:'Ještě ne',icao:'ICAO letiště',slz:'SLZ / UL plocha',custom:'Vlastní / neveřejná',landed:'Přistál jsem',export:'Export zálohy',import:'Import',search:'Hledat název nebo kód (LKPR, Kunovice…)',here:'Přistál jsem tady',note:'Poznámka',saved:'Uloženo',imported:'Import hotov',importedAccount:a=>`Převedeno: přistání ${a.landings}, příznaky ${a.flags}, fotky ${a.photos}, plochy ${a.strips}`,bad:'Neplatný soubor',addTitle:'Přidat vlastní plochu',addHint:'Klepnutím na mapu umísti novou plochu, pak ji doplň.',addName:'Název plochy:',addNoName:'Přidání zrušeno – chybí název.',del:'Smazat plochu',delConfirm:'Opravdu smazat tuto vlastní plochu?',newStripDefault:'Nová plocha',shortPh:'Zkratka (např. VLAS)',descPh:'Poznámky k ploše (povrch, délka dráhy, kontakt, PPR…)',photoLabel:'Přidat fotku',more:'Další možnosti',aiTitle:'Dráhy a frekvence',runways:'Dráhy',freqs:'Frekvence',lit:'osvětlená',aiNote:'Jen pro informaci – zdroj OurAirports, může být neúplné nebo zastaralé. Vždy ověř v AIP / VFR příručce.',surf:{asp:'asfalt',con:'beton',grs:'tráva',grv:'štěrk',paved:'zpevněná'},mapOnly:'Jen mapa – schovat seznam',showList:'Zobrazit seznam',countries:'Země',ccHint:'Česko je vždy zobrazené. Zahraniční letiště jsou z databáze OurAirports – u malých ploch můžou být neúplná.',loading:'Načítám letiště…',loadFail:'Zahraniční letiště se nepodařilo načíst',ccNames:{CZ:'Česko',SK:'Slovensko',DE:'Německo',PL:'Polsko',AT:'Rakousko'},termsMenu:'Podmínky použití',privacyMenu:'Ochrana osobních údajů',feedback:'Napsat nám',admin:'Správa',fbHint:'Návrh, chyba nebo pochvala. Odpověď z aplikace nepřijde, pokud ji chcete, napište na support@mylandings.net.',fbSend:'Odeslat',fbClose:'Zavřít',fbThanks:'Díky, vzkaz je odeslaný.',fbLimit:'Dnes už bylo vzkazů dost, zkuste to zítra.',commReport:'Nahlásit',commReportSend:'Odeslat hlášení',commReportDetails:'Podrobnosti (nepovinné)',commReported:'Nahlášeno, děkujeme.',commAlready:'Už jste to nahlásili.',reason_spam:'Spam',reason_offensive:'Urážlivé',reason_illegal:'Nezákonné',reason_privacy:'Soukromí',reason_copyright:'Autorská práva',reason_other:'Jiné',community:'Od pilotů',commLoading:'Načítám…',commFail:'Nepodařilo se. Zkuste to znovu.',commLimit:'Limit je vyčerpaný, nebo chybí přezdívka.',commEmpty:'Zatím tu nic není.',commSignIn:'Přidávat může jen přihlášený pilot.',commUnknown:'Pilot',commYou:'Vy',commPublic:'veřejné',commPrivate:'soukromé',commHidden:'skryté správcem',commMakePublic:'Zveřejnit',commMakePrivate:'Skrýt',commDelete:'Smazat',commDeleteConfirm:'Smazat komentář?',commPlaceholder:'Komentář',commShare:'Veřejné, uvidí všichni',commSend:'Přidat',publishConfirm:'Zveřejnit? Uvidí to všichni včetně nepřihlášených, spolu s vaší přezdívkou.',maxPhotos:'Max. 3 fotky',fav:'Oblíbené',want:'Chci navštívit',favOnly:'★ Oblíbené',wantOnly:'⚑ Chci navštívit',removePhoto:'Odebrat fotku',storageFull:'Úložiště je plné – zkus menší fotku nebo smaž starší záznamy',ghBtn:'GitHub sync',ghPrompt:'Vlož GitHub token (fine-grained, jen pro tento repozitář, oprávnění Contents: Read and write). Záznamy i fotky se pak ukládají do repozitáře a synchronizují mezi zařízeními. Prázdné = jen v tomto prohlížeči.',ghSet:'GitHub připojen – synchronizuji',ghOff:'GitHub odpojen – ukládám jen v tomto zařízení',syncing:'Synchronizuji…',synced:'Synchronizováno',syncErr:'Sync selhal – zkus ⟳',e401:'Token je neplatný nebo vypršel – vlož nový (GitHub sync)',e403:'Token nemá oprávnění zápisu (Contents: Read and write) k repozitáři Landings',e404:'Token nemá přístup k repozitáři Landings',enet:'Nelze se spojit s GitHubem (offline?)',ephoto:'Fotku se nepodařilo nahrát, zkusím to znovu',readOnly:'Uloženo jen v tomto zařízení',ghAccount:'V účtu se GitHub sync nepoužívá',leaveUnsent:'Některé změny se ještě neodeslaly a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',leavePhotos:'Některé fotky se ještě nenahrály a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',syncTitle:'Synchronizovat teď',uploading:'Nahrávám fotku na GitHub…',uploaded:'Fotka nahrána',uploadFail:'Nahrání selhalo – zkontroluj token',dateFmt:d=>{const[y,m,x]=d.split('-');return`${+x}. ${+m}. ${y}`},src:'Zdroj: VFR příručka ŘLP ČR, platnost od 3. 9. 2026 · souřadnice a zahraniční letiště OurAirports · vlastní plochy si přidáváš sám'},
+ en:{title:"Where I've landed",of:'of',all:'All',icaoOnly:'ICAO airports only',slzOnly:'UL airstrips only',customOnly:'Custom strips only',doneOnly:'Landed',todoOnly:'Not yet',icao:'ICAO airport',slz:'UL / microlight strip',custom:'Custom / private',landed:'Landed',export:'Export backup',import:'Import',search:'Search name or code (LKPR, Kunovice…)',here:'I landed here',note:'Note',saved:'Saved',imported:'Import done',importedAccount:a=>`Added: landings ${a.landings}, flags ${a.flags}, photos ${a.photos}, strips ${a.strips}`,bad:'Invalid file',addTitle:'Add a custom strip',addHint:'Tap the map to place the new strip, then fill it in.',addName:'Strip name:',addNoName:'Cancelled – no name given.',del:'Delete strip',delConfirm:'Delete this custom strip?',newStripDefault:'New strip',shortPh:'Short code (e.g. VLAS)',descPh:'Notes on the strip (surface, runway length, contact, PPR…)',photoLabel:'Add photo',more:'More options',aiTitle:'Runways & frequencies',runways:'Runways',freqs:'Frequencies',lit:'lighted',aiNote:'For information only – source OurAirports, may be incomplete or outdated. Always check the AIP / VFR manual.',surf:{asp:'asphalt',con:'concrete',grs:'grass',grv:'gravel',paved:'paved'},mapOnly:'Map only – hide the list',showList:'Show the list',countries:'Countries',ccHint:'Czechia is always shown. Foreign airfields come from the OurAirports database – small strips may be incomplete.',loading:'Loading airfields…',loadFail:'Could not load foreign airfields',ccNames:{CZ:'Czechia',SK:'Slovakia',DE:'Germany',PL:'Poland',AT:'Austria'},termsMenu:'Terms of use',privacyMenu:'Privacy',feedback:'Write to us',admin:'Admin',fbHint:'An idea, a bug or praise. The app cannot reply, write to support@mylandings.net if you want an answer.',fbSend:'Send',fbClose:'Close',fbThanks:'Thanks, the message is sent.',fbLimit:'Enough messages for today, please try tomorrow.',commReport:'Report',commReportSend:'Send report',commReportDetails:'Details (optional)',commReported:'Reported, thank you.',commAlready:'You already reported this.',reason_spam:'Spam',reason_offensive:'Offensive',reason_illegal:'Illegal',reason_privacy:'Privacy',reason_copyright:'Copyright',reason_other:'Other',community:'From pilots',commLoading:'Loading…',commFail:'That failed. Please try again.',commLimit:'Limit reached, or the nickname is missing.',commEmpty:'Nothing here yet.',commSignIn:'Only signed-in pilots can add here.',commUnknown:'Pilot',commYou:'You',commPublic:'public',commPrivate:'private',commHidden:'hidden by the admin',commMakePublic:'Publish',commMakePrivate:'Hide',commDelete:'Delete',commDeleteConfirm:'Delete this comment?',commPlaceholder:'Comment',commShare:'Public, visible to everyone',commSend:'Add',publishConfirm:'Publish? Everyone will see it, including guests, together with your nickname.',maxPhotos:'Max. 3 photos',fav:'Favourite',want:'Want to visit',favOnly:'★ Favourites',wantOnly:'⚑ Want to visit',removePhoto:'Remove photo',storageFull:'Storage full – try a smaller photo or delete older entries',ghBtn:'GitHub sync',ghPrompt:'Paste a GitHub token (fine-grained, this repo only, Contents: Read and write). Landings and photos are then stored in the repository and synced across devices. Leave empty to keep everything in this browser only.',ghSet:'GitHub connected – syncing',ghOff:'GitHub disconnected – saving on this device only',syncing:'Syncing…',synced:'Synced',syncErr:'Sync failed – tap ⟳',e401:'Token invalid or expired – paste a new one (GitHub sync)',e403:'Token lacks write access (Contents: Read and write) to the Landings repo',e404:'Token has no access to the Landings repo',enet:'Cannot reach GitHub (offline?)',ephoto:'Could not upload a photo, will retry',readOnly:'Saved on this device only',ghAccount:'GitHub sync is not used inside an account',leaveUnsent:'Some changes were not sent yet and signing out removes them from this device. Sign out anyway?',leavePhotos:'Some photos were not uploaded yet and signing out removes them from this device. Sign out anyway?',syncTitle:'Sync now',uploading:'Uploading photo to GitHub…',uploaded:'Photo uploaded',uploadFail:'Upload failed – check the token',dateFmt:d=>{const[y,m,x]=d.split('-');return`${y}-${m}-${x}`},src:'Source: Czech VFR Manual (ANS CR), effective 3 Sep 2026 · coordinates and foreign airfields OurAirports · custom strips are your own additions'}
+};
+let lang=localStorage.getItem('lang')||(navigator.language.startsWith('cs')?'cs':'en');
+const t=k=>T[lang][k];
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.t));
+  document.getElementById('q').placeholder=t('search');
+  document.getElementById('addbtn').title=t('addTitle');
+  const mb2=document.getElementById('morebtn'); if(mb2) mb2.title=mb2.ariaLabel=t('more');
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+  const sb=document.getElementById('syncbtn'); sb.title=t('syncTitle'); if(lastSyncOk||!ghToken()) document.getElementById('syncst').textContent=syncLabel();
+  render(); if(typeof renderCC==='function') renderCC(); if(typeof renderAuth==='function') renderAuth();
+  const mb=document.getElementById('maponlybtn'); if(mb){ const on=document.getElementById('app').classList.contains('maponly'); mb.title=mb.ariaLabel=t(on?'showList':'mapOnly'); }
+}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lang',lang);applyLang();if(map)map.closePopup();});
+
+// Keys of the guest and GitHub mode. A signed-in account gets its own copies, see useAccount.
+const STATE_KEYS={KEY:'visited-cz-airfields',CKEY:'custom-airfields',PKEY:'airfield-photos',FKEY:'airfield-flags',TKEY:'sync-tombstones'};
+let {KEY,CKEY,PKEY,FKEY,TKEY}=STATE_KEYS;
+let visited={};
+try{visited=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+let custom={};
+try{custom=JSON.parse(localStorage.getItem(CKEY)||'{}')}catch(e){}
+// tombstones: 'v:CODE' / 'c:CODE' -> time of deletion, so deletions sync too
+let photos={};
+try{photos=JSON.parse(localStorage.getItem(PKEY)||'{}')}catch(e){}
+let flags={};
+try{flags=JSON.parse(localStorage.getItem(FKEY)||'{}')}catch(e){}
+let tomb={};
+try{tomb=JSON.parse(localStorage.getItem(TKEY)||'{}')}catch(e){}
+function kind(a){ return a.custom?'custom':(a.slz?'slz':'icao'); }
+// --- countries: Czechia always, neighbours on demand (data/airports-eu.json from OurAirports) ---
+const CCS=['CZ','SK','DE','PL','AT'], CCKEY='countries';
+let selCC=['CZ'];
+try{ const x=JSON.parse(localStorage.getItem(CCKEY)||'null'); if(Array.isArray(x)) selCC=['CZ',...x.filter(c=>c!=='CZ'&&CCS.includes(c))]; }catch(e){}
+let foreign=null, foreignLoading=null;
+function shownForeign(){ return foreign?foreign.filter(a=>selCC.includes(a.cc)):[]; }
+function allData(){ return DATA.concat(shownForeign(),Object.values(custom)); }
+function refreshTotal(){ document.getElementById('tot').textContent=allData().length; }
+refreshTotal();
+function saveTomb(){ localStorage.setItem(TKEY,JSON.stringify(tomb)); }
+function savePhotos(code){
+  if(code){ if(photos[code]){ photos[code].ts=Date.now(); delete tomb['p:'+code]; } else tomb['p:'+code]=Date.now(); saveTomb(); }
+  try{ localStorage.setItem(PKEY,JSON.stringify(photos)); }catch(e){ status(t('storageFull')); }
+  schedulePush();
+}
+function saveFlags(code){
+  if(code){ if(flags[code]){ flags[code].ts=Date.now(); delete tomb['f:'+code]; } else tomb['f:'+code]=Date.now(); saveTomb(); }
+  localStorage.setItem(FKEY,JSON.stringify(flags)); schedulePush();
+}
+function toggleFlag(a,k){
+  const f={...(flags[a.code]||{})}; if(f[k]) delete f[k]; else f[k]=true; delete f.ts;
+  if(f.fav||f.want) flags[a.code]=f; else delete flags[a.code];
+  saveFlags(a.code);
+  if(k==='fav'&&f.fav&&!visited[a.code]){ set(a,{date:today(),note:''}); return; } // favourite = I have been there
+  style(a); render();
+}
+const MAXPH=3;
+// photos: list of {url,path}; custom strips keep it on the strip (a.pics), airfields in photos[code].pics
+function legacyPics(o){ return o?(o.pics||(o.photo?[{url:o.photo,...(o.photoPath?{path:o.photoPath}:{})}]:[])):[]; }
+function getPics(a){ return legacyPics(a.custom?a:photos[a.code]); }
+function setPics(a,list){
+  if(a.custom){ a.pics=list; delete a.photo; delete a.photoPath; saveCustom(a); }
+  else { if(list.length) photos[a.code]={pics:list}; else delete photos[a.code]; savePhotos(a.code); }
+}
+function normalizePics(){
+  let ch=false;
+  Object.values(custom).forEach(a=>{ if(a.photo!==undefined||a.photoPath!==undefined){ a.pics=legacyPics(a); delete a.photo; delete a.photoPath; ch=true; } });
+  Object.keys(photos).forEach(c=>{ const o=photos[c]; if(!o.pics){ const l=legacyPics(o); if(l.length) photos[c]={pics:l,ts:o.ts||Date.now()}; else delete photos[c]; ch=true; } });
+  return ch;
+}
+normalizePics();
+function save(){ localStorage.setItem(KEY,JSON.stringify(visited)); saveTomb(); status(t('saved')); schedulePush(); }
+function saveCustom(a){
+  if(a){ a.ts=Date.now(); delete tomb['c:'+a.code]; saveTomb(); }
+  try{ localStorage.setItem(CKEY,JSON.stringify(custom)); }catch(e){ status(t('storageFull')); }
+  schedulePush();
+}
+function status(x){const s=document.getElementById('st');s.textContent=x;setTimeout(()=>{if(s.textContent===x)s.textContent=''},2500)}
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+// Drawing onto a canvas and encoding again leaves all EXIF behind, including the location.
+const PHOTO_SIDE=1600, THUMB_SIDE=400, PHOTO_BYTES=250*1024, THUMB_BYTES=30*1024;
+function loadImage(src){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.crossOrigin='anonymous'; // photos of an import come from another host and the canvas must stay readable
+    img.onload=()=>resolve(img); img.onerror=()=>reject(new Error('img'));
+    img.src=src;
+  });
+}
+async function encodeJpeg(img,side,maxBytes){
+  const scale=Math.min(1,side/Math.max(img.width,img.height));
+  const c=document.createElement('canvas'); c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  let blob=null;
+  for(const q of [0.82,0.72,0.62,0.5,0.4]){
+    blob=await new Promise(done=>c.toBlob(done,'image/jpeg',q));
+    if(!blob) throw new Error('img');
+    if(blob.size<=maxBytes) break;
+  }
+  return blob;
+}
+async function photoFiles(src){
+  const img=await loadImage(src);
+  return {full:await encodeJpeg(img,PHOTO_SIDE,PHOTO_BYTES),thumb:await encodeJpeg(img,THUMB_SIDE,THUMB_BYTES)};
+}
+function compressImage(file,maxW=900,quality=0.72){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(reader.error);
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('img'));
+      img.onload=()=>{
+        const scale=Math.min(1,maxW/img.width);
+        const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        const c=document.createElement('canvas'); c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',quality));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+// keep the card as a builder function, so it is always rebuilt in the current language.
+// Rebuild only after the current tap has finished: replacing the tapped button mid-click
+// makes Leaflet treat it as a click on the map and close the card.
+function refreshMarkerPopup(a){ setTimeout(()=>{ const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); },0); }
+
+// --- GitHub photo storage ---
+const GHKEY='gh-token';
+function ghRepo(){
+  // fixed repo – the app runs on its own domain (mylandings.net), so it can't be derived from the URL
+  return {owner:'Baldis-Baldis',repo:'Landings'};
+}
+// Off inside an account: photos and records of an account must never reach the public repository.
+function ghToken(){ return account?'':localStorage.getItem(GHKEY)||''; }
+document.getElementById('gh').onclick=()=>{
+  if(account){ status(t('ghAccount')); return; }
+  const tok=prompt(t('ghPrompt'),ghToken());
+  if(tok===null) return;
+  if(tok.trim()){ localStorage.setItem(GHKEY,tok.trim()); status(t('ghSet')); syncNow(); }
+  else { localStorage.removeItem(GHKEY); status(t('ghOff')); syncNow(); }
+};
+async function ghUpload(dataUrl,a){
+  const {owner,repo}=ghRepo();
+  const safe=(a.short||a.name||'photo').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'photo';
+  const path=`photos/${safe}-${Date.now().toString(36)}.jpg`;
+  const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+    method:'PUT',headers:{Authorization:'Bearer '+ghToken(),Accept:'application/vnd.github+json'},
+    body:JSON.stringify({message:'Add photo '+(a.short||a.name),content:dataUrl.split(',')[1]})
+  });
+  if(!res.ok){ const e=new Error('upload'); e.status=res.status; throw e; }
+  const j=await res.json();
+  return {url:j.content.download_url,path,sha:j.content.sha};
+}
+async function ghDelete(a){
+  if(a.path&&!a.photoPath) a={...a,photoPath:a.path};
+  // the path can come from an imported file: never let it reach anything but a photo
+  if(!/^photos\/[a-z0-9-]+\.jpg$/.test(a.photoPath||'')||!ghToken()) return;
+  const {owner,repo}=ghRepo();
+  try{
+    const g=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${a.photoPath}`,{headers:{Authorization:'Bearer '+ghToken(),Accept:'application/vnd.github+json'}});
+    if(!g.ok) return; const sha=(await g.json()).sha;
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${a.photoPath}`,{
+      method:'DELETE',headers:{Authorization:'Bearer '+ghToken(),Accept:'application/vnd.github+json'},
+      body:JSON.stringify({message:'Remove photo '+(a.short||a.name),sha})
+    });
+  }catch(e){}
+}
+
+// --- Server sync: records live in data/landings.json in the repo ---
+const SYNCPATH='data/landings.json';
+let syncBusy=false, syncAgain=false, pushTimer=null, lastSyncOk=0;
+let account=null, accountEpoch=0, accountBase=null, accountPhotos={}, photoLinks={}, stateGen=0;
+function b64ToText(s){ const bin=atob(s.replace(/\s/g,'')); return new TextDecoder().decode(Uint8Array.from(bin,c=>c.charCodeAt(0))); }
+function textToB64(txt){ const b=new TextEncoder().encode(txt); let s=''; for(let i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000)); return btoa(s); }
+function canon(o){ if(Array.isArray(o)) return '['+o.map(canon).join(',')+']'; if(o&&typeof o==='object') return '{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+canon(o[k])).join(',')+'}'; return JSON.stringify(o); }
+function ghHeaders(){ const h={Accept:'application/vnd.github+json'}; if(ghToken()) h.Authorization='Bearer '+ghToken(); return h; }
+function emptyState(){ return {visited:{},custom:{},photos:{},flags:{},tomb:{}}; }
+async function ghGetState(){
+  const {owner,repo}=ghRepo();
+  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${SYNCPATH}?nc=${Date.now()}`,{headers:ghHeaders(),cache:'no-store'});
+  if(r.status===404) return {sha:null,data:emptyState()};
+  if(!r.ok) throw new Error('get '+r.status);
+  const j=await r.json();
+  const text=j.content?b64ToText(j.content):await (await fetch(j.download_url,{cache:'no-store'})).text();
+  const d=JSON.parse(text||'{}');
+  return {sha:j.sha,data:{visited:d.visited||{},custom:d.custom||{},photos:d.photos||{},flags:d.flags||{},tomb:d.tomb||{}}};
+}
+function mergeState(L,R){
+  const out={visited:{},custom:{},photos:{},flags:{},tomb:{...(L.tomb||{})}};
+  for(const [k,v] of Object.entries(R.tomb||{})) if(!(out.tomb[k]>=v)) out.tomb[k]=v;
+  for(const key of ['visited','custom','photos','flags']){
+    const p=key[0]+':', A=L[key]||{}, B=R[key]||{};
+    new Set([...Object.keys(A),...Object.keys(B)]).forEach(code=>{
+      const a=A[code], b=B[code];
+      const pick=!a?b:!b?a:((b.ts||0)>(a.ts||0)?b:a);
+      const td=out.tomb[p+code]||0;
+      if((pick.ts||0)>td||!td){ out[key][code]=pick; delete out.tomb[p+code]; }
+    });
+  }
+  return out;
+}
+function applyState(s){
+  visited=s.visited; tomb=s.tomb; photos=s.photos||{}; flags=s.flags||{};
+  // update custom strips in place so open popups keep working
+  Object.keys(custom).forEach(code=>{ if(!s.custom[code]){ delete custom[code]; if(map&&markers[code]){ map.removeLayer(markers[code]); delete markers[code]; } } });
+  Object.entries(s.custom).forEach(([code,a])=>{
+    if(custom[code]){
+      if(canon(custom[code])!==canon(a)){
+        const o=custom[code]; Object.keys(o).forEach(k=>delete o[k]); Object.assign(o,a);
+        if(markers[code]){ markers[code].setLatLng([o.lat,o.lon]); if(!markers[code].isPopupOpen()) refreshMarkerPopup(o); }
+      }
+    } else { custom[code]=a; if(map) addMarker(a); }
+  });
+  localStorage.setItem(KEY,JSON.stringify(visited)); saveTomb();
+  normalizePics();
+  localStorage.setItem(FKEY,JSON.stringify(flags));
+  try{ localStorage.setItem(PKEY,JSON.stringify(photos)); }catch(e){}
+  try{ localStorage.setItem(CKEY,JSON.stringify(custom)); }catch(e){}
+  allData().forEach(style),refreshClusters(); refreshTotal(); render();
+}
+async function migratePhotos(){
+  // photos kept as base64 in the browser get uploaded first, so the shared file stays small
+  for(const [code,o] of [...Object.entries(custom),...Object.entries(photos)]){
+    for(const p of (o.pics||[])){
+      if(p.url&&p.url.startsWith('data:')){
+        const owner=custom[code]||DATA.find(x=>x.code===code)||{name:code};
+        let r; try{ r=await ghUpload(p.url,owner); }catch(e){ throw new Error('photo '+(e.status||'')); }
+        p.url=r.url; p.path=r.path; o.ts=Date.now();
+      }
+    }
+  }
+  try{ localStorage.setItem(CKEY,JSON.stringify(custom)); localStorage.setItem(PKEY,JSON.stringify(photos)); }catch(e){}
+}
+function setSync(state,txt){
+  const b=document.getElementById('syncbtn'); if(!b) return;
+  b.className='sync '+state; document.getElementById('syncst').textContent=txt||''; b.title=txt||'';
+}
+function syncLabel(){
+  if(!account&&!ghToken()) return t('readOnly');
+  const d=new Date(lastSyncOk); return t('synced')+' '+d.toLocaleTimeString(lang==='cs'?'cs-CZ':'en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function schedulePush(){ stateGen++; if(!account&&!ghToken()) return; clearTimeout(pushTimer); pushTimer=setTimeout(syncNow,1500); }
+async function syncNow(){
+  if(!/^https?:/.test(location.protocol)) return;
+  if(!account&&!ghToken()){ setSync('',syncLabel()); return; } // a guest has local data only and downloads nothing
+  if(syncBusy){ syncAgain=true; return; }
+  syncBusy=true; clearTimeout(pushTimer); setSync('busy',t('syncing'));
+  const epoch=accountEpoch;
+  try{
+    if(account) await syncAccount(epoch);
+    else for(let attempt=0;;attempt++){
+      const remote=await ghGetState();
+      if(epoch!==accountEpoch) break; // signed in meanwhile: this state belongs to the old mode
+      const local={visited,custom:JSON.parse(JSON.stringify(custom)),photos,flags,tomb};
+      const merged=mergeState(local,remote.data);
+      if(canon(merged)!==canon(local)) applyState(merged);
+      if(!ghToken()) break;
+      await migratePhotos();
+      const out={visited,custom,photos,flags,tomb};
+      if(canon(out)===canon(remote.data)) break;
+      const {owner,repo}=ghRepo();
+      const body={message:'Sync landings',content:textToB64(JSON.stringify({v:1,updated:new Date().toISOString(),...out},null,1))};
+      if(remote.sha) body.sha=remote.sha;
+      const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${SYNCPATH}`,{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});
+      if(res.ok) break;
+      if((res.status===409||res.status===422)&&attempt<3) continue; // someone else wrote meanwhile – merge again
+      throw new Error('put '+res.status);
+    }
+    if(epoch===accountEpoch){ lastSyncOk=Date.now(); setSync(account||ghToken()?'ok':'',syncLabel()); }
+  }catch(e){
+    console.warn('sync',e);
+    const m=String(e&&e.message||e), code=(m.match(/\d{3}/)||[''])[0];
+    let msg=m.startsWith('photo')?t('ephoto'):code==='401'?t('e401'):code==='403'?t('e403'):code==='404'?t('e404'):(e instanceof TypeError)?t('enet'):t('syncErr');
+    setSync('err',msg+' ['+m+']');
+  }
+  syncBusy=false;
+  if(syncAgain){ syncAgain=false; syncNow(); }
+}
+
+// --- Account sync: send what differs from the last confirmed state, then take the server's state ---
+const newId=()=>crypto.randomUUID();
+const accountKey=name=>'u:'+account.id+':'+name;
+function saveBase(){ try{ localStorage.setItem(accountKey('sync-base'),JSON.stringify(accountBase)); localStorage.setItem(accountKey('sync-photos'),JSON.stringify(accountPhotos)); }catch(e){} }
+const LINK_MS=3600000, LINK_MARGIN=600000;
+async function freshPhotoLinks(rows){
+  const now=Date.now(), need=rows.map(r=>r.id).filter(id=>!(photoLinks[id]&&photoLinks[id].until>now+LINK_MARGIN));
+  if(need.length){
+    const got=await window.backend.photoLinks(need);
+    for(const id of need) photoLinks[id]={...got[id],until:now+LINK_MS};
+  }
+  return Object.fromEntries(rows.map(r=>[r.id,{url:photoLinks[r.id].url,thumb:photoLinks[r.id].thumb}]));
+}
+// The same source gives the same id, and it differs per account because photo ids are global.
+async function stableId(text){
+  const b=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(account.id+':'+text))).slice(0,16);
+  b[6]=(b[6]&15)|64; b[8]=(b[8]&63)|128;
+  const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-');
+}
+async function importToAccount(data){
+  const {state,added}=await window.syncCore.mergeImport(data,{visited,custom,flags,photos},stableId);
+  applyState({...state,tomb});
+  schedulePush();
+  return added;
+}
+// Removed here since the last sync. Runs before the rows go: a strip cannot leave while its files exist.
+async function removeGonePhotos(){
+  const here=window.syncCore.photoIds({custom,photos});
+  for(const id of Object.keys(accountPhotos)){
+    if(here[id]) continue;
+    await window.backend.removePhoto(id);
+    delete accountPhotos[id]; saveBase();
+  }
+}
+// One failed photo must not stop the rest of the sync, so failures are only counted.
+async function uploadWaitingPhotos(epoch){
+  let failed=0;
+  for(const {pic,airfield_code,custom_airfield_id} of window.syncCore.pendingPhotos({custom,photos})){
+    try{
+      pic.pid=pic.pid||newId(); // kept across attempts, so a retry finds its row and files
+      const files=await photoFiles(pic.url);
+      await window.backend.uploadPhoto({id:pic.pid,airfield_code,custom_airfield_id,...files});
+      if(epoch!==accountEpoch) return failed;
+      pic.id=pic.pid; accountPhotos[pic.id]=true; saveBase();
+    }catch(e){ console.warn('photo',e); failed++; }
+  }
+  return failed;
+}
+async function syncAccount(epoch){
+  const core=window.syncCore;
+  for(let round=0;round<3;round++){
+    const gen=stateGen;
+    const next=core.toRows({visited,custom,flags},accountBase,newId);
+    try{ localStorage.setItem(CKEY,JSON.stringify(custom)); }catch(e){} // new strips got their id
+    await removeGonePhotos();
+    if(epoch!==accountEpoch) return;
+    const changes=core.diff(accountBase,next);
+    if(!core.isEmpty(changes)){
+      await window.backend.pushAccount(changes);
+      if(epoch!==accountEpoch) return;
+      accountBase=next; saveBase();
+    }
+    const failedPhotos=await uploadWaitingPhotos(epoch);
+    if(epoch!==accountEpoch) return;
+    const server=await window.backend.pullAccount();
+    const links=await freshPhotoLinks(server.photos);
+    if(epoch!==accountEpoch) return;
+    if(gen!==stateGen) continue; // edited during the sync: send that first
+    const s=core.fromRows(server,{visited,custom,flags,photos},newId,links);
+    const cur={visited,custom:JSON.parse(JSON.stringify(custom)),flags,photos};
+    if(canon({visited:s.visited,custom:s.custom,flags:s.flags,photos:s.photos})!==canon(cur)) applyState({visited:s.visited,custom:s.custom,photos:s.photos,flags:s.flags,tomb});
+    accountBase=s.base; accountPhotos=s.photoIds; saveBase();
+    if(failedPhotos) throw new Error('photo upload');
+    return;
+  }
+  syncAgain=true;
+}
+function readState(){
+  const read=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){ return {}; } };
+  return {visited:read(KEY),custom:read(CKEY),photos:read(PKEY),flags:read(FKEY),tomb:read(TKEY)};
+}
+// Called by auth.js. An account starts from its own copy, the guest and GitHub data stay untouched.
+window.useAccount=user=>{
+  if((user&&user.id)===(account&&account.id)) return;
+  account=user; accountEpoch++; lastSyncOk=0; clearTimeout(pushTimer);
+  ({KEY,CKEY,PKEY,FKEY,TKEY}=STATE_KEYS);
+  accountBase=null; accountPhotos={}; photoLinks={};
+  if(user){
+    KEY=accountKey(KEY); CKEY=accountKey(CKEY); PKEY=accountKey(PKEY); FKEY=accountKey(FKEY); TKEY=accountKey(TKEY);
+    try{ accountBase=JSON.parse(localStorage.getItem(accountKey('sync-base'))||'null'); accountPhotos=JSON.parse(localStorage.getItem(accountKey('sync-photos'))||'{}'); }catch(e){}
+  }
+  applyState(readState());
+  showAccountMenu();
+  syncNow();
+};
+// Signing out removes the account's copy from this device, so ask if that would lose anything.
+window.leaveAccount=async signOut=>{
+  await syncNow();
+  const core=window.syncCore;
+  const unsent=!core.isEmpty(core.diff(accountBase,core.toRows({visited,custom,flags},accountBase,newId)));
+  const waiting=core.pendingPhotos({custom,photos}).length>0;
+  if((unsent||waiting)&&!confirm(t(unsent?'leaveUnsent':'leavePhotos'))) return false;
+  const prefix='u:'+account.id+':';
+  await signOut();
+  Object.keys(localStorage).filter(k=>k.startsWith(prefix)).forEach(k=>localStorage.removeItem(k));
+  return true;
+};
+
+let map=null; const markers={};
+try{
+  map=L.map('map').setView([49.8,15.5],7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap · letiště: VFR příručka ŘLP ČR (WEF 03 SEP 26)'}).addTo(map);
+  allData().forEach(addMarker);
+  map.on('click',e=>{ if(addMode) placeCustom(e.latlng.lat,e.latlng.lng); });
+  // button in the map: hide the list panel to browse the map full screen
+  const MapOnly=L.Control.extend({options:{position:'topright'},onAdd(){
+    const d=L.DomUtil.create('div','leaflet-bar'); const b=L.DomUtil.create('button','mapbtn',d); b.type='button'; b.id='maponlybtn';
+    L.DomEvent.disableClickPropagation(d); b.onclick=()=>setMapOnly(!document.getElementById('app').classList.contains('maponly'));
+    return d; }});
+  new MapOnly().addTo(map);
+  // re-pan once the popup has its final size (photos, buttons), so it is never cut off at the top
+  map.on('popupopen',()=>map.getContainer().classList.add('popopen'));
+  map.on('popupclose',()=>map.getContainer().classList.remove('popopen'));
+  map.on('popupopen',e=>setTimeout(()=>{
+    try{
+      const c=e.popup.getElement(); if(!c) return;
+      const pr=c.getBoundingClientRect(), mr=map.getContainer().getBoundingClientRect();
+      const dy=pr.top-(mr.top+10), dx=Math.min(0,pr.left-(mr.left+10))||Math.max(0,pr.right-(mr.right-10));
+      if(dy<0||dx) map.panBy([dx,Math.min(0,dy)]);
+    }catch(_){}
+  },80));
+}catch(e){ document.getElementById('map').innerHTML='<p style="padding:16px;color:#5B657A">Mapu se nepodařilo načíst / Map failed to load.</p>'; }
+let cluster=null;
+function clusterLayer(){
+  if(cluster) return cluster;
+  cluster=(L.markerClusterGroup?L.markerClusterGroup({disableClusteringAtZoom:10,maxClusterRadius:45,showCoverageOnHover:false,chunkedLoading:true,
+    iconCreateFunction:c=>{ const n=c.getChildCount(), has=c.getAllChildMarkers().some(m=>visited[m._code]);
+      const sz=n<10?30:n<100?36:44; return L.divIcon({html:`<div class="clu${has?' has':''}" style="width:${sz}px;height:${sz}px">${n}</div>`,className:'',iconSize:[sz,sz]}); }})
+    :L.layerGroup()).addTo(map);
+  return cluster;
+}
+const ICON_EXPAND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+const ICON_LIST='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>';
+// keep the wide (tablet/PC) layout exact: the panels fill the height under the header
+function measureHeader(){ document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px'); if(map) map.invalidateSize(); }
+window.addEventListener('resize',measureHeader); window.addEventListener('orientationchange',()=>setTimeout(measureHeader,300));
+function setMapOnly(on,quiet){
+  const app=document.getElementById('app'); app.classList.toggle('maponly',on);
+  const b=document.getElementById('maponlybtn');
+  if(b){ b.innerHTML=on?ICON_LIST:ICON_EXPAND; b.title=b.ariaLabel=t(on?'showList':'mapOnly'); }
+  if(!quiet) try{ localStorage.setItem('maponly',on?'1':''); }catch(e){}
+  if(map) setTimeout(()=>map.invalidateSize(),50);
+}
+// --- runways & frequencies (data/airport-info.json, refreshed monthly by a GitHub Action) ---
+let airInfo=null, airInfoLoading=null, aiOpen=false;
+try{ aiOpen=localStorage.getItem('ai-open')==='1'; }catch(e){}
+function loadAirInfo(){
+  if(airInfo||airInfoLoading) return airInfoLoading||Promise.resolve();
+  airInfoLoading=fetch('data/airport-info.json').then(r=>{ if(!r.ok) throw 0; return r.json(); })
+    .then(j=>{ airInfo=j.info||{}; }).catch(()=>{ airInfoLoading=null; });
+  return airInfoLoading;
+}
+function infoHtml(a){
+  const x=airInfo&&airInfo[a.code]; if(!x) return '';
+  const fmt=n=>n==null?'?':n.toLocaleString(lang==='cs'?'cs-CZ':'en-GB');
+  const rw=(x.r||[]), fq=(x.f||[]);
+  const sum=[rw.map(r=>r[0]).filter(Boolean).join(', '), fq.length?fq[0][2]:''].filter(Boolean).join(' · ');
+  let h=`<details class="ai"${aiOpen?' open':''}><summary>${t('aiTitle')} <small>${esc(sum)}</small></summary><div class="aib">`;
+  if(rw.length) h+=`<h4>${t('runways')}</h4>`+rw.map(r=>`<div><b>${esc(r[0]||'—')}</b><span>${r[1]?fmt(r[1])+(r[2]?' × '+fmt(r[2]):'')+' m':''}${r[3]?(r[1]?', ':'')+esc(t('surf')[r[3]]||r[3]):''}${r[4]?', '+t('lit'):''}</span></div>`).join('');
+  if(fq.length) h+=`<h4>${t('freqs')}</h4>`+fq.map(f=>`<div><span class="mhz">${esc(f[2])}</span><span>${esc(f[0])}${f[1]&&f[1].toUpperCase()!==f[0]?` <span class="d">${esc(f[1])}</span>`:''}</span></div>`).join('');
+  return h+`<p>${t('aiNote')}</p></div></details>`;
+}
+// landed airfields get a small green pin, the others a ring
+// pins: gold = favourite (been there), green = landed, orange with a target = want to visit
+function pinIcon(kindPin){
+  const fill=kindPin==='gold'?'pinGold':kindPin==='want'?'pinO':'pinG';
+  const inner=kindPin==='want'?'<circle cx="12" cy="11" r="5" fill="none" stroke="#fff" stroke-width="1.6"/><circle cx="12" cy="11" r="1.9" fill="#fff"/>':'<path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/>';
+  return L.divIcon({className:'pin',iconSize:[22,30],iconAnchor:[11,26],popupAnchor:[0,-24],
+    html:`<svg width="22" height="30" viewBox="0 0 24 34"><ellipse cx="12" cy="31.5" rx="5" ry="1.9" fill="rgba(0,0,0,.28)"/><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#${fill})" stroke="#fff" stroke-width="1.4"/>${inner}</svg>`});
+}
+// a favourite means "I have been there" – it always gets the (gold) pin
+function pinKind(a){ const fl=flags[a.code]||{}; return fl.fav?'gold':visited[a.code]?'green':fl.want?'want':''; }
+function wantsPin(a){ return !!pinKind(a); }
+function newMarker(a){
+  const landed=wantsPin(a);
+  const m=landed?L.marker([a.lat,a.lon],{icon:pinIcon(pinKind(a)),keyboard:false,riseOnHover:true})
+                :L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2});
+  m._code=a.code; m._hidden=false; m._pin=landed; m._pk=pinKind(a);
+  m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]});
+  return m;
+}
+function isForeign(a){ return !!(a.cc&&a.cc!=='CZ'); }
+function addMarker(a,batch){
+  const m=newMarker(a);
+  if(isForeign(a)){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
+  markers[a.code]=m; style(a);
+}
+function swapMarker(a){
+  const old=markers[a.code]; if(!old) return;
+  const wasOpen=old.isPopupOpen&&old.isPopupOpen(), hidden=old._hidden;
+  const m=newMarker(a); m._hidden=hidden; markers[a.code]=m;
+  if(isForeign(a)){ const c=clusterLayer(); if(c.hasLayer(old)) c.removeLayer(old); if(!hidden) c.addLayer(m); }
+  else { if(old._map) map.removeLayer(old); if(!hidden) m.addTo(map); }
+  if(wasOpen&&!hidden) setTimeout(()=>{ if(m._map) m.openPopup(); },0);
+}
+function showOnMap(a){
+  const m=markers[a.code]; if(!map||!m) return;
+  if(cluster&&cluster.hasLayer&&cluster.hasLayer(m)){
+    // above zoom 10 clusters split up; wait until the marker is really on the map, then open it
+    map.setView([a.lat,a.lon],12,{animate:false});
+    let n=0; const tryOpen=()=>{ if(m._map) m.openPopup(); else if(n++<40) setTimeout(tryOpen,50); }; tryOpen();
+  }
+  else { map.setView([a.lat,a.lon],12); m.openPopup(); }
+}
+function syncForeignMarkers(){
+  if(!map||!foreign) return;
+  const add=[];
+  foreign.forEach(a=>{
+    const want=selCC.includes(a.cc), has=!!markers[a.code];
+    if(want&&!has) addMarker(a,add);
+    if(!want&&has){ clusterLayer().removeLayer(markers[a.code]); delete markers[a.code]; }
+  });
+  if(add.length){ const c=clusterLayer(); c.addLayers?c.addLayers(add):add.forEach(m=>c.addLayer(m)); }
+}
+function loadForeign(){
+  if(foreign) return Promise.resolve();
+  if(!foreignLoading){
+    status(t('loading'));
+    foreignLoading=fetch('data/airports-eu.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+      .then(j=>{ foreign=j.airports||[]; }).catch(e=>{ foreignLoading=null; status(t('loadFail')); throw e; });
+  }
+  return foreignLoading;
+}
+async function applyCountries(){
+  try{ localStorage.setItem(CCKEY,JSON.stringify(selCC)); }catch(e){}
+  if(selCC.length>1){ try{ await loadForeign(); }catch(e){ renderCC(); return; } }
+  syncForeignMarkers(); allData().forEach(style),refreshClusters(); refreshTotal(); render(); renderCC();
+}
+const ccPanel=document.getElementById('ccpanel'), ccBtn=document.getElementById('ccbtn');
+function ccCount(c){ return c==='CZ'?DATA.length:(foreign?foreign.filter(a=>a.cc===c).length:''); }
+function renderCC(){
+  ccBtn.textContent='🌍'+(selCC.length>1?' '+selCC.length:''); ccBtn.title=t('countries')+': '+selCC.join(', ');
+  ccBtn.classList.toggle('on',selCC.length>1);
+  ccPanel.innerHTML=CCS.map(c=>`<label class="${selCC.includes(c)?'sel':''}${c==='CZ'?' fixed':''}"><input type="checkbox" name="cc" value="${c}" ${selCC.includes(c)?'checked':''} ${c==='CZ'?'disabled':''}>${c} ${t('ccNames')[c]} <small>${ccCount(c)}</small></label>`).join('')+`<div class="cchint">${t('ccHint')}</div>`;
+  ccPanel.querySelectorAll('input:not([disabled])').forEach(i=>i.onchange=()=>{
+    selCC=['CZ',...CCS.filter(c=>c!=='CZ'&&(c===i.value?i.checked:selCC.includes(c)))];
+    applyCountries();
+  });
+}
+ccBtn.onclick=()=>ccPanel.classList.toggle('on');
+function style(a){
+  let m=markers[a.code]; if(!m) return;
+  const v=visited[a.code], colors={icao:'#C4177C',slz:'#2C64B5',custom:'#8A5A2B'};
+  const fl=flags[a.code]||{};
+  if(m._pin!==wantsPin(a)){ swapMarker(a); m=markers[a.code]; }
+  if(m._pin){ const k=pinKind(a); if(m._pk!==k){ m._pk=k; m.setIcon(pinIcon(k)); } return; }
+  m.setStyle({color:colors[kind(a)],fillColor:'#fff',fillOpacity:.9,weight:2});
+}
+// cluster bubbles turn green when they contain a landed airfield – recompute after changes
+function refreshClusters(){ if(cluster&&cluster.refreshClusters) cluster.refreshClusters(); }
+const today=()=>new Date().toISOString().slice(0,10);
+function popup(a){
+  const v=visited[a.code]||{}, isCustom=!!a.custom;
+  const d=document.createElement('div');d.className='pop';
+  let html='';
+  html+= isCustom ? `<input type="text" name="cname" class="cname" value="${esc(a.name)}" placeholder="${esc(t('addName'))}">` : `<b>${esc(a.name)}</b>`;
+  html+= isCustom ? `<input type="text" name="cshort" class="cshort" maxlength="8" value="${esc(a.short||'')}" placeholder="${esc(t('shortPh'))}">`
+                  : `<div class="m">${esc(a.code)}${a.town?' · '+esc(a.town):''}${a.elev?' · '+esc(String(a.elev))+' ft':''}${a.cc&&a.cc!=='CZ'?' · '+t('ccNames')[a.cc]:''}</div>`;
+  const fl=flags[a.code]||{};
+  html+=`<div class="flags"><button type="button" class="flag fav${fl.fav?' on':''}">${fl.fav?'★':'☆'} ${t('fav')}</button><button type="button" class="flag want${fl.want?' on':''}">⚑ ${t('want')}</button></div>`;
+  if(!isCustom) html+=infoHtml(a);
+  if(isCustom) html+=`<textarea name="cdesc" class="cdesc" placeholder="${esc(t('descPh'))}">${esc(a.desc||'')}</textarea>`;
+  const pics=getPics(a);
+  const canShare=p=>account&&!isCustom&&p.id; // a strip stays private, the database refuses it too
+  if(pics.length) html+=`<div class="gal">${pics.map((p,i)=>`<div><img src="${esc(p.thumb||p.url)}" data-i="${i}" alt="">${canShare(p)?`<button type="button" class="pubpic${p.pub?' on':''}" data-i="${i}" title="${esc(t(p.pub?'commPublic':'commPrivate'))}">${p.pub?'🌐':'🔒'}</button>`:''}<button type="button" class="rmpic" data-i="${i}" title="${esc(t('removePhoto'))}">×</button></div>`).join('')}</div>`;
+  html+= pics.length<MAXPH ? `<label class="file-label">${t('photoLabel')} (${pics.length}/${MAXPH})<input type="file" name="cphoto" accept="image/*" multiple class="cphoto"></label>`
+                           : `<div class="file-label">${t('maxPhotos')}</div>`;
+  html+=`<label><input type="checkbox" name="landed" class="landed-cb" ${v.date!==undefined?'checked':''}> ${t('here')}</label>
+  <input type="date" name="landed-date" class="landed-date" value="${esc(v.date||'')}"><input type="text" name="landed-note" class="landed-note" placeholder="${esc(t('note'))}" value="${esc(v.note||'')}">`;
+  d.innerHTML=html;
+  const fit=()=>{ const pp=markers[a.code]&&markers[a.code].getPopup(); if(pp&&pp.isOpen()){ try{ pp._updateLayout(); pp._updatePosition(); }catch(e){} } };
+  if(!isCustom){
+    const sec=window.community.section(a.code,{t,signedIn:()=>!!account,onResize:fit,openPhoto:openLightbox});
+    // The section swaps elements while handling a click. Leaflet then finds no card above the removed
+    // element, takes it for a click on the map and closes the card, so the click must stop here.
+    sec.addEventListener('click',e=>e.stopPropagation());
+    d.appendChild(sec);
+  }
+  if(!isCustom&&!airInfo) loadAirInfo().then(()=>{ if(airInfo&&airInfo[a.code]&&markers[a.code]&&markers[a.code].isPopupOpen()) refreshMarkerPopup(a); });
+  const det=d.querySelector('details.ai');
+  if(det) det.addEventListener('toggle',()=>{
+    if(det.open===aiOpen) return; // the browser also fires 'toggle' when a card is built already open
+    aiOpen=det.open; try{ localStorage.setItem('ai-open',aiOpen?'1':''); }catch(e){}
+    fit();
+  });
+  const cb=d.querySelector('.landed-cb'), dt=d.querySelector('.landed-date'), nt=d.querySelector('.landed-note');
+  cb.onchange=()=>{ if(cb.checked){ if(!dt.value) dt.value=today(); set(a,{date:dt.value,note:nt.value}); } else set(a,null); };
+  dt.onchange=nt.onchange=()=>{ if(cb.checked) set(a,{date:dt.value,note:nt.value}); };
+  if(isCustom){
+    const nameInp=d.querySelector('.cname');
+    nameInp.onchange=()=>{ a.name=nameInp.value.trim()||t('newStripDefault'); saveCustom(a); render(); };
+    const shortInp=d.querySelector('.cshort');
+    shortInp.onchange=()=>{ a.short=shortInp.value.trim().toUpperCase(); saveCustom(a); render(); };
+    const descInp=d.querySelector('.cdesc');
+    descInp.onchange=()=>{ a.desc=descInp.value; saveCustom(a); };
+    const del=document.createElement('button'); del.type='button'; del.className='del'; del.textContent=t('del');
+    del.onclick=()=>{ if(confirm(t('delConfirm'))) deleteCustom(a); };
+    d.appendChild(del);
+  }
+  d.querySelector('.flag.fav').onclick=()=>{ toggleFlag(a,'fav'); refreshMarkerPopup(a); };
+  d.querySelector('.flag.want').onclick=()=>{ toggleFlag(a,'want'); refreshMarkerPopup(a); };
+  const fileInp=d.querySelector('.cphoto');
+  if(fileInp) fileInp.onchange=async()=>{
+    const files=[...fileInp.files].slice(0,MAXPH-getPics(a).length); if(!files.length) return;
+    for(const f of files){
+      try{
+        const durl=await compressImage(f,account?1600:undefined,account?0.8:undefined);
+        let pic={url:durl};
+        if(ghToken()){
+          status(t('uploading'));
+          try{ const r=await ghUpload(durl,a); pic={url:r.url,path:r.path}; status(t('uploaded')); }
+          catch(e){ status(t('uploadFail')); break; }
+        }
+        const cur=getPics(a); if(cur.length>=MAXPH) break;
+        setPics(a,[...cur,pic]);
+      }catch(err){ status(t('bad')); }
+    }
+    refreshMarkerPopup(a); render();
+  };
+  d.querySelectorAll('.gal img').forEach(img=>img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i));
+  d.querySelectorAll('.pubpic').forEach(b=>b.onclick=async()=>{
+    const cur=getPics(a), p=cur[+b.dataset.i]; if(!p) return;
+    if(!p.pub&&!confirm(t('publishConfirm'))) return;
+    try{
+      await window.backend.setPhotoPublic(p.id,!p.pub);
+      const {pub,...rest}=p;
+      setPics(a,cur.map(x=>x===p?(pub?rest:{...rest,pub:true}):x));
+      refreshMarkerPopup(a);
+    }catch(e){ console.warn('share',e); status(t(e&&e.code==='P0001'?'commLimit':'commFail')); }
+  });
+  d.querySelectorAll('.rmpic').forEach(b=>b.onclick=()=>{
+    const cur=getPics(a), i=+b.dataset.i, gone=cur[i]; if(!gone) return;
+    ghDelete({...gone,name:a.name}); setPics(a,cur.filter((_,j)=>j!==i));
+    refreshMarkerPopup(a); render();
+  });
+  return d;
+}
+const lb=document.getElementById('lightbox');
+let lbList=[], lbIdx=0;
+function lbShow(){ lb.querySelector('img').src=lbList[lbIdx]; lb.querySelector('.lbcnt').textContent=lbList.length>1?`${lbIdx+1} / ${lbList.length}`:''; lb.classList.toggle('multi',lbList.length>1); }
+function openLightbox(list,i=0){ lbList=Array.isArray(list)?list:[list]; lbIdx=i; lbShow(); lb.classList.add('on'); }
+function lbStep(n){ if(lbList.length<2) return; lbIdx=(lbIdx+n+lbList.length)%lbList.length; lbShow(); }
+function closeLightbox(){ lb.classList.remove('on'); }
+lb.onclick=closeLightbox;
+lb.querySelector('.lbprev').onclick=e=>{ e.stopPropagation(); lbStep(-1); };
+lb.querySelector('.lbnext').onclick=e=>{ e.stopPropagation(); lbStep(1); };
+let lbX=null;
+lb.addEventListener('touchstart',e=>{ lbX=e.touches[0].clientX; },{passive:true});
+lb.addEventListener('touchend',e=>{ if(lbX===null) return; const dx=e.changedTouches[0].clientX-lbX; lbX=null; if(Math.abs(dx)>40){ e.preventDefault(); lbStep(dx<0?1:-1); } });
+document.addEventListener('keydown',e=>{ if(!lb.classList.contains('on')) return; if(e.key==='Escape') closeLightbox(); if(e.key==='ArrowRight') lbStep(1); if(e.key==='ArrowLeft') lbStep(-1); });
+function set(a,val){
+  if(val){ val.ts=Date.now(); visited[a.code]=val; delete tomb['v:'+a.code]; }
+  else {
+    delete visited[a.code]; tomb['v:'+a.code]=Date.now();
+    const fl=flags[a.code]; if(fl&&fl.fav){ const f={...fl}; delete f.fav; delete f.ts; if(f.want) flags[a.code]=f; else delete flags[a.code]; saveFlags(a.code); }
+  }
+  style(a); if(a.cc&&a.cc!=='CZ') refreshClusters(); render(); save();
+}
+
+let addMode=false;
+const addBtn=document.getElementById('addbtn'), addHint=document.getElementById('addhint');
+addBtn.onclick=()=>{
+  addMode=!addMode;
+  addBtn.classList.toggle('on',addMode);
+  addHint.style.display=addMode?'block':'none';
+  document.getElementById('map').classList.toggle('addmode',addMode);
+};
+function placeCustom(lat,lon){
+  const code='C'+Date.now().toString(36).toUpperCase();
+  const a={code,name:t('newStripDefault'),lat:Math.round(lat*100000)/100000,lon:Math.round(lon*100000)/100000,elev:'',town:'',custom:true,desc:'',pics:[]};
+  custom[code]=a; saveCustom(a); refreshTotal();
+  if(!['all','custom','todo'].includes(f.value)) f.value='all'; // a new strip must stay visible on the map
+  if(map){ addMarker(a); map.setView([lat,lon],13); markers[code].openPopup(); }
+  addMode=false; addBtn.classList.remove('on'); addHint.style.display='none';
+  document.getElementById('map').classList.remove('addmode');
+  render();
+}
+function deleteCustom(a){
+  const now=Date.now();
+  delete custom[a.code]; tomb['c:'+a.code]=now;
+  if(visited[a.code]){ delete visited[a.code]; tomb['v:'+a.code]=now; }
+  if(flags[a.code]){ delete flags[a.code]; tomb['f:'+a.code]=now; localStorage.setItem(FKEY,JSON.stringify(flags)); }
+  saveCustom(); save();
+  if(map&&markers[a.code]){ map.removeLayer(markers[a.code]); delete markers[a.code]; }
+  refreshTotal(); render();
+}
+
+const list=document.getElementById('list'), q=document.getElementById('q'), f=document.getElementById('f');
+q.oninput=render;
+f.onchange=()=>{
+  render();
+  // zoom the map to what the filter shows
+  if(!map||f.value==='all') return;
+  const pts=allData().filter(a=>matchesFilter(a,f.value)).map(a=>[a.lat,a.lon]);
+  if(pts.length) map.fitBounds(pts,{padding:[30,30],maxZoom:10});
+};
+function matchesFilter(a,mode){
+  const k=kind(a);
+  if(mode==='icao')return k==='icao'; if(mode==='slz')return k==='slz'; if(mode==='custom')return k==='custom';
+  if(mode==='done')return !!visited[a.code]; if(mode==='todo')return !visited[a.code];
+  if(mode==='fav')return !!(flags[a.code]||{}).fav; if(mode==='want')return !!(flags[a.code]||{}).want; return true;
+}
+// the map shows only what the filter selects (search text filters just the list)
+function applyMapFilter(data,mode){
+  if(!map) return;
+  const addC=[], remC=[];
+  data.forEach(a=>{
+    const m=markers[a.code]; if(!m) return;
+    const show=matchesFilter(a,mode); if(m._hidden===!show) return;
+    m._hidden=!show;
+    if(a.cc&&a.cc!=='CZ'){ (show?addC:remC).push(m); }
+    else if(show) m.addTo(map); else map.removeLayer(m);
+  });
+  if(cluster){
+    if(remC.length) cluster.removeLayers?cluster.removeLayers(remC):remC.forEach(m=>cluster.removeLayer(m));
+    if(addC.length) cluster.addLayers?cluster.addLayers(addC):addC.forEach(m=>cluster.addLayer(m));
+  }
+}
+function render(){
+  const data=allData();
+  document.getElementById('cnt').textContent=data.filter(a=>visited[a.code]).length;
+  const s=q.value.trim().toLowerCase(), mode=f.value;
+  list.innerHTML='';
+  const frag=document.createDocumentFragment();
+  applyMapFilter(data,mode);
+  data.filter(a=>{
+    if(s&&!(a.name.toLowerCase().includes(s)||(a.custom?(a.short||''):a.code).toLowerCase().includes(s)||(a.town||'').toLowerCase().includes(s))) return false;
+    return matchesFilter(a,mode);
+  }).forEach(a=>{
+    const v=visited[a.code], k=kind(a);
+    const r=document.createElement('div');r.className='row'+(v?' done':'');
+    r.innerHTML=`<input type="checkbox" name="visited" ${v?'checked':''}><div><div class="name">${esc(a.name)}${(flags[a.code]||{}).fav?'<span class="ic fav">★</span>':''}${(flags[a.code]||{}).want?'<span class="ic want">⚑</span>':''}</div><div class="meta">${a.cc&&a.cc!=='CZ'?`<span class="cc">${esc(a.cc)}</span>`:''}<span class="code ${k}">${k==='custom'?esc(a.short||'—'):esc(a.code)}</span> ${esc(a.town||'')}${getPics(a).length?' 📷'+(getPics(a).length>1?getPics(a).length:''):''}</div></div><div class="date">${v&&v.date?esc(t('dateFmt')(String(v.date))):''}</div>`;
+    const cb=r.querySelector('input');
+    cb.onclick=e=>{e.stopPropagation(); cb.checked?set(a,{date:today(),note:''}):set(a,null);};
+    r.onclick=()=>showOnMap(a);
+    frag.appendChild(r);
+  });
+  list.appendChild(frag);
+}
+document.getElementById('exp').onclick=()=>{
+  const b=new Blob([JSON.stringify({visited,custom,photos,flags},null,1)],{type:'application/json'});
+  const x=document.createElement('a');x.href=URL.createObjectURL(b);x.download='landings-cz.json';x.click();
+};
+document.getElementById('imp').onclick=()=>document.getElementById('file').click();
+document.getElementById('file').onchange=async e=>{
+  try{
+    const data=JSON.parse(await e.target.files[0].text());
+    if(account){ const a=await importToAccount(data); e.target.value=''; status(t('importedAccount')(a)); return; }
+    const now=Date.now(), iv=(data.visited||data.custom)?(data.visited||{}):data, ic=data.custom||{};
+    Object.entries(iv).forEach(([c,v])=>{ visited[c]={...v,ts:now}; delete tomb['v:'+c]; });
+    Object.entries(data.photos||{}).forEach(([c,p])=>{ photos[c]={...p,ts:now}; delete tomb['p:'+c]; });
+    Object.entries(data.flags||{}).forEach(([c,x])=>{ flags[c]={...x,ts:now}; delete tomb['f:'+c]; });
+    normalizePics(); savePhotos(); saveFlags();
+    Object.entries(ic).forEach(([c,a])=>{ if(custom[c]) Object.assign(custom[c],a,{ts:now}); else custom[c]={...a,ts:now}; delete tomb['c:'+c]; });
+    saveCustom(); refreshTotal();
+    if(map){ Object.values(custom).forEach(a=>{ if(!markers[a.code]) addMarker(a); }); allData().forEach(style),refreshClusters(); }
+    render(); save(); status(t('imported'));
+  }catch(err){ status(t('bad')); }
+};
+// footer "⋯" menu: GitHub sync, export, import, data source
+const menu=document.getElementById('menu'), moreBtn=document.getElementById('morebtn');
+function setMenu(on){ menu.classList.toggle('on',on); moreBtn.classList.toggle('on',on); }
+moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')); };
+menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
+document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
+// Account items of the menu. The admin item only leads to the page, the database decides what it shows.
+const APP_VERSION='landings-v27'; // matches the cache name in sw.js
+function showAccountMenu(){
+  document.getElementById('fb').hidden=!account;
+  const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;
+  const me=account&&account.id;
+  if(me) window.backend.isAdmin().then(yes=>{ if((account&&account.id)===me) adminBtn.hidden=!yes; }).catch(()=>{});
+}
+document.getElementById('adminbtn').onclick=()=>{ location.href='admin.html'; };
+const fbDlg=document.getElementById('fbdlg'), fbText=document.getElementById('fbtext'), fbMsg=document.getElementById('fbmsg'), fbSend=document.getElementById('fbsend');
+document.getElementById('fb').onclick=()=>{ fbMsg.textContent=''; fbSend.disabled=false; fbDlg.showModal(); fbText.focus(); };
+document.getElementById('fbclose').onclick=()=>fbDlg.close();
+fbSend.onclick=async()=>{
+  if(!fbText.value.trim()) return;
+  fbSend.disabled=true;
+  try{ await window.backend.sendFeedback(fbText.value,APP_VERSION); fbText.value=''; fbMsg.textContent=t('fbThanks'); setTimeout(()=>fbDlg.close(),2500); }
+  catch(e){ console.warn('feedback',e); fbMsg.textContent=t(e&&e.code==='P0001'?'fbLimit':'commFail'); fbSend.disabled=false; }
+};
+applyLang();
+measureHeader();
+setMapOnly((()=>{ try{ return localStorage.getItem('maponly')==='1'; }catch(e){ return false; } })(),true);
+applyCountries();
+document.getElementById('syncbtn').title=t('syncTitle');
+document.getElementById('syncbtn').onclick=syncNow;
+syncNow();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&Date.now()-lastSyncOk>15000) syncNow(); });
+window.addEventListener('online',syncNow);
+// updateViaCache 'none': the browser checks sw.js itself on every load, not after its HTTP cache expires.
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{});
+// The running version, so a test can tell an old copy from a new one.
+document.getElementById('appver').textContent=APP_VERSION;

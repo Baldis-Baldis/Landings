@@ -1,0 +1,24 @@
+{
+ "visited": {
+  "LKBE": { "date": "2026-09-10", "note": "Sample note, made up for tests", "ts": 1767225600000 },
+  "LKHK": { "date": "2026-08-02", "note": "", "ts": 1767225600001 },
+  "LKLB": { "date": "", "note": "", "ts": 1767225600002 },
+  "AT-0009": { "date": "2026-07-15", "ts": 1767225600003 }
+ },
+ "flags": {
+  "LKBE": { "fav": true, "ts": 1767225600000 },
+  "LKHK": { "fav": true, "want": true, "ts": 1767225600001 },
+  "LKPM": { "want": true, "ts": 1767225600002 }
+ },
+ "photos": {
+  "LKHK": { "pics": [
+   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-a.jpg", "path": "photos/sample-a.jpg" },
+   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-b.jpg", "path": "photos/sample-b.jpg" }
+  ], "ts": 1767225600001 },
+  "LKBE": { "pics": [
+   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-c.jpg", "path": "photos/sample-c.jpg" }
+  ], "ts": 1767225600000 }
+ },
+ "custom": {},
+ "tomb": {}
+}

@@ -1,0 +1,12 @@
+:root{--ink:#1B2740;--ink2:#5B657A;--line:#D5DAE3;--paper:#F3F5F8}
+body{margin:0;padding:16px;font:500 15px/1.55 Barlow,sans-serif;color:var(--ink);background:var(--paper)}
+main{max-width:760px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 20px}
+h1,h2{font-family:"Barlow Condensed",sans-serif;line-height:1.2}
+h1{font-size:30px;margin:12px 0 4px}
+h2{font-size:20px;margin:22px 0 6px}
+.meta,.top{color:var(--ink2);font-size:13px}
+a{color:var(--ink)}
+code{font-size:13px;background:var(--paper);padding:0 3px;border-radius:3px}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+li{margin:4px 0}
+.warn{border-left:4px solid var(--ink);padding:6px 12px;background:var(--paper)}
