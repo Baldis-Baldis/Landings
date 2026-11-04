@@ -131,6 +131,8 @@
   // the database still refuses public content without them.
   async function onUser(next) {
     if ((next && next.id) === (user && user.id)) return;
+    // The analytics beacon runs only for guests (analytics.js): a session must not share the page with it.
+    if (next && window.analyticsBeacon) { location.reload(); return; }
     user = next; nickname = null; askedNick = false; termsOk = false;
     renderAuth();
     if (!user) { if (window.useAccount) window.useAccount(null); return; }

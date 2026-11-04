@@ -25,7 +25,7 @@ class El {
   submit() { this.listeners.submit({ preventDefault() {}, target: this }); return tick(); }
 }
 
-function load(overrides = {}) {
+function load(overrides = {}, page = {}) {
   const els = new Map();
   const $ = id => { if (!els.has(id)) els.set(id, new El(id)); return els.get(id); };
   const calls = [];
@@ -49,6 +49,7 @@ function load(overrides = {}) {
       createElement: () => ({}),
       head: { append(tag) { calls.push(['script', tag.src]); setTimeout(() => tag.onload()); } },
     },
+    ...page,
   };
   ctx.window = ctx;
   vm.createContext(ctx);
@@ -181,4 +182,22 @@ test('a failed sign-out stays signed in and says so', async () => {
   assert.equal($('authdlg').open, true);
   assert.equal($('auth').textContent, 'Účet: Pilot');
   assert.ok($('authmsg').textContent);
+});
+
+test('a sign-in in a page with the analytics beacon reloads before the account is used', async () => {
+  let reloads = 0, used = 0;
+  const page = { analyticsBeacon: true, location: { reload() { reloads += 1; } }, useAccount() { used += 1; } };
+  const { emit } = load({ getTermsVersion: async () => '2026-11-02' }, page);
+  await emit(null);
+  assert.equal(reloads, 0, 'a guest page stays');
+  await emit(USER);
+  assert.equal(reloads, 1);
+  assert.equal(used, 0, 'the account is never used in a page with the beacon');
+});
+
+test('without the beacon a sign-in does not reload', async () => {
+  let reloads = 0;
+  const { emit } = load({ getTermsVersion: async () => '2026-11-02' }, { location: { reload() { reloads += 1; } } });
+  await emit(USER);
+  assert.equal(reloads, 0);
 });

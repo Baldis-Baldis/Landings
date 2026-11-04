@@ -122,15 +122,18 @@ test('local servers get the Turnstile test key, the site gets the real one', () 
 
 test('the analytics beacon loads on mylandings.net only and never on the admin page', () => {
   const source = readFileSync(join(root, 'analytics.js'), 'utf8');
-  const loaded = hostname => {
+  const loaded = (hostname, keys = [], search = '') => {
     const added = [];
     const ctx = {
-      location: { hostname },
+      URLSearchParams,
+      localStorage: Object.fromEntries(keys.map(k => [k, '{}'])),
+      location: { hostname, search },
       document: {
         createElement: tag => ({ tag, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; } }),
         head: { append: node => added.push(node) },
       },
     };
+    ctx.window = ctx;
     vm.runInNewContext(source, ctx);
     return added;
   };
@@ -140,6 +143,11 @@ test('the analytics beacon loads on mylandings.net only and never on the admin p
   for (const host of ['localhost', '127.0.0.1', 'www.mylandings.net', 'mylandings.net.evil.test']) {
     assert.equal(loaded(host).length, 0, host);
   }
+  // guests only: a session or a sign-in return keeps the foreign script out of the page
+  assert.equal(loaded('mylandings.net', ['sb-bgxzlirvbuxjjawqkkyw-auth-token']).length, 0, 'signed in');
+  assert.equal(loaded('mylandings.net', ['sb-bgxzlirvbuxjjawqkkyw-auth-token-code-verifier']).length, 0, 'sign-in started');
+  assert.equal(loaded('mylandings.net', [], '?code=one-time').length, 0, 'return with a code');
+  assert.equal(loaded('mylandings.net', ['lang', 'visited-cz-airfields']).length, 1, 'guest data is fine');
   assert.match(page, /<script src="analytics\.js"><\/script>/);
   const admin = readFileSync(join(root, 'admin.html'), 'utf8');
   assert.ok(!/analytics|cloudflareinsights/.test(admin), 'admin page has no analytics');
