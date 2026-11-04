@@ -34,7 +34,8 @@ test('the CSP allows no inline or foreign code', () => {
   const csp = page.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
   const rule = name => csp.split('; ').find(r => r.startsWith(`${name} `));
   assert.equal(rule('default-src'), "default-src 'none'");
-  assert.equal(rule('script-src'), "script-src 'self' https://challenges.cloudflare.com");
+  assert.equal(rule('script-src'), "script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com");
+  assert.ok(rule('connect-src').split(' ').includes('https://cloudflareinsights.com'), 'the beacon reports here');
   assert.equal(rule('base-uri'), "base-uri 'none'");
   assert.ok(!/unsafe-eval/.test(csp));
   assert.ok(page.indexOf('Content-Security-Policy') < page.indexOf('<link'), 'CSP must come before any resource');
@@ -98,7 +99,7 @@ test('the legal pages exist, carry no code and are linked from the app', () => {
     assert.match(doc, /http-equiv="Content-Security-Policy" content="default-src 'none';/);
     assert.ok(!/(src|href)="http:/.test(doc));
     assert.match(doc, /id="en"/, `${file}: English part`);
-    assert.match(doc, /Verze 2026-11-02/);
+    assert.match(doc, /Verze \d{4}-\d{2}-\d{2}, účinná od/);
     assert.match(page, new RegExp(`href="${file}"`), `${file} linked from the app`);
   }
   const auth = readFileSync(join(root, 'auth.js'), 'utf8');
@@ -117,4 +118,31 @@ test('local servers get the Turnstile test key, the site gets the real one', () 
   for (const host of ['mylandings.net', 'www.mylandings.net', 'localhost.example.com']) {
     assert.match(keyOn(host), /^0x4/, host);
   }
+});
+
+test('the analytics beacon loads on mylandings.net only and never on the admin page', () => {
+  const source = readFileSync(join(root, 'analytics.js'), 'utf8');
+  const loaded = hostname => {
+    const added = [];
+    const ctx = {
+      location: { hostname },
+      document: {
+        createElement: tag => ({ tag, attrs: {}, setAttribute(k, v) { this.attrs[k] = v; } }),
+        head: { append: node => added.push(node) },
+      },
+    };
+    vm.runInNewContext(source, ctx);
+    return added;
+  };
+  const [beacon] = loaded('mylandings.net');
+  assert.equal(beacon.src, 'https://static.cloudflareinsights.com/beacon.min.js');
+  assert.deepEqual(JSON.parse(beacon.attrs['data-cf-beacon']), { token: 'e4c16690ec62451891e27a22d445c8d4' });
+  for (const host of ['localhost', '127.0.0.1', 'www.mylandings.net', 'mylandings.net.evil.test']) {
+    assert.equal(loaded(host).length, 0, host);
+  }
+  assert.match(page, /<script src="analytics\.js"><\/script>/);
+  const admin = readFileSync(join(root, 'admin.html'), 'utf8');
+  assert.ok(!/analytics|cloudflareinsights/.test(admin), 'admin page has no analytics');
+  const privacy = readFileSync(join(root, 'privacy.html'), 'utf8');
+  assert.equal((privacy.match(/Cloudflare Web Analytics/g) || []).length >= 2, true, 'named in Czech and English');
 });

@@ -42,6 +42,8 @@ for (const url of [
   'https://bgxzlirvbuxjjawqkkyw.supabase.co/rest/v1/landings?select=*',
   'https://bgxzlirvbuxjjawqkkyw.supabase.co/storage/v1/object/sign/photos/a.jpg?token=x',
   'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+  'https://static.cloudflareinsights.com/beacon.min.js',
+  'https://cloudflareinsights.com/cdn-cgi/rum',
   'https://mylandings.net/admin.html',
   'https://mylandings.net/admin.js',
 ]) {
