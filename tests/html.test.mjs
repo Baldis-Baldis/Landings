@@ -104,3 +104,17 @@ test('the legal pages exist, carry no code and are linked from the app', () => {
   const auth = readFileSync(join(root, 'auth.js'), 'utf8');
   assert.match(auth, /TERMS_VERSION = '2026-11-02'/, 'the app asks for the version the pages show');
 });
+
+test('local servers get the Turnstile test key, the site gets the real one', () => {
+  const config = readFileSync(join(root, 'config.js'), 'utf8');
+  const keyOn = hostname => {
+    const ctx = { location: { hostname } };
+    ctx.window = ctx;
+    vm.runInNewContext(config, ctx);
+    return ctx.MYLANDINGS_CONFIG.turnstileSiteKey;
+  };
+  for (const host of ['localhost', '127.0.0.1', '[::1]']) assert.equal(keyOn(host), '1x00000000000000000000AA', host);
+  for (const host of ['mylandings.net', 'www.mylandings.net', 'localhost.example.com']) {
+    assert.match(keyOn(host), /^0x4/, host);
+  }
+});
