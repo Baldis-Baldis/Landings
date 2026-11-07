@@ -1,7 +1,6 @@
-const DATA = [{"code":"LKBE","name":"Benešov","lat":49.7408,"lon":14.6447,"elev":"1319","town":"Benešov","slz":false},{"code":"LKBO","name":"Bohuňovice","lat":49.6706,"lon":17.295,"elev":"771","town":"Bohuňovice","slz":false},{"code":"LKBOLE","name":"Boleradice","lat":48.96194,"lon":16.83167,"elev":"649","town":"","slz":true},{"code":"LKBORE","name":"Borek","lat":50.21086,"lon":14.65769,"elev":"557","town":"Borek","slz":true},{"code":"LKTB","name":"BRNO/Tuřany","lat":49.15128,"lon":16.69397,"elev":"778","town":"Brno","slz":false},{"code":"LKBR","name":"Broumov","lat":50.5619,"lon":16.3428,"elev":"1342","town":"Broumov","slz":false},{"code":"LKBRUS","name":"Brusné","lat":49.36788,"lon":17.65228,"elev":"1033","town":"Brusné","slz":true},{"code":"LKBRTO","name":"Brťov","lat":49.41086,"lon":16.49944,"elev":"","town":"Brťov-Jeneč","slz":true},{"code":"LKBU","name":"Bubovice","lat":49.9744,"lon":14.1781,"elev":"1401","town":"Bubovice","slz":false},{"code":"LKBUDK","name":"Budkovice","lat":49.07869,"lon":16.35562,"elev":"","town":"Ivančice","slz":true},{"code":"LKBYNO","name":"Bynovec","lat":50.8219,"lon":14.27174,"elev":"","town":"Bynovec","slz":true},{"code":"LKBYST","name":"Bystřice nad Pernštejnem","lat":49.52278,"lon":16.23222,"elev":"1942","town":"Bystřice nad Pernštejnem","slz":true},{"code":"LKBA","name":"Břeclav","lat":48.79044,"lon":16.89253,"elev":"531","town":"Břeclav","slz":false},{"code":"LKBREZ","name":"Březí Falcon","lat":49.33889,"lon":16.23137,"elev":"1680","town":"Březí","slz":true},{"code":"LKCHAR","name":"Charvátce","lat":50.43343,"lon":13.81111,"elev":"915","town":"Libčeves","slz":true},{"code":"LKCB","name":"Cheb","lat":50.0661,"lon":12.4117,"elev":"1585","town":"Cheb","slz":false},{"code":"LKCHOC","name":"Choceň","lat":49.97728,"lon":16.18492,"elev":"873","town":"Choceň","slz":true},{"code":"LKCH","name":"Chomutov","lat":50.4689,"lon":13.4681,"elev":"1132","town":"Otvice","slz":false},{"code":"LKCHOR","name":"Chornice","lat":49.6861,"lon":16.73091,"elev":"1129","town":"Chornice","slz":true},{"code":"LKCHOT","name":"Choteč","lat":50.43389,"lon":15.53056,"elev":"1076","town":"Choteč","slz":true},{"code":"LKCT","name":"Chotěboř","lat":49.6858,"lon":15.6761,"elev":"1949","town":"Chotěboř","slz":false},{"code":"LKCHOV","name":"Chotěšov","lat":49.65167,"lon":13.18972,"elev":"1181","town":"Chotěšov","slz":true},{"code":"LKCR","name":"Chrudim","lat":49.9364,"lon":15.7806,"elev":"981","town":"Chrudim","slz":false},{"code":"LKCHRA","name":"Chrášťany","lat":50.05872,"lon":14.92307,"elev":"876","town":"Chrášťany","slz":true},{"code":"LKCHVO","name":"Chvojenec","lat":50.10863,"lon":15.92674,"elev":"","town":"Chvojenec","slz":true},{"code":"LKCHRI","name":"Chřibská","lat":50.85819,"lon":14.46569,"elev":"1260","town":"Chřibská","slz":true},{"code":"LKDOUD","name":"Doudleby","lat":48.88504,"lon":14.48638,"elev":"1542","town":"Doudleby","slz":true},{"code":"LKDRUZ","name":"Druzcov u Lípy","lat":50.72779,"lon":14.92524,"elev":"1509","town":"Osečná","slz":true},{"code":"LKDUSN","name":"Dušníky","lat":50.41278,"lon":14.19806,"elev":"728","town":"Dušníky","slz":true},{"code":"LKDK","name":"Dvůr Králové","lat":50.4142,"lon":15.8369,"elev":"932","town":"Dvůr Králové nad Labem","slz":false},{"code":"LKDETR","name":"Dětřichov Oáza","lat":49.72917,"lon":17.11806,"elev":"751","town":"Uničov","slz":true},{"code":"LKER","name":"Erpužice","lat":49.8028,"lon":13.0381,"elev":"1572","town":"Erpužice","slz":false},{"code":"LKFR","name":"Frýdlant","lat":49.5894,"lon":18.3792,"elev":"1440","town":"Frýdlant","slz":false},{"code":"LKEXCA","name":"Hatě Excalibur","lat":48.76155,"lon":16.05541,"elev":"778","town":"Chvalovice","slz":true},{"code":"LKHB","name":"Havlíčkův Brod","lat":49.5972,"lon":15.5492,"elev":"1519","town":"Havlíčkův Brod","slz":false},{"code":"LKHATH","name":"Hať u Hlučína","lat":49.95181,"lon":18.26516,"elev":"","town":"Hať","slz":true},{"code":"LKHLAS","name":"Hláska","lat":49.06694,"lon":14.24139,"elev":"1430","town":"","slz":true},{"code":"LKHD","name":"Hodkovice","lat":50.6572,"lon":15.0778,"elev":"1480","town":"Hodkovice nad Mohelkou","slz":false},{"code":"LKPOCA","name":"Horní Počaply","lat":50.41812,"lon":14.38427,"elev":"524","town":"Horní Počáply","slz":true},{"code":"LKPRIM","name":"Horní Přím","lat":50.22931,"lon":15.70205,"elev":"919","town":"Horní Priam","slz":true},{"code":"LKHS","name":"Hosín","lat":49.04,"lon":14.495,"elev":"1621","town":"Hluboká nad Vltavou","slz":false},{"code":"LKHC","name":"Hořice","lat":50.3576,"lon":15.57698,"elev":"922","town":"Holovousy","slz":false},{"code":"LKHV","name":"Hořovice","lat":49.8481,"lon":13.8935,"elev":"1214","town":"Hořovice","slz":false},{"code":"LKHK","name":"Hradec Králové","lat":50.2532,"lon":15.8452,"elev":"791","town":"Hradec Králové","slz":false},{"code":"LKHRAD","name":"Hradčany","lat":50.61925,"lon":14.73275,"elev":"912","town":"Kuřívody","slz":true},{"code":"LKHN","name":"Hranice","lat":49.5461,"lon":17.7044,"elev":"797","town":"Hranice","slz":false},{"code":"LKJA","name":"Jaroměř","lat":50.3314,"lon":15.9539,"elev":"889","town":"Jaroměř","slz":false},{"code":"LKJI","name":"Jihlava","lat":49.4194,"lon":15.6353,"elev":"1821","town":"Jihlava","slz":false},{"code":"LKJH","name":"Jindřichův Hradec","lat":49.15068,"lon":14.97241,"elev":"1667","town":"Jindřichův Hradec","slz":false},{"code":"LKJC","name":"Jičín","lat":50.43,"lon":15.3331,"elev":"863","town":"Jičín","slz":false},{"code":"LKKAPL","name":"Kaplice","lat":48.71861,"lon":14.45056,"elev":"2100","town":"Kaplice","slz":true},{"code":"LKKV","name":"Karlovy Vary","lat":50.203,"lon":12.915,"elev":"1989","town":"Karlovy Vary","slz":false},{"code":"LKKEJZ","name":"Kejžlice","lat":49.5919,"lon":15.40137,"elev":"1588","town":"Kejžlice","slz":true},{"code":"LKKL","name":"Kladno","lat":50.1128,"lon":14.0897,"elev":"1421","town":"Kladno","slz":false},{"code":"LKKT","name":"Klatovy","lat":49.4183,"lon":13.3219,"elev":"1299","town":"Klatovy","slz":false},{"code":"LKKO","name":"Kolín","lat":50.0019,"lon":15.1733,"elev":"932","town":"Kolín","slz":false},{"code":"LKKOST","name":"Kostomlaty","lat":50.20843,"lon":14.92585,"elev":"","town":"","slz":true},{"code":"LKKOTV","name":"Kotvrdovice","lat":49.36399,"lon":16.7849,"elev":"1860","town":"Kotvrdovice","slz":true},{"code":"LKKOZY","name":"Kozmice","lat":49.91333,"lon":18.1643,"elev":"885","town":"Kozmice","slz":true},{"code":"LKKRAM","name":"Kramolín","lat":48.915,"lon":14.72639,"elev":"1650","town":"Kramolín","slz":true},{"code":"LKKR","name":"Krnov","lat":50.07441,"lon":17.69522,"elev":"1230","town":"Krnov","slz":false},{"code":"LKKM","name":"Kroměříž","lat":49.2856,"lon":17.4158,"elev":"620","town":"Kroměříž","slz":false},{"code":"LKKRPY","name":"Krpy","lat":50.32592,"lon":14.66553,"elev":"803","town":"","slz":true},{"code":"LKKU","name":"Kunovice","lat":49.0294,"lon":17.4397,"elev":"581","town":"Uherské Hradiště","slz":false},{"code":"LKKUNE","name":"Kunětice","lat":50.06833,"lon":15.8125,"elev":"728","town":"Kunětice","slz":true},{"code":"LKKY","name":"Kyjov","lat":48.98,"lon":17.1247,"elev":"689","town":"Svatobořice","slz":false},{"code":"LKJIRI","name":"Křelovice - Jiřičky","lat":49.55222,"lon":15.15556,"elev":"1683","town":"Křelovice","slz":true},{"code":"LKKA","name":"Křižanov","lat":49.3683,"lon":16.1161,"elev":"1831","town":"Křižanov","slz":false},{"code":"LKKRIZ","name":"Kříženec","lat":49.8706,"lon":12.7725,"elev":"2076","town":"Planá","slz":true},{"code":"LKPL","name":"Letkov","lat":49.7231,"lon":13.4522,"elev":"1371","town":"Letkov","slz":false},{"code":"LKLETO","name":"Letovice","lat":49.54667,"lon":16.59861,"elev":"","town":"Letovice","slz":true},{"code":"LKLT","name":"Letňany","lat":50.1314,"lon":14.5256,"elev":"909","town":"Letňany","slz":false},{"code":"LKLB","name":"Liberec","lat":50.76705,"lon":15.02307,"elev":"1329","town":"Liberec","slz":false},{"code":"LKLIBA","name":"Libáň","lat":50.37044,"lon":15.20104,"elev":"738","town":"","slz":true},{"code":"LKLOMN","name":"Lomnice nad Popelkou","lat":50.54,"lon":15.38806,"elev":"","town":"Lomnice nad Popelkou","slz":true},{"code":"LKLOUC","name":"Loučeň","lat":50.27874,"lon":15.06101,"elev":"636","town":"Loučeň","slz":true},{"code":"LKLU","name":"Luhačovice","lat":49.08819,"lon":17.71877,"elev":"","town":"Luhačovice","slz":false},{"code":"LKLUKL","name":"Lukla","lat":50.51102,"lon":13.33914,"elev":"2172","town":"Blatno","slz":true},{"code":"LKCM","name":"Medlánky","lat":49.2367,"lon":16.555,"elev":"853","town":"Medlánky","slz":false},{"code":"LKMI","name":"Mikulovice","lat":50.3017,"lon":17.2975,"elev":"1381","town":"Mikulovice","slz":false},{"code":"LKMILO","name":"Milovice","lat":50.23743,"lon":14.90999,"elev":"650","town":"","slz":true},{"code":"LKMIRO","name":"Miroslav","lat":48.93139,"lon":16.29861,"elev":"781","town":"Miroslav","slz":true},{"code":"LKMIRA","name":"Miroslav AirCon","lat":48.93167,"lon":16.33972,"elev":"715","town":"Miroslav","slz":true},{"code":"LKMLAD","name":"Mladá","lat":50.24359,"lon":14.85586,"elev":"","town":"Milovice","slz":true},{"code":"LKMB","name":"Mladá Boleslav","lat":50.3983,"lon":14.8983,"elev":"781","town":"Mladá Boleslav","slz":false},{"code":"LKMH","name":"Mnichovo Hradiště","lat":50.5402,"lon":15.0066,"elev":"800","town":"Mnichovo Hradiště","slz":false},{"code":"LKMK","name":"Moravská Třebová","lat":49.7983,"lon":16.6878,"elev":"1322","town":"Moravská Třebová","slz":false},{"code":"LKMO","name":"Most","lat":50.525,"lon":13.6831,"elev":"1089","town":"Most","slz":false},{"code":"LKMIST","name":"Místek","lat":49.65278,"lon":18.34583,"elev":"1066","town":"Místek","slz":true},{"code":"LKNABO","name":"Nabočany","lat":49.94611,"lon":15.89556,"elev":896,"town":"2 km SW Hrochův Týnec","slz":true},{"code":"LKNAPA","name":"Napajedla","lat":49.19889,"lon":13.6,"elev":"1761","town":"","slz":true},{"code":"LKNEPL","name":"Neplachov","lat":49.14194,"lon":14.60972,"elev":1417,"town":"8,5 km SW Veselí nad Lužnicí","slz":true},{"code":"LKNVCE","name":"Nová Včelnice","lat":49.26722,"lon":15.07778,"elev":"1765","town":"Nová Včelnice","slz":true},{"code":"LKNM","name":"Nové Město","lat":50.3642,"lon":16.1136,"elev":"1001","town":"Nové Město nad Metují","slz":false},{"code":"LKNUCI","name":"Nučice","lat":49.9511,"lon":14.86994,"elev":"","town":"Nučice","slz":true},{"code":"LKNYMB","name":"Nymburk","lat":50.1691,"lon":15.05245,"elev":"607","town":"Nymburk","slz":true},{"code":"LKNACH","name":"Náchod","lat":50.41296,"lon":16.12185,"elev":"1443","town":"Vysokov","slz":true},{"code":"LKOL","name":"Olomouc","lat":49.58771,"lon":17.20928,"elev":"869","town":"Olomouc","slz":false},{"code":"LKOPAV","name":"Opava","lat":49.94056,"lon":17.98611,"elev":"850","town":"Velké Hoštice","slz":true},{"code":"LKOSIC","name":"Osičiny","lat":50.01647,"lon":14.77221,"elev":"1280","town":"Osičiny","slz":true},{"code":"LKMT","name":"OSTRAVA/Mošnov","lat":49.6963,"lon":18.1111,"elev":"844","town":"Mošnov","slz":false},{"code":"LKOSTR","name":"Ostrov","lat":50.33628,"lon":12.96915,"elev":"1680","town":"Ostrov","slz":true},{"code":"LKPC","name":"Panenský Týnec","lat":50.3061,"lon":13.9342,"elev":"1207","town":"Panensky Tynec","slz":false},{"code":"LKPANO","name":"Panoší Újezd","lat":50.03867,"lon":13.69681,"elev":"1558","town":"Panoší Újezd","slz":true},{"code":"LKPD","name":"Pardubice","lat":50.01505,"lon":15.73981,"elev":"741","town":"Pardubice","slz":false},{"code":"LKPS","name":"Plasy","lat":49.9203,"lon":13.3769,"elev":"1430","town":"Plasy","slz":false},{"code":"LKLN","name":"Plzeň/Líně","lat":49.6752,"lon":13.2746,"elev":"1188","town":"Plzen","slz":false},{"code":"LKPN","name":"Podhořany","lat":49.9392,"lon":15.5497,"elev":"1250","town":"Podhořany u Ronova","slz":false},{"code":"LKPOLE","name":"Polepy","lat":50.52027,"lon":14.27224,"elev":"692","town":"Polepy","slz":true},{"code":"LKPA","name":"Polička","lat":49.7394,"lon":16.2589,"elev":"1982","town":"Polička","slz":false},{"code":"LKPR","name":"PRAHA/Ruzyně","lat":50.10087,"lon":14.25991,"elev":"1247","town":"Prague","slz":false},{"code":"LKVO","name":"PRAHA/Vodochody","lat":50.2166,"lon":14.3958,"elev":"919","town":"Vodochody","slz":false},{"code":"LKPJ","name":"Prostějov","lat":49.4478,"lon":17.1339,"elev":"699","town":"Prostějov","slz":false},{"code":"LKPISK","name":"Písek - Krašovice","lat":49.33944,"lon":14.11389,"elev":"1351","town":"Písek","slz":true},{"code":"LKPO","name":"Přerov","lat":49.4258,"lon":17.4047,"elev":"676","town":"Přerov","slz":false},{"code":"LKPI","name":"Přibyslav","lat":49.5808,"lon":15.7628,"elev":"1739","town":"Přibyslav","slz":false},{"code":"LKPM","name":"Příbram","lat":49.7201,"lon":14.1006,"elev":"1529","town":"Drásov","slz":false},{"code":"LKRK","name":"Rakovník","lat":50.0942,"lon":13.6889,"elev":"1270","town":"Rakovnik","slz":false},{"code":"LKRAMS","name":"Ramš","lat":50.64167,"lon":14.54139,"elev":"","town":"Sosnová","slz":true},{"code":"LKRA","name":"Raná","lat":50.4039,"lon":13.7519,"elev":"879","town":"Raná","slz":false},{"code":"LKRY","name":"Rokycany","lat":49.75194,"lon":13.58972,"elev":"1329","town":"Rokycany","slz":false},{"code":"LKRO","name":"Roudnice","lat":50.41019,"lon":14.22708,"elev":"732","town":"Roudnice nad Labem","slz":false},{"code":"LKSZ","name":"Sazená","lat":50.3247,"lon":14.2589,"elev":"761","town":"Sazená","slz":false},{"code":"LKSK","name":"Skuteč","lat":49.8278,"lon":16.0058,"elev":"1601","town":"Skuteč","slz":false},{"code":"LKSN","name":"Slaný","lat":50.21639,"lon":14.08784,"elev":"1079","town":"Slaný","slz":false},{"code":"LKSLUS","name":"Slušovice","lat":49.25903,"lon":17.81334,"elev":"1155","town":"Slušovice","slz":true},{"code":"LKSO","name":"Soběslav","lat":49.2455,"lon":14.71299,"elev":"1342","town":"Soběslav","slz":false},{"code":"LKSPAK","name":"Stará Paka","lat":50.501389,"lon":15.483056,"elev":1588,"town":"Stará Paka","slz":true},{"code":"LKSA","name":"Staňkov","lat":49.56652,"lon":13.04867,"elev":"1404","town":"Staňkov","slz":false},{"code":"LKSB","name":"Stichovice","lat":49.48739,"lon":17.05261,"elev":"840","town":"Mostkovice","slz":false},{"code":"LKST","name":"Strakonice","lat":49.2517,"lon":13.8928,"elev":"1381","town":"Strakonice","slz":false},{"code":"LKSR","name":"Strunkovice","lat":49.0825,"lon":14.0758,"elev":"1572","town":"Prachatice","slz":false},{"code":"LKSTRZ","name":"Strážnice","lat":48.88778,"lon":17.29444,"elev":"614","town":"","slz":true},{"code":"LKTD","name":"Tachov","lat":49.79722,"lon":12.70717,"elev":"1640","town":"Tachov","slz":false},{"code":"LKTEPL","name":"Teplice","lat":50.62083,"lon":13.80977,"elev":"1148","town":"Zabrušany","slz":true},{"code":"LKTERE","name":"Terezín","lat":50.51944,"lon":14.15583,"elev":"482","town":"Terezín","slz":true},{"code":"LKTO","name":"Toužim","lat":50.0864,"lon":12.9528,"elev":"2139","town":"Toužim","slz":false},{"code":"LKTC","name":"Točná","lat":49.98544,"lon":14.42647,"elev":"1027","town":"Prague","slz":false},{"code":"LKTRUT","name":"Trutnov","lat":50.5675,"lon":15.86528,"elev":"1486","town":"Trutnov","slz":true},{"code":"LKTA","name":"Tábor","lat":49.3911,"lon":14.7083,"elev":"1440","town":"Tábor","slz":false},{"code":"LKTRBH","name":"Třebihošť","lat":50.43546,"lon":15.69312,"elev":"1640","town":"Třebihošť","slz":true},{"code":"LKPAVL","name":"Velké Pavlovice","lat":48.88056,"lon":16.825,"elev":"561","town":"Velké Pavlovice","slz":true},{"code":"LKVP","name":"Velké Poříčí","lat":50.4678,"lon":16.2056,"elev":"1322","town":"Velke Porici","slz":false},{"code":"LKVL","name":"Vlašim","lat":49.7289,"lon":14.8789,"elev":"1421","town":"Vlašim","slz":false},{"code":"LKVR","name":"Vrchlabí","lat":50.6242,"lon":15.6464,"elev":"1611","town":"Lánov","slz":false},{"code":"LKVRAT","name":"Vrátkov","lat":50.03954,"lon":14.82274,"elev":"1033","town":"Vrátkov","slz":true},{"code":"LKVM","name":"Vysoké Mýto","lat":49.9281,"lon":16.18503,"elev":"991","town":"Vysoké Mýto","slz":false},{"code":"LKVY","name":"Vyškov","lat":49.3003,"lon":17.0253,"elev":"922","town":"Vyskov","slz":false},{"code":"LKZB","name":"Zbraslavice","lat":49.8142,"lon":15.2017,"elev":"1621","town":"Zbraslavice","slz":false},{"code":"LKZL","name":"Zlín","lat":49.1983,"lon":17.5178,"elev":"600","town":"Otrokovice","slz":false},{"code":"LKSTIP","name":"Zlín - Štípa","lat":49.27278,"lon":17.74639,"elev":"1086","town":"Zlín","slz":true},{"code":"LKZN","name":"Znojmo","lat":48.81774,"lon":16.06583,"elev":"830","town":"Znojmo","slz":false},{"code":"LKZA","name":"Zábřeh","lat":49.92826,"lon":18.07556,"elev":"791","town":"Dolní Benešov","slz":false},{"code":"LKZAHO","name":"Záhoří","lat":49.46611,"lon":17.66528,"elev":1040,"town":"7 km N Bystřice pod Hostýnem","slz":true},{"code":"LKUL","name":"Ústí nad Labem","lat":50.6997,"lon":13.9697,"elev":"791","town":"Usti Nad Labem","slz":false},{"code":"LKUO","name":"Ústí nad Orlicí","lat":49.9786,"lon":16.4264,"elev":"1342","town":"Ústí nad Orlicí","slz":false},{"code":"LKCEBI","name":"Čebín","lat":49.31868,"lon":16.49682,"elev":"1004","town":"Kuřim","slz":true},{"code":"LKCE","name":"Česká Lípa","lat":50.7094,"lon":14.5667,"elev":"932","town":"Česká Lípa","slz":false},{"code":"LKCS","name":"České Budějovice","lat":48.94817,"lon":14.42832,"elev":"1417","town":"České Budějovice","slz":false},{"code":"LKCDUB","name":"Český Dub","lat":50.67806,"lon":14.99972,"elev":"1283","town":"Český Dub","slz":true},{"code":"LKCAST","name":"Částkovice","lat":49.40935,"lon":15.14369,"elev":"1926","town":"Nová Cerekev","slz":true},{"code":"LKSTET","name":"Štětí","lat":50.465,"lon":14.40611,"elev":"787","town":"Štětí","slz":true},{"code":"LKSU","name":"Šumperk","lat":49.9606,"lon":17.0178,"elev":"1099","town":"Nový Malín","slz":false},{"code":"LKZM","name":"Žamberk","lat":50.0839,"lon":16.4439,"elev":"1411","town":"Žamberk","slz":false},{"code":"LKZD","name":"Žatec/Macerka","lat":50.3175,"lon":13.5128,"elev":"879","town":"Žatec","slz":false}];
 const T={
- cs:{title:'Kde jsem přistál',of:'z',all:'Vše',icaoOnly:'Jen ICAO letiště',slzOnly:'Jen SLZ plochy',customOnly:'Jen vlastní plochy',doneOnly:'Přistál jsem',todoOnly:'Ještě ne',icao:'ICAO letiště',slz:'SLZ / UL plocha',custom:'Vlastní / neveřejná',landed:'Přistál jsem',export:'Export zálohy',import:'Import',search:'Hledat název nebo kód (LKPR, Kunovice…)',here:'Přistál jsem tady',note:'Poznámka',saved:'Uloženo',imported:'Import hotov',importedAccount:a=>`Převedeno: přistání ${a.landings}, příznaky ${a.flags}, fotky ${a.photos}, plochy ${a.strips}`,bad:'Neplatný soubor',addTitle:'Přidat vlastní plochu',addHint:'Klepnutím na mapu umísti novou plochu, pak ji doplň.',addName:'Název plochy:',addNoName:'Přidání zrušeno – chybí název.',del:'Smazat plochu',delConfirm:'Opravdu smazat tuto vlastní plochu?',newStripDefault:'Nová plocha',shortPh:'Zkratka (např. VLAS)',descPh:'Poznámky k ploše (povrch, délka dráhy, kontakt, PPR…)',photoLabel:'Přidat fotku',more:'Další možnosti',aiTitle:'Dráhy a frekvence',runways:'Dráhy',freqs:'Frekvence',lit:'osvětlená',aiNote:'Jen pro informaci – zdroj OurAirports, může být neúplné nebo zastaralé. Vždy ověř v AIP / VFR příručce.',surf:{asp:'asfalt',con:'beton',grs:'tráva',grv:'štěrk',paved:'zpevněná'},mapOnly:'Jen mapa – schovat seznam',showList:'Zobrazit seznam',countries:'Země',ccSearch:'Hledat zemi…',ccMine:'Moje a vybrané',ccNone:'Žádná země neodpovídá',ccClear:'Zrušit vše',ccDone:'Hotovo',ccClose:'Zavřít',ccPicks:{near:'Sousedé',alps:'Alpy',adriatic:'Jadran'},ccRegions:{central:'Střední Evropa',west:'Západní Evropa',south:'Jižní Evropa',north:'Severní Evropa',east:'Balkán a východ'},ccHint:'Česko je vždy zobrazené. Zahraniční letiště jsou z databáze OurAirports – u malých ploch můžou být neúplná.',loading:'Načítám letiště…',loadFail:'Zahraniční letiště se nepodařilo načíst',termsMenu:'Podmínky použití',termsShort:'Podmínky',privacyShort:'Soukromí',privacyMenu:'Ochrana osobních údajů',feedback:'Napsat nám',admin:'Správa',fbHint:'Návrh, chyba nebo pochvala. Odpověď z aplikace nepřijde, pokud ji chcete, napište na support@mylandings.net.',fbSend:'Odeslat',fbClose:'Zavřít',fbThanks:'Díky, vzkaz je odeslaný.',fbLimit:'Dnes už bylo vzkazů dost, zkuste to zítra.',commReport:'Nahlásit',commReportSend:'Odeslat hlášení',commReportDetails:'Podrobnosti (nepovinné)',commReported:'Nahlášeno, děkujeme.',commAlready:'Už jste to nahlásili.',reason_spam:'Spam',reason_offensive:'Urážlivé',reason_illegal:'Nezákonné',reason_privacy:'Soukromí',reason_copyright:'Autorská práva',reason_other:'Jiné',community:'Od pilotů',commLoading:'Načítám…',commFail:'Nepodařilo se. Zkuste to znovu.',commLimit:'Limit je vyčerpaný, nebo chybí přezdívka.',commEmpty:'Zatím tu nic není.',commSignIn:'Přidávat může jen přihlášený pilot.',commUnknown:'Pilot',commYou:'Vy',commPublic:'veřejné',commPrivate:'soukromé',commHidden:'skryté správcem',commMakePublic:'Zveřejnit',commMakePrivate:'Skrýt',commDelete:'Smazat',commDeleteConfirm:'Smazat komentář?',commPlaceholder:'Komentář',commShare:'Veřejné, uvidí všichni',commSend:'Přidat',publishConfirm:'Zveřejnit? Uvidí to všichni včetně nepřihlášených, spolu s vaší přezdívkou.',maxPhotos:'Max. 3 fotky',fav:'Oblíbené',want:'Chci navštívit',favOnly:'★ Oblíbené',wantOnly:'◎ Chci navštívit',removePhoto:'Odebrat fotku',storageFull:'Úložiště je plné – zkus menší fotku nebo smaž starší záznamy',syncing:'Synchronizuji…',synced:'Synchronizováno',syncErr:'Sync selhal – zkus ⟳',enet:'Nelze se spojit se serverem (offline?)',ephoto:'Fotku se nepodařilo nahrát, zkusím to znovu',readOnly:'Uloženo jen v tomto zařízení',leaveUnsent:'Některé změny se ještě neodeslaly a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',leavePhotos:'Některé fotky se ještě nenahrály a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',syncTitle:'Synchronizovat teď',dateFmt:d=>{const[y,m,x]=d.split('-');return`${+x}. ${+m}. ${y}`},src:'Seznam českých letišť a ploch podle VFR příručky ŘLP ČR (stav k {date}). Souřadnice, dráhy, frekvence a zahraniční letiště: OurAirports. Pouze informativní údaje – nepoužívat k navigaci ani plánování letu. Vlastní plochy si přidáváš sám.'},
- en:{title:"Where I've landed",of:'of',all:'All',icaoOnly:'ICAO airports only',slzOnly:'UL airstrips only',customOnly:'Custom strips only',doneOnly:'Landed',todoOnly:'Not yet',icao:'ICAO airport',slz:'UL / microlight strip',custom:'Custom / private',landed:'Landed',export:'Export backup',import:'Import',search:'Search name or code (LKPR, Kunovice…)',here:'I landed here',note:'Note',saved:'Saved',imported:'Import done',importedAccount:a=>`Added: landings ${a.landings}, flags ${a.flags}, photos ${a.photos}, strips ${a.strips}`,bad:'Invalid file',addTitle:'Add a custom strip',addHint:'Tap the map to place the new strip, then fill it in.',addName:'Strip name:',addNoName:'Cancelled – no name given.',del:'Delete strip',delConfirm:'Delete this custom strip?',newStripDefault:'New strip',shortPh:'Short code (e.g. VLAS)',descPh:'Notes on the strip (surface, runway length, contact, PPR…)',photoLabel:'Add photo',more:'More options',aiTitle:'Runways & frequencies',runways:'Runways',freqs:'Frequencies',lit:'lighted',aiNote:'For information only – source OurAirports, may be incomplete or outdated. Always check the AIP / VFR manual.',surf:{asp:'asphalt',con:'concrete',grs:'grass',grv:'gravel',paved:'paved'},mapOnly:'Map only – hide the list',showList:'Show the list',countries:'Countries',ccSearch:'Search country…',ccMine:'Mine and selected',ccNone:'No country matches',ccClear:'Clear all',ccDone:'Done',ccClose:'Close',ccPicks:{near:'Neighbours',alps:'Alps',adriatic:'Adriatic'},ccRegions:{central:'Central Europe',west:'Western Europe',south:'Southern Europe',north:'Northern Europe',east:'Balkans and east'},ccHint:'Czechia is always shown. Foreign airfields come from the OurAirports database – small strips may be incomplete.',loading:'Loading airfields…',loadFail:'Could not load foreign airfields',termsMenu:'Terms of use',termsShort:'Terms',privacyShort:'Privacy',privacyMenu:'Privacy',feedback:'Write to us',admin:'Admin',fbHint:'An idea, a bug or praise. The app cannot reply, write to support@mylandings.net if you want an answer.',fbSend:'Send',fbClose:'Close',fbThanks:'Thanks, the message is sent.',fbLimit:'Enough messages for today, please try tomorrow.',commReport:'Report',commReportSend:'Send report',commReportDetails:'Details (optional)',commReported:'Reported, thank you.',commAlready:'You already reported this.',reason_spam:'Spam',reason_offensive:'Offensive',reason_illegal:'Illegal',reason_privacy:'Privacy',reason_copyright:'Copyright',reason_other:'Other',community:'From pilots',commLoading:'Loading…',commFail:'That failed. Please try again.',commLimit:'Limit reached, or the nickname is missing.',commEmpty:'Nothing here yet.',commSignIn:'Only signed-in pilots can add here.',commUnknown:'Pilot',commYou:'You',commPublic:'public',commPrivate:'private',commHidden:'hidden by the admin',commMakePublic:'Publish',commMakePrivate:'Hide',commDelete:'Delete',commDeleteConfirm:'Delete this comment?',commPlaceholder:'Comment',commShare:'Public, visible to everyone',commSend:'Add',publishConfirm:'Publish? Everyone will see it, including guests, together with your nickname.',maxPhotos:'Max. 3 photos',fav:'Favourite',want:'Want to visit',favOnly:'★ Favourites',wantOnly:'◎ Want to visit',removePhoto:'Remove photo',storageFull:'Storage full – try a smaller photo or delete older entries',syncing:'Syncing…',synced:'Synced',syncErr:'Sync failed – tap ⟳',enet:'Cannot reach the server (offline?)',ephoto:'Could not upload a photo, will retry',readOnly:'Saved on this device only',leaveUnsent:'Some changes were not sent yet and signing out removes them from this device. Sign out anyway?',leavePhotos:'Some photos were not uploaded yet and signing out removes them from this device. Sign out anyway?',syncTitle:'Sync now',dateFmt:d=>{const[y,m,x]=d.split('-');return`${y}-${m}-${x}`},src:'List of Czech aerodromes and strips based on the ŘLP ČR VFR Manual (as of {date}). Coordinates, runways, frequencies and foreign aerodromes: OurAirports. For information only – not for navigation or flight planning. Custom strips are added by you.'}
+ cs:{title:'Kde jsem přistál',of:'z',all:'Vše',icaoOnly:'Jen ICAO letiště',slzOnly:'Jen SLZ plochy',customOnly:'Jen vlastní plochy',doneOnly:'Přistál jsem',todoOnly:'Ještě ne',icao:'ICAO letiště',slz:'SLZ / UL plocha',custom:'Vlastní / neveřejná',landed:'Přistál jsem',export:'Export zálohy',import:'Import',search:'Hledat název nebo kód (LKPR, Kunovice…)',here:'Přistál jsem tady',note:'Poznámka',saved:'Uloženo',imported:'Import hotov',importedAccount:a=>`Převedeno: přistání ${a.landings}, příznaky ${a.flags}, fotky ${a.photos}, plochy ${a.strips}`,bad:'Neplatný soubor',addTitle:'Přidat vlastní plochu',addHint:'Klepnutím na mapu umísti novou plochu, pak ji doplň.',addName:'Název plochy:',addNoName:'Přidání zrušeno – chybí název.',del:'Smazat plochu',delConfirm:'Opravdu smazat tuto vlastní plochu?',newStripDefault:'Nová plocha',shortPh:'Zkratka (např. VLAS)',descPh:'Poznámky k ploše (povrch, délka dráhy, kontakt, PPR…)',photoLabel:'Přidat fotku',more:'Další možnosti',aiTitle:'Dráhy a frekvence',runways:'Dráhy',freqs:'Frekvence',lit:'osvětlená',aiNote:'Jen pro informaci – zdroj OurAirports, může být neúplné nebo zastaralé. Vždy ověř v AIP / VFR příručce.',surf:{asp:'asfalt',con:'beton',grs:'tráva',grv:'štěrk',paved:'zpevněná'},mapOnly:'Jen mapa – schovat seznam',showList:'Zobrazit seznam',countries:'Země',ccSearch:'Hledat zemi…',ccMine:'Moje a vybrané',ccNone:'Žádná země neodpovídá',ccClear:'Zrušit vše',ccDone:'Hotovo',ccClose:'Zavřít',ccPicks:{near:'Sousedé',alps:'Alpy',adriatic:'Jadran'},ccNbOf:'Sousedé',ccAddAll:'Přidat vše',homeHint:'Vyberte svou domovskou zemi',homePick:'Vybrat',homeSet:'Nastavit jako domovskou zemi',homeIs:'Domovská země',homePanelHint:'Domovskou zemi nastavíte domečkem ⌂ u země.',ccRegions:{central:'Střední Evropa',west:'Západní Evropa',south:'Jižní Evropa',north:'Severní Evropa',east:'Balkán a východ'},ccHint:'Výchozí výběr je domovská země. Česká letiště jsou podle VFR příručky ŘLP ČR, ostatní z databáze OurAirports – u malých ploch můžou být neúplná.',loading:'Načítám letiště…',loadFail:'Zahraniční letiště se nepodařilo načíst',termsMenu:'Podmínky použití',termsShort:'Podmínky',privacyShort:'Soukromí',privacyMenu:'Ochrana osobních údajů',feedback:'Napsat nám',admin:'Správa',fbHint:'Návrh, chyba nebo pochvala. Odpověď z aplikace nepřijde, pokud ji chcete, napište na support@mylandings.net.',fbSend:'Odeslat',fbClose:'Zavřít',fbThanks:'Díky, vzkaz je odeslaný.',fbLimit:'Dnes už bylo vzkazů dost, zkuste to zítra.',commReport:'Nahlásit',commReportSend:'Odeslat hlášení',commReportDetails:'Podrobnosti (nepovinné)',commReported:'Nahlášeno, děkujeme.',commAlready:'Už jste to nahlásili.',reason_spam:'Spam',reason_offensive:'Urážlivé',reason_illegal:'Nezákonné',reason_privacy:'Soukromí',reason_copyright:'Autorská práva',reason_other:'Jiné',community:'Od pilotů',commLoading:'Načítám…',commFail:'Nepodařilo se. Zkuste to znovu.',commLimit:'Limit je vyčerpaný, nebo chybí přezdívka.',commEmpty:'Zatím tu nic není.',commSignIn:'Přidávat může jen přihlášený pilot.',commUnknown:'Pilot',commYou:'Vy',commPublic:'veřejné',commPrivate:'soukromé',commHidden:'skryté správcem',commMakePublic:'Zveřejnit',commMakePrivate:'Skrýt',commDelete:'Smazat',commDeleteConfirm:'Smazat komentář?',commPlaceholder:'Komentář',commShare:'Veřejné, uvidí všichni',commSend:'Přidat',publishConfirm:'Zveřejnit? Uvidí to všichni včetně nepřihlášených, spolu s vaší přezdívkou.',maxPhotos:'Max. 3 fotky',fav:'Oblíbené',want:'Chci navštívit',favOnly:'★ Oblíbené',wantOnly:'◎ Chci navštívit',removePhoto:'Odebrat fotku',storageFull:'Úložiště je plné – zkus menší fotku nebo smaž starší záznamy',syncing:'Synchronizuji…',synced:'Synchronizováno',syncErr:'Sync selhal – zkus ⟳',enet:'Nelze se spojit se serverem (offline?)',ephoto:'Fotku se nepodařilo nahrát, zkusím to znovu',readOnly:'Uloženo jen v tomto zařízení',leaveUnsent:'Některé změny se ještě neodeslaly a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',leavePhotos:'Některé fotky se ještě nenahrály a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',syncTitle:'Synchronizovat teď',dateFmt:d=>{const[y,m,x]=d.split('-');return`${+x}. ${+m}. ${y}`},src:'Seznam českých letišť a ploch podle VFR příručky ŘLP ČR (stav k {date}). Souřadnice, dráhy, frekvence a zahraniční letiště: OurAirports. Pouze informativní údaje – nepoužívat k navigaci ani plánování letu. Vlastní plochy si přidáváš sám.'},
+ en:{title:"Where I've landed",of:'of',all:'All',icaoOnly:'ICAO airports only',slzOnly:'UL airstrips only',customOnly:'Custom strips only',doneOnly:'Landed',todoOnly:'Not yet',icao:'ICAO airport',slz:'UL / microlight strip',custom:'Custom / private',landed:'Landed',export:'Export backup',import:'Import',search:'Search name or code (LKPR, Kunovice…)',here:'I landed here',note:'Note',saved:'Saved',imported:'Import done',importedAccount:a=>`Added: landings ${a.landings}, flags ${a.flags}, photos ${a.photos}, strips ${a.strips}`,bad:'Invalid file',addTitle:'Add a custom strip',addHint:'Tap the map to place the new strip, then fill it in.',addName:'Strip name:',addNoName:'Cancelled – no name given.',del:'Delete strip',delConfirm:'Delete this custom strip?',newStripDefault:'New strip',shortPh:'Short code (e.g. VLAS)',descPh:'Notes on the strip (surface, runway length, contact, PPR…)',photoLabel:'Add photo',more:'More options',aiTitle:'Runways & frequencies',runways:'Runways',freqs:'Frequencies',lit:'lighted',aiNote:'For information only – source OurAirports, may be incomplete or outdated. Always check the AIP / VFR manual.',surf:{asp:'asphalt',con:'concrete',grs:'grass',grv:'gravel',paved:'paved'},mapOnly:'Map only – hide the list',showList:'Show the list',countries:'Countries',ccSearch:'Search country…',ccMine:'Mine and selected',ccNone:'No country matches',ccClear:'Clear all',ccDone:'Done',ccClose:'Close',ccPicks:{near:'Neighbours',alps:'Alps',adriatic:'Adriatic'},ccNbOf:'Neighbours',ccAddAll:'Add all',homeHint:'Choose your home country',homePick:'Choose',homeSet:'Set as home country',homeIs:'Home country',homePanelHint:'Set your home country with the house ⌂ next to it.',ccRegions:{central:'Central Europe',west:'Western Europe',south:'Southern Europe',north:'Northern Europe',east:'Balkans and east'},ccHint:'Your home country is the default selection. Czech airfields follow the ANS CR VFR Manual, others come from the OurAirports database – small strips may be incomplete.',loading:'Loading airfields…',loadFail:'Could not load foreign airfields',termsMenu:'Terms of use',termsShort:'Terms',privacyShort:'Privacy',privacyMenu:'Privacy',feedback:'Write to us',admin:'Admin',fbHint:'An idea, a bug or praise. The app cannot reply, write to support@mylandings.net if you want an answer.',fbSend:'Send',fbClose:'Close',fbThanks:'Thanks, the message is sent.',fbLimit:'Enough messages for today, please try tomorrow.',commReport:'Report',commReportSend:'Send report',commReportDetails:'Details (optional)',commReported:'Reported, thank you.',commAlready:'You already reported this.',reason_spam:'Spam',reason_offensive:'Offensive',reason_illegal:'Illegal',reason_privacy:'Privacy',reason_copyright:'Copyright',reason_other:'Other',community:'From pilots',commLoading:'Loading…',commFail:'That failed. Please try again.',commLimit:'Limit reached, or the nickname is missing.',commEmpty:'Nothing here yet.',commSignIn:'Only signed-in pilots can add here.',commUnknown:'Pilot',commYou:'You',commPublic:'public',commPrivate:'private',commHidden:'hidden by the admin',commMakePublic:'Publish',commMakePrivate:'Hide',commDelete:'Delete',commDeleteConfirm:'Delete this comment?',commPlaceholder:'Comment',commShare:'Public, visible to everyone',commSend:'Add',publishConfirm:'Publish? Everyone will see it, including guests, together with your nickname.',maxPhotos:'Max. 3 photos',fav:'Favourite',want:'Want to visit',favOnly:'★ Favourites',wantOnly:'◎ Want to visit',removePhoto:'Remove photo',storageFull:'Storage full – try a smaller photo or delete older entries',syncing:'Syncing…',synced:'Synced',syncErr:'Sync failed – tap ⟳',enet:'Cannot reach the server (offline?)',ephoto:'Could not upload a photo, will retry',readOnly:'Saved on this device only',leaveUnsent:'Some changes were not sent yet and signing out removes them from this device. Sign out anyway?',leavePhotos:'Some photos were not uploaded yet and signing out removes them from this device. Sign out anyway?',syncTitle:'Sync now',dateFmt:d=>{const[y,m,x]=d.split('-');return`${y}-${m}-${x}`},src:'List of Czech aerodromes and strips based on the ŘLP ČR VFR Manual (as of {date}). Coordinates, runways, frequencies and foreign aerodromes: OurAirports. For information only – not for navigation or flight planning. Custom strips are added by you.'}
 };
 let lang=localStorage.getItem('lang')||(navigator.language.startsWith('cs')?'cs':'en');
 // effective date of the VFR manual the Czech list follows; shown in the menu and the map credit
@@ -40,14 +39,30 @@ try{flags=JSON.parse(localStorage.getItem(FKEY)||'{}')}catch(e){}
 let tomb={};
 try{tomb=JSON.parse(localStorage.getItem(TKEY)||'{}')}catch(e){}
 function kind(a){ return a.custom?'custom':(a.slz?'slz':'icao'); }
-// --- countries: Czechia always, others on demand (data/countries/XX.json from OurAirports, list in countries.js) ---
+// --- countries: one file per country (data/countries/XX.json, list in countries.js), loaded when picked ---
 // CCS is the whitelist: only its codes ever reach a URL or the page
-const CCS=Object.keys(COUNTRIES).filter(c=>COUNTRIES[c].live), CCKEY='countries';
-let selCC=['CZ'];
-try{ const x=JSON.parse(localStorage.getItem(CCKEY)||'null'); if(Array.isArray(x)) selCC=['CZ',...CCS.filter(c=>c!=='CZ'&&x.includes(c))]; }catch(e){}
+const CCS=Object.keys(COUNTRIES).filter(c=>COUNTRIES[c].live), CCKEY='countries', HOMEKEY='home-country', HINTKEY='home-hint', ASSUMEDKEY='home-assumed';
+// country with most own landings, told by the codes alone (custom strips are left out)
+function topLandedCountry(){
+  const n={}; let best='';
+  for(const code of Object.keys(visited)){ if(!visited[code]||custom[code]) continue; const c=countryOfCode(code); if(CCS.includes(c)) n[c]=(n[c]||0)+1; }
+  for(const c of CCS) if(n[c]&&(!best||n[c]>n[best])) best=c;
+  return best;
+}
+// home country: the user's own choice, else what the stored selection, own landings or the browser language tell.
+// If nothing tells, Czechia is shown for now and a hint asks; only a real choice is stored. A selection saved
+// while the home country was only assumed is marked, so it never passes for a choice (selections saved by older
+// versions are not marked: Czechia, their first entry, was the home country then).
+let home='', homeKnown=true, storedSel=null, assumed=false;
+try{ const h=localStorage.getItem(HOMEKEY); if(CCS.includes(h)) home=h; assumed=localStorage.getItem(ASSUMEDKEY)==='1'; }catch(e){}
+try{ const x=JSON.parse(localStorage.getItem(CCKEY)||'null'); if(Array.isArray(x)){ storedSel=CCS.filter(c=>x.includes(c)); if(!home&&!assumed&&CCS.includes(x[0])) home=x[0]; } }catch(e){}
+if(!home) home=topLandedCountry();
+if(!home) home=guessHome(navigator.languages&&navigator.languages.length?[...navigator.languages]:[navigator.language||''],CCS);
+if(!home){ home=CCS.includes('CZ')?'CZ':CCS[0]; homeKnown=false; }
+let selCC=storedSel&&storedSel.length?storedSel:[home];
 const ccData={}, ccLoading={};
 function shownForeign(){ return selCC.filter(c=>ccData[c]).flatMap(c=>ccData[c]); }
-function allData(){ return DATA.concat(shownForeign(),Object.values(custom)); }
+function allData(){ return shownForeign().concat(Object.values(custom)); }
 function refreshTotal(){ document.getElementById('tot').textContent=allData().length; }
 refreshTotal();
 function saveTomb(){ localStorage.setItem(TKEY,JSON.stringify(tomb)); }
@@ -65,7 +80,7 @@ function toggleFlag(a,k){
   if(f.fav||f.want) flags[a.code]=f; else delete flags[a.code];
   saveFlags(a.code);
   if(k==='fav'&&f.fav&&!visited[a.code]){ set(a,{date:today(),note:''}); return; } // favourite = I have been there
-  style(a); if(a.cc&&a.cc!=='CZ') refreshClusters(); render();
+  style(a); if(clustered(a)) refreshClusters(); render();
 }
 const MAXPH=3;
 // photos: list of {url,path}; custom strips keep it on the strip (a.pics), airfields in photos[code].pics
@@ -320,7 +335,7 @@ try{
     return d; }});
   new MapOnly().addTo(map);
   // the country button lives inside the map container: clicks and wheel must not reach the map
-  const ccBar=document.getElementById('ccbar'); L.DomEvent.disableClickPropagation(ccBar); L.DomEvent.disableScrollPropagation(ccBar);
+  for(const id of ['ccbar','homehint']){ const e=document.getElementById(id); L.DomEvent.disableClickPropagation(e); L.DomEvent.disableScrollPropagation(e); }
   // re-pan once the popup has its final size (photos, buttons), so it is never cut off at the top
   map.on('popupopen',()=>map.getContainer().classList.add('popopen'));
   map.on('popupclose',()=>map.getContainer().classList.remove('popopen'));
@@ -391,17 +406,20 @@ function newMarker(a){
   m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]});
   return m;
 }
-function isForeign(a){ return !!(a.cc&&a.cc!=='CZ'); }
+// the home country is drawn airfield by airfield like Czechia always was; other countries, and a home country
+// too big for that, go into clusters
+const HOME_FLAT_MAX=400;
+function clustered(a){ return !!a.cc&&(a.cc!==home||(ccData[home]||[]).length>HOME_FLAT_MAX); }
 function addMarker(a,batch){
   const m=newMarker(a);
-  if(isForeign(a)){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
+  if(clustered(a)){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);
   markers[a.code]=m; style(a);
 }
 function swapMarker(a){
   const old=markers[a.code]; if(!old) return;
   const wasOpen=old.isPopupOpen&&old.isPopupOpen(), hidden=old._hidden;
   const m=newMarker(a); m._hidden=hidden; markers[a.code]=m;
-  if(isForeign(a)){ const c=clusterLayer(); if(c.hasLayer(old)) c.removeLayer(old); if(!hidden) c.addLayer(m); }
+  if(clustered(a)){ const c=clusterLayer(); if(c.hasLayer(old)) c.removeLayer(old); if(!hidden) c.addLayer(m); }
   else { if(old._map) map.removeLayer(old); if(!hidden) m.addTo(map); }
   if(wasOpen&&!hidden) setTimeout(()=>{ if(m._map) m.openPopup(); },0);
 }
@@ -414,6 +432,13 @@ function showOnMap(a){
   }
   else { map.setView([a.lat,a.lon],12); m.openPopup(); }
 }
+function dropMarker(code){
+  const m=markers[code]; if(!m) return;
+  if(cluster&&cluster.hasLayer&&cluster.hasLayer(m)) cluster.removeLayer(m); else if(m._map) map.removeLayer(m);
+  delete markers[code];
+}
+// after the home country changes, markers move between the map and the clusters
+function dropCountryMarkers(){ for(const c of Object.keys(ccData)) ccData[c].forEach(a=>dropMarker(a.code)); }
 function syncForeignMarkers(){
   if(!map) return;
   const add=[];
@@ -422,17 +447,17 @@ function syncForeignMarkers(){
     ccData[c].forEach(a=>{
       const has=!!markers[a.code];
       if(want&&!has) addMarker(a,add);
-      if(!want&&has){ clusterLayer().removeLayer(markers[a.code]); delete markers[a.code]; }
+      if(!want&&has) dropMarker(a.code);
     });
   }
   if(add.length){ const c=clusterLayer(); c.addLayers?c.addLayers(add):add.forEach(m=>c.addLayer(m)); }
 }
-// one file per country: its airfields (none for CZ, the list is above) and their runways and frequencies
+// one file per country: its airfields and their runways and frequencies
 function loadCountry(c){
   if(!CCS.includes(c)) return Promise.reject(new Error('unknown country'));
   if(!ccLoading[c]) ccLoading[c]=fetch('data/countries/'+c+'.json').then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(j=>{
-      if(c!=='CZ') ccData[c]=(Array.isArray(j.airports)?j.airports:[]).filter(a=>a&&a.cc===c&&typeof a.code==='string');
+      ccData[c]=(Array.isArray(j.airports)?j.airports:[]).filter(a=>a&&a.cc===c&&typeof a.code==='string');
       if(j.info&&typeof j.info==='object') Object.assign(airInfo,j.info);
     }).catch(e=>{ delete ccLoading[c]; throw e; });
   return ccLoading[c];
@@ -444,41 +469,66 @@ function loadCCIndex(){
   return ccIndexLoading;
 }
 async function applyCountries(){
-  try{ localStorage.setItem(CCKEY,JSON.stringify(selCC)); }catch(e){}
-  const need=selCC.filter(c=>c!=='CZ'&&!ccData[c]);
+  try{ localStorage.setItem(CCKEY,JSON.stringify(selCC)); if(!homeKnown) localStorage.setItem(ASSUMEDKEY,'1'); }catch(e){}
+  const need=selCC.filter(c=>!ccData[c]);
   if(need.length){
     status(t('loading'));
     const res=await Promise.allSettled(need.map(loadCountry));
     status(res.some(r=>r.status==='rejected')?t('loadFail'):'');
   }
-  syncForeignMarkers(); allData().forEach(style); refreshClusters(); refreshTotal(); render(); renderCC();
+  syncForeignMarkers(); allData().forEach(style); refreshClusters(); refreshTotal(); render(); renderCC(); renderHomeHint();
 }
 // --- country picker: button with chips on the map, panel (floating window, bottom sheet on phones) ---
 const ccBtn=document.getElementById('ccbtn'), ccChips=document.getElementById('ccchips'), ccSheet=document.getElementById('ccsheet');
 const ccList=ccSheet.querySelector('.cclist'), ccQ=ccSheet.querySelector('.ccq'), ccPicks=ccSheet.querySelector('.ccpicks');
-let ccTop=[];
+let ccTop=[], ccOffer='';
+const ccOpen=new Set(); // regions left open while the panel redraws
 const ccName=c=>COUNTRIES[c][lang==='cs'?'cs':'en'];
 const fold=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
-// landings per country; foreign codes tell their country (or are listed in the index), custom strips are left out
+// landings per country; codes tell their country (or are listed in the index), custom strips are left out
 function landingsByCountry(){
-  const out={}, cz=new Set(DATA.map(a=>a.code));
+  const out={};
   for(const code of Object.keys(visited)){
     if(!visited[code]||custom[code]) continue;
-    const c=cz.has(code)?'CZ':countryOfCode(code,ccIndex&&ccIndex.exceptions);
+    const c=countryOfCode(code,ccIndex&&ccIndex.exceptions);
     if(c) out[c]=(out[c]||0)+1;
   }
   return out;
 }
 function el(tag,cls,text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+function addCountries(list){ selCC=CCS.filter(x=>selCC.includes(x)||list.includes(x)); applyCountries(); }
+function setHome(c){
+  if(!CCS.includes(c)) return;
+  home=c; homeKnown=true; try{ localStorage.setItem(HOMEKEY,c); localStorage.removeItem(ASSUMEDKEY); }catch(e){}
+  dropCountryMarkers();
+  if(!selCC.includes(c)) selCC=CCS.filter(x=>selCC.includes(x)||x===c);
+  applyCountries();
+}
+// row: checkbox, code, name, own landings, airfield count, house to make it the home country.
+// The last selected country cannot be switched off.
 function ccRow(c,mine){
-  const lab=el('label','ccrow'+(c==='CZ'?' fixed':''));
-  const i=el('input'); i.type='checkbox'; i.name='cc'; i.value=c; i.checked=selCC.includes(c); i.disabled=c==='CZ';
-  i.onchange=()=>{ selCC=['CZ',...CCS.filter(x=>x!=='CZ'&&(x===c?i.checked:selCC.includes(x)))]; applyCountries(); };
+  const f=document.createDocumentFragment(), row=el('div','ccrow'+(c===home&&homeKnown?' home':'')), lab=el('label','cclab');
+  const i=el('input'); i.type='checkbox'; i.name='cc'; i.value=c; i.checked=selCC.includes(c); i.disabled=i.checked&&selCC.length===1;
+  i.onchange=()=>{ const on=i.checked; selCC=CCS.filter(x=>x===c?on:selCC.includes(x)); if(!selCC.length) selCC=[c]; ccOffer=on?c:''; applyCountries(); };
   lab.append(i,el('span','cccode',c),el('span','ccname',ccName(c)));
   if(mine[c]) lab.append(el('span','ccmine','✓ '+mine[c]));
-  const n=c==='CZ'?DATA.length:ccIndex&&ccIndex.countries[c]?ccIndex.countries[c].n:'';
+  const n=ccIndex&&ccIndex.countries[c]?ccIndex.countries[c].n:'';
   lab.append(el('span','ccn',n===''?'':String(n)));
-  return lab;
+  const h=el('button','cchome','⌂'); h.type='button';
+  h.title=t(c===home&&homeKnown?'homeIs':'homeSet'); h.setAttribute('aria-label',h.title+': '+ccName(c)); h.setAttribute('aria-pressed',String(c===home&&homeKnown));
+  h.onclick=()=>setHome(c);
+  row.append(lab,h); f.append(row);
+  // just switched on: offer its neighbours that are not shown yet
+  if(ccOffer===c){
+    const nb=(COUNTRY_NEIGHBOURS[c]||[]).filter(x=>CCS.includes(x)&&!selCC.includes(x));
+    if(nb.length){
+      const d=el('div','ccoffer'); d.append(el('span',null,t('ccNbOf')+' ('+ccName(c)+'):'));
+      nb.forEach(x=>{ const b=el('button','ccadd','+ '+x); b.type='button'; b.title=ccName(x); b.onclick=()=>addCountries([x]); d.append(b); });
+      if(nb.length>1){ const all=el('button','ccadd all',t('ccAddAll')); all.type='button'; all.onclick=()=>addCountries(nb); d.append(all); }
+      f.append(d);
+    }
+  }
+  return f;
 }
 function renderCCList(){
   const mine=landingsByCountry(), q=fold(ccQ.value.trim());
@@ -493,6 +543,7 @@ function renderCCList(){
   for(const r of COUNTRY_REGIONS){
     const cs=CCS.filter(c=>COUNTRIES[c].r===r&&!ccTop.includes(c)); if(!cs.length) continue;
     const d=el('details','ccgrp'), s=el('summary',null,t('ccRegions')[r]+' ');
+    d.open=ccOpen.has(r); d.addEventListener('toggle',()=>{ if(d.open) ccOpen.add(r); else ccOpen.delete(r); });
     s.append(el('small',null,String(cs.length))); d.append(s); cs.forEach(c=>d.append(ccRow(c,mine)));
     ccList.append(d);
   }
@@ -500,28 +551,36 @@ function renderCCList(){
 function renderCCPicks(){
   ccPicks.textContent='';
   for(const [k,list] of Object.entries(COUNTRY_PICKS)){
-    const ok=list.filter(c=>CCS.includes(c)&&c!=='CZ'); if(!ok.length) continue;
+    const ok=(k==='near'?COUNTRY_NEIGHBOURS[home]||[]:list).filter(c=>CCS.includes(c)); if(!ok.length) continue;
     const b=el('button','ccpick',t('ccPicks')[k]); b.type='button'; b.title=ok.join(', ');
-    b.onclick=()=>{ selCC=['CZ',...CCS.filter(c=>c!=='CZ'&&(selCC.includes(c)||ok.includes(c)))]; applyCountries(); };
+    b.onclick=()=>addCountries(ok);
     ccPicks.append(b);
   }
   const none=el('button','ccpick clear',t('ccClear')); none.type='button';
-  none.onclick=()=>{ selCC=['CZ']; applyCountries(); };
+  none.onclick=()=>{ selCC=[home]; ccOffer=''; applyCountries(); };
   ccPicks.append(none);
 }
 function renderCC(){
   ccBtn.textContent='🌍 '+t('countries')+' ▾'; ccBtn.title=t('countries')+': '+selCC.join(', ');
   ccChips.textContent='';
-  selCC.slice(0,4).forEach(c=>ccChips.append(el('span','ccchip',c)));
+  selCC.slice(0,4).forEach(c=>ccChips.append(el('span','ccchip'+(c===home&&homeKnown?' home':''),c)));
   if(selCC.length>4) ccChips.append(el('span','ccchip more','+'+(selCC.length-4)));
-  if(!ccSheet.hidden){ renderCCPicks(); renderCCList(); }
+  if(!ccSheet.hidden){ ccSheet.querySelector('.cchomehint').hidden=homeKnown; renderCCPicks(); renderCCList(); }
 }
+// a quiet hint on the map while the home country is only assumed; closing it is remembered
+const homeHint=document.getElementById('homehint');
+function renderHomeHint(){
+  let closed=false; try{ closed=localStorage.getItem(HINTKEY)==='closed'; }catch(e){}
+  homeHint.hidden=homeKnown||closed;
+}
+homeHint.querySelector('.hhpick').onclick=()=>openCC();
+homeHint.querySelector('.hhx').onclick=()=>{ try{ localStorage.setItem(HINTKEY,'closed'); }catch(e){} homeHint.hidden=true; };
 function openCC(){
   const mine=landingsByCountry();
-  ccTop=CCS.filter(c=>selCC.includes(c)||mine[c]);
+  ccTop=CCS.filter(c=>c===home||selCC.includes(c)||mine[c]); ccOffer=''; ccOpen.clear();
   ccQ.value=''; ccSheet.hidden=false; document.body.classList.add('ccopen');
   renderCC(); ccSheet.querySelector('.ccdlg').focus();
-  if(!ccIndex) loadCCIndex().then(()=>{ if(!ccSheet.hidden){ ccTop=CCS.filter(c=>selCC.includes(c)||landingsByCountry()[c]); renderCCList(); } }).catch(()=>{});
+  if(!ccIndex) loadCCIndex().then(()=>{ if(!ccSheet.hidden){ ccTop=CCS.filter(c=>c===home||selCC.includes(c)||landingsByCountry()[c]); renderCCList(); } }).catch(()=>{});
 }
 function closeCC(){ if(ccSheet.hidden) return; ccSheet.hidden=true; document.body.classList.remove('ccopen'); ccBtn.focus(); }
 ccBtn.onclick=openCC; ccChips.onclick=openCC;
@@ -547,7 +606,7 @@ function popup(a){
   let html='';
   html+= isCustom ? `<input type="text" name="cname" class="cname" value="${esc(a.name)}" placeholder="${esc(t('addName'))}">` : `<b>${esc(a.name)}</b>`;
   html+= isCustom ? `<input type="text" name="cshort" class="cshort" maxlength="8" value="${esc(a.short||'')}" placeholder="${esc(t('shortPh'))}">`
-                  : `<div class="m">${esc(a.code)}${a.town?' · '+esc(a.town):''}${a.elev?' · '+esc(String(a.elev))+' ft':''}${a.cc&&a.cc!=='CZ'&&COUNTRIES[a.cc]?' · '+ccName(a.cc):''}</div>`;
+                  : `<div class="m">${esc(a.code)}${a.town?' · '+esc(a.town):''}${a.elev?' · '+esc(String(a.elev))+' ft':''}${a.cc&&a.cc!==home&&COUNTRIES[a.cc]?' · '+ccName(a.cc):''}</div>`;
   const fl=flags[a.code]||{};
   html+=`<div class="flags"><button type="button" class="flag fav${fl.fav?' on':''}">${fl.fav?'★':'☆'} ${t('fav')}</button><button type="button" class="flag want${fl.want?' on':''}">${WANT_ICON} ${t('want')}</button></div>`;
   if(!isCustom) html+=infoHtml(a);
@@ -568,7 +627,7 @@ function popup(a){
     sec.addEventListener('click',e=>e.stopPropagation());
     d.appendChild(sec);
   }
-  if(!isCustom&&!airInfo[a.code]&&CCS.includes(a.cc||'CZ')&&!ccLoading[a.cc||'CZ']) loadCountry(a.cc||'CZ').then(()=>{ if(airInfo[a.code]&&markers[a.code]&&markers[a.code].isPopupOpen()) refreshMarkerPopup(a); }).catch(()=>{});
+  if(!isCustom&&!airInfo[a.code]&&CCS.includes(a.cc)&&!ccLoading[a.cc]) loadCountry(a.cc).then(()=>{ if(airInfo[a.code]&&markers[a.code]&&markers[a.code].isPopupOpen()) refreshMarkerPopup(a); }).catch(()=>{});
   const det=d.querySelector('details.ai');
   if(det) det.addEventListener('toggle',()=>{
     if(det.open===aiOpen) return; // the browser also fires 'toggle' when a card is built already open
@@ -641,7 +700,7 @@ function set(a,val){
     delete visited[a.code]; tomb['v:'+a.code]=Date.now();
     const fl=flags[a.code]; if(fl&&fl.fav){ const f={...fl}; delete f.fav; delete f.ts; if(f.want) flags[a.code]=f; else delete flags[a.code]; saveFlags(a.code); }
   }
-  style(a); if(a.cc&&a.cc!=='CZ') refreshClusters(); render(); save();
+  style(a); if(clustered(a)) refreshClusters(); render(); save();
 }
 
 let addMode=false;
@@ -695,7 +754,7 @@ function applyMapFilter(data,mode){
     const m=markers[a.code]; if(!m) return;
     const show=matchesFilter(a,mode); if(m._hidden===!show) return;
     m._hidden=!show;
-    if(a.cc&&a.cc!=='CZ'){ (show?addC:remC).push(m); }
+    if(clustered(a)){ (show?addC:remC).push(m); }
     else if(show) m.addTo(map); else map.removeLayer(m);
   });
   if(cluster){
@@ -716,7 +775,7 @@ function render(){
   }).forEach(a=>{
     const v=visited[a.code], k=kind(a);
     const r=document.createElement('div');r.className='row'+(v?' done':'');
-    r.innerHTML=`<input type="checkbox" name="visited" ${v?'checked':''}><div><div class="name">${esc(a.name)}${(flags[a.code]||{}).fav?'<span class="ic fav">★</span>':''}${(flags[a.code]||{}).want?'<span class="ic want">${WANT_ICON}</span>':''}</div><div class="meta">${a.cc&&a.cc!=='CZ'?`<span class="cc">${esc(a.cc)}</span>`:''}<span class="code ${k}">${k==='custom'?esc(a.short||'—'):esc(a.code)}</span> ${esc(a.town||'')}${getPics(a).length?' 📷'+(getPics(a).length>1?getPics(a).length:''):''}</div></div><div class="date">${v&&v.date?esc(t('dateFmt')(String(v.date))):''}</div>`;
+    r.innerHTML=`<input type="checkbox" name="visited" ${v?'checked':''}><div><div class="name">${esc(a.name)}${(flags[a.code]||{}).fav?'<span class="ic fav">★</span>':''}${(flags[a.code]||{}).want?'<span class="ic want">${WANT_ICON}</span>':''}</div><div class="meta">${a.cc&&a.cc!==home?`<span class="cc">${esc(a.cc)}</span>`:''}<span class="code ${k}">${k==='custom'?esc(a.short||'—'):esc(a.code)}</span> ${esc(a.town||'')}${getPics(a).length?' 📷'+(getPics(a).length>1?getPics(a).length:''):''}</div></div><div class="date">${v&&v.date?esc(t('dateFmt')(String(v.date))):''}</div>`;
     const cb=r.querySelector('input');
     cb.onclick=e=>{e.stopPropagation(); cb.checked?set(a,{date:today(),note:''}):set(a,null);};
     r.onclick=()=>showOnMap(a);
@@ -751,7 +810,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v35'; // matches the cache name in sw.js
+const APP_VERSION='landings-v36'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

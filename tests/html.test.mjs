@@ -59,9 +59,12 @@ test('every local file the page loads exists', () => {
   for (const [, file] of fonts.matchAll(/url\(([\w.-]+)\)/g)) assert.ok(existsSync(join(root, 'vendor/fonts', file)), file);
 });
 
-test('the airport update still finds the Czech list', () => {
-  assert.match(html, /const DATA = (\[.*?\]);/s);
-  assert.match(readFileSync(join(root, 'tools/update-airports.mjs'), 'utf8'), /readFileSync\(join\(root, 'app\.js'\)/);
+test('the Czech list lives in its country file, not in the app', () => {
+  assert.ok(!/const DATA\b/.test(html));
+  const cz = JSON.parse(readFileSync(join(root, 'data/countries/CZ.json'), 'utf8'));
+  assert.equal(cz.airports.length, 165);
+  for (const a of cz.airports) { assert.equal(a.cc, 'CZ'); assert.match(a.code, /^LK[A-Z0-9]{2,4}$/); }
+  assert.match(cz.source, /VFR/);
 });
 
 test('a guest downloads nothing and the GitHub sync is gone', () => {
@@ -185,16 +188,17 @@ test('the terms say who owns the app and what licence users give for their conte
 
 // --- country picker ---
 const countriesSrc = readFileSync(join(root, 'countries.js'), 'utf8');
-const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_PICKS,COUNTRY_REGIONS,countryOfCode})');
+const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_PICKS,COUNTRY_REGIONS,COUNTRY_NEIGHBOURS,countryOfCode,guessHome})');
 
 test('country data come only from whitelisted codes', () => {
   assert.match(html, /const CCS=Object\.keys\(COUNTRIES\)\.filter\(c=>COUNTRIES\[c\]\.live\)/);
   assert.match(html, /if\(!CCS\.includes\(c\)\) return Promise\.reject\(new Error\('unknown country'\)\);\s*if\(!ccLoading\[c\]\) ccLoading\[c\]=fetch\('data\/countries\/'\+c\+'\.json'\)/);
   assert.deepEqual(html.match(/fetch\('data\/[^)]*\)/g), ["fetch('data/countries/'+c+'.json')", "fetch('data/countries/index.json')"], 'country file and index are the only data URLs');
   // a stored selection keeps only whitelisted codes, in whitelist order, with CZ first
-  assert.match(html, /selCC=\['CZ',\.\.\.CCS\.filter\(c=>c!=='CZ'&&x\.includes\(c\)\)\]/);
+  assert.match(html, /storedSel=CCS\.filter\(c=>x\.includes\(c\)\)/);
+  assert.match(html, /const h=localStorage\.getItem\(HOMEKEY\); if\(CCS\.includes\(h\)\) home=h;/);
   for (const c of Object.keys(C.COUNTRIES)) assert.match(c, /^[A-Z]{2}$/);
-  for (const list of Object.values(C.COUNTRY_PICKS)) for (const c of list) assert.ok(C.COUNTRIES[c], c);
+  for (const list of Object.values(C.COUNTRY_PICKS)) for (const c of list || []) assert.ok(C.COUNTRIES[c], c);
   for (const c of Object.values(C.COUNTRIES)) assert.ok(C.COUNTRY_REGIONS.includes(c.r));
 });
 
@@ -212,7 +216,8 @@ test('the country of a code comes from its prefix or the index, never from odd i
   assert.equal(C.countryOfCode('ETSI'), 'DE');
   assert.equal(C.countryOfCode('AT-0009'), 'AT');
   assert.equal(C.countryOfCode('CZ-0052', { 'CZ-0052': 'SK' }), 'SK');
-  assert.equal(C.countryOfCode('ETT1'), '');
+  assert.equal(C.countryOfCode('ETT1'), 'DE', 'national code on an ICAO prefix');
+  assert.equal(C.countryOfCode('LKCDUB'), 'CZ');
   assert.equal(C.countryOfCode('XX-0001'), '', 'not a known country');
   assert.equal(C.countryOfCode('LZIB', { LZIB: 'ZZ' }), 'SK', 'an exception must name a known country');
   assert.equal(C.countryOfCode('__proto__', {}), '');
@@ -223,4 +228,51 @@ test('the page loads the country list before the app and the worker keeps it off
   assert.ok(page.indexOf('<script src="countries.js">') > 0 && page.indexOf('<script src="countries.js">') < page.indexOf('<script src="app.js">'));
   assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/countries\.js'/);
   assert.ok(!/airports-eu\.json|airport-info\.json/.test(html), 'the old combined files are no longer used');
+});
+
+test('every country has its land neighbours, both ways, and only from the list', () => {
+  assert.deepEqual(Object.keys(C.COUNTRY_NEIGHBOURS).sort(), Object.keys(C.COUNTRIES).sort());
+  for (const [c, list] of Object.entries(C.COUNTRY_NEIGHBOURS)) for (const n of list) {
+    assert.ok(C.COUNTRIES[n], c + ' -> ' + n);
+    assert.ok(C.COUNTRY_NEIGHBOURS[n].includes(c), n + ' should list ' + c);
+  }
+  assert.deepEqual([...C.COUNTRY_NEIGHBOURS.CZ].sort(), ['AT', 'DE', 'PL', 'SK']);
+});
+
+test('the home country comes from the browser language, never a guess for plain English', () => {
+  const live = ['CZ', 'SK', 'AT', 'DE', 'PL'];
+  assert.equal(C.guessHome(['cs-CZ', 'cs'], live), 'CZ');
+  assert.equal(C.guessHome(['de-DE', 'de'], live), 'DE');
+  assert.equal(C.guessHome(['de-AT'], live), 'AT');
+  assert.equal(C.guessHome(['de-CH'], live), '', 'a Swiss German is not sent to Germany');
+  assert.equal(C.guessHome(['en-US', 'en'], live), '');
+  assert.equal(C.guessHome(['en-GB'], live), '', 'GB has no data yet');
+  assert.equal(C.guessHome(['fr-FR', 'sk'], live), 'SK', 'the first usable language wins');
+  assert.equal(C.guessHome(undefined, live), '');
+  assert.equal(C.guessHome([42, null, ''], live), '');
+});
+
+test('the home country: own choice, stored selection, landings, language, else Czechia shown with a hint', () => {
+  const start = html.indexOf('let home='), end = html.indexOf('let selCC=');
+  const order = html.slice(start, end);
+  const at = (x) => { const i = order.indexOf(x); assert.ok(i >= 0, x); return i; };
+  assert.ok(at('localStorage.getItem(HOMEKEY)') < at('x[0]'));
+  assert.ok(at('x[0]') < at('topLandedCountry()'));
+  assert.ok(at('topLandedCountry()') < at('guessHome('));
+  assert.ok(at('guessHome(') < at('homeKnown=false'));
+  // a selection saved while the home country was only assumed does not count as a choice
+  assert.match(order, /if\(!home&&!assumed&&CCS\.includes\(x\[0\]\)\) home=x\[0\];/);
+  assert.match(html, /if\(!homeKnown\) localStorage\.setItem\(ASSUMEDKEY,'1'\);/);
+  assert.match(html, /localStorage\.setItem\(HOMEKEY,c\); localStorage\.removeItem\(ASSUMEDKEY\);/);
+  // only a real choice is stored
+  assert.equal((html.match(/localStorage\.setItem\(HOMEKEY/g) || []).length, 1);
+  assert.match(html, /function setHome\(c\)\{\s*if\(!CCS\.includes\(c\)\) return;/);
+  assert.match(html, /homeHint\.hidden=homeKnown\|\|closed;/);
+  assert.ok(!/geolocation/.test(html), 'no location');
+});
+
+test('the last selected country cannot be switched off', () => {
+  assert.match(html, /i\.disabled=i\.checked&&selCC\.length===1;/);
+  assert.match(html, /if\(!selCC\.length\) selCC=\[c\];/);
+  assert.match(html, /none\.onclick=\(\)=>\{ selCC=\[home\];/);
 });

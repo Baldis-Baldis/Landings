@@ -1,7 +1,8 @@
 // Refreshes airfield data from OurAirports (public domain) for every live country in countries.js.
 // Writes data/countries/XX.json (airfields with runways and frequencies) and data/countries/index.json
-// (counts, file sizes, codes whose country the code itself does not tell). The Czech list stays in app.js
-// (VFR manual); data/countries/CZ.json only carries runways and frequencies for it.
+// (counts, file sizes, codes whose country the code itself does not tell). The Czech list in
+// data/countries/CZ.json follows the VFR manual and is kept by hand: the script never rewrites it, it only
+// refreshes the runways and frequencies of those airfields.
 //
 // Safety: everything is downloaded and checked before anything is written. The run fails and writes nothing
 // when a download fails, a file looks empty, or a country loses more than 20 % of its airfields or info.
@@ -42,10 +43,12 @@ export function loadCountries(root) {
   return vm.runInNewContext(src + ';({COUNTRIES,countryOfCode})');
 }
 
-export function czechCodes(appJs) {
-  const m = /const DATA = (\[.*?\]);/s.exec(appJs);
-  if (!m) throw new Error('could not find the Czech airfield list (const DATA) in app.js');
-  return JSON.parse(m[1]).map(a => a.code);
+// the hand-kept Czech list, taken over unchanged
+export function czechList(root) {
+  let f = null;
+  try { f = JSON.parse(readFileSync(join(root, 'data', 'countries', 'CZ.json'), 'utf8')); } catch {}
+  if (!f || !Array.isArray(f.airports) || !f.airports.length) throw new Error('data/countries/CZ.json has no Czech airfield list');
+  return { airports: f.airports, source: f.source || SOURCE };
 }
 
 // same rule as the app always had: real ICAO code if there is one, otherwise the OurAirports ident
@@ -77,9 +80,10 @@ const round5 = x => Number(Number(x).toFixed(5));
 const lt = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
 // builds the per-country data from the three OurAirports tables
-export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, czCodes) {
+export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, czAirports) {
   const live = Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live && c !== 'CZ');
-  const out = { CZ: { airports: null, info: {} } };
+  const out = { CZ: { airports: czAirports, info: {} } };
+  const czCodes = czAirports.map(a => a.code);
   live.forEach(c => { out[c] = { airports: [], info: {} }; });
   const seen = new Set(), identToCode = new Map(), codeCc = new Map(), exceptions = {};
   for (const r of airports) {
@@ -97,6 +101,7 @@ export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz
     if (countryOfCode(code, null) !== cc) exceptions[code] = cc;
   }
   live.forEach(c => out[c].airports.sort((a, b) => lt(a.name, b.name)));
+  for (const code of czCodes) if (countryOfCode(code, null) !== 'CZ') exceptions[code] = 'CZ';
   // Czech airfields: match the VFR-manual codes to OurAirports records
   const cz = new Set(czCodes);
   for (const r of airports) {
@@ -134,7 +139,7 @@ export function previousCounts(root) {
   if (idx && idx.countries) {
     for (const c of Object.keys(idx.countries)) {
       const f = read(join(dir, c + '.json'));
-      prev[c] = { airports: f && f.airports ? f.airports.length : null, info: f && f.info ? Object.keys(f.info).length : null };
+      prev[c] = { airports: f && Array.isArray(f.airports) ? f.airports.length : null, info: f && f.info ? Object.keys(f.info).length : null };
     }
     return prev;
   }
@@ -170,22 +175,22 @@ const stable = (o) => JSON.stringify(o);
 // downloads, checks and only then writes; returns a short report
 export async function run({ root, getCsv = fetchCsv, today = new Date().toISOString().slice(0, 10), log = console.log } = {}) {
   const { COUNTRIES, countryOfCode } = loadCountries(root);
-  const czCodes = czechCodes(readFileSync(join(root, 'app.js'), 'utf8'));
+  const cz = czechList(root);
   const [airports, runways, freqs] = await Promise.all(['airports.csv', 'runways.csv', 'airport-frequencies.csv'].map(n => getCsv(n)));
-  const { countries, exceptions } = build({ airports, runways, freqs }, COUNTRIES, countryOfCode, czCodes);
+  const { countries, exceptions } = build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz.airports);
   checkCounts(previousCounts(root), countries);
 
   const dir = join(root, 'data', 'countries');
   mkdirSync(dir, { recursive: true });
   const files = {}, index = { source: SOURCE, countries: {}, exceptions };
   for (const c of Object.keys(countries).sort(lt)) {
-    const body = countries[c].airports ? { airports: countries[c].airports, info: countries[c].info } : { info: countries[c].info };
+    const body = { airports: countries[c].airports, info: countries[c].info };
     const path = join(dir, c + '.json');
     let old = null; try { old = JSON.parse(readFileSync(path, 'utf8')); } catch {}
     const same = old && stable({ airports: old.airports, info: old.info }) === stable({ airports: body.airports, info: body.info });
-    const text = same ? readFileSync(path, 'utf8') : JSON.stringify({ source: SOURCE, generated: today, cc: c, ...body });
+    const text = same ? readFileSync(path, 'utf8') : JSON.stringify({ source: c === 'CZ' ? cz.source : SOURCE, generated: today, cc: c, ...body });
     files[path] = same ? null : text;
-    index.countries[c] = { n: c === 'CZ' ? czCodes.length : body.airports.length, info: Object.keys(body.info).length, bytes: Buffer.byteLength(text) };
+    index.countries[c] = { n: body.airports.length, info: Object.keys(body.info).length, bytes: Buffer.byteLength(text) };
   }
   const ipath = join(dir, 'index.json');
   let oldIdx = null; try { oldIdx = JSON.parse(readFileSync(ipath, 'utf8')); } catch {}

@@ -47,13 +47,44 @@ const COUNTRIES={
   MD:{cs:'Moldavsko',en:'Moldova',r:'east',icao:['LU']}
 };
 const COUNTRY_REGIONS=['central','west','south','north','east'];
-const COUNTRY_PICKS={near:['SK','AT','DE','PL'],alps:['AT','CH','DE','IT','SI','FR','LI'],adriatic:['SI','HR','IT','ME','AL']};
+// land neighbours within this list (a neighbour outside it, e.g. UA or TR, is left out)
+const COUNTRY_NEIGHBOURS={
+  CZ:['DE','AT','SK','PL'], SK:['CZ','AT','HU','PL'], AT:['DE','CZ','SK','HU','SI','IT','CH','LI'],
+  DE:['DK','PL','CZ','AT','CH','FR','LU','BE','NL'], PL:['DE','CZ','SK','LT'], HU:['AT','SK','SI','HR','RS','RO'],
+  SI:['AT','IT','HU','HR'], CH:['DE','FR','IT','AT','LI'], LI:['CH','AT'],
+  FR:['BE','LU','DE','CH','IT','MC','ES','AD'], BE:['FR','LU','DE','NL'], NL:['DE','BE'], LU:['BE','DE','FR'],
+  GB:['IE'], IE:['GB'], MC:['FR'],
+  IT:['FR','CH','AT','SI','SM'], SM:['IT'], ES:['FR','AD','PT'], PT:['ES'], AD:['FR','ES'], MT:[],
+  GR:['AL','MK','BG'], CY:[], HR:['SI','HU','RS','BA','ME'],
+  DK:['DE'], SE:['NO','FI'], NO:['SE','FI'], FI:['SE','NO'], IS:[], EE:['LV'], LV:['EE','LT'], LT:['LV','PL'],
+  RS:['HU','RO','BG','MK','XK','ME','BA','HR'], BA:['HR','RS','ME'], ME:['HR','BA','RS','XK','AL'],
+  MK:['RS','XK','AL','GR','BG'], AL:['ME','XK','MK','GR'], XK:['RS','ME','AL','MK'],
+  RO:['HU','RS','BG','MD'], BG:['RO','RS','MK','GR'], MD:['RO']
+};
+// "near" means the neighbours of the home country, see COUNTRY_NEIGHBOURS
+const COUNTRY_PICKS={near:null,alps:['AT','CH','DE','IT','SI','FR','LI'],adriatic:['SI','HR','IT','ME','AL']};
 // country of a foreign airfield code without loading its data: listed exception, "XX-" ident or ICAO prefix
 function countryOfCode(code,exceptions){
   if(typeof code!=='string') return '';
   if(exceptions&&Object.prototype.hasOwnProperty.call(exceptions,code)&&Object.prototype.hasOwnProperty.call(COUNTRIES,exceptions[code])) return exceptions[code];
   const dash=/^([A-Z]{2})-/.exec(code);
   if(dash) return Object.prototype.hasOwnProperty.call(COUNTRIES,dash[1])?dash[1]:'';
-  if(/^[A-Z]{4}$/.test(code)){ const p=code.slice(0,2); for(const c in COUNTRIES) if(COUNTRIES[c].icao.includes(p)) return c; }
+  // ICAO codes and the longer national codes built on them (LKCDUB, ETT1)
+  if(/^[A-Z]{2}[A-Z0-9]{2,4}$/.test(code)){ const p=code.slice(0,2); for(const c in COUNTRIES) if(COUNTRIES[c].icao.includes(p)) return c; }
+  return '';
+}
+// language of the browser -> home country; only the language list, never the IP address or location.
+// A region in the tag wins (de-AT, en-GB, fr-BE); "en" alone or en-US tells nothing.
+const LANG_COUNTRY={cs:'CZ',sk:'SK',pl:'PL',de:'DE',hu:'HU',sl:'SI',hr:'HR',fr:'FR',it:'IT',nl:'NL',es:'ES',pt:'PT',el:'GR',
+  da:'DK',sv:'SE',nb:'NO',nn:'NO',no:'NO',fi:'FI',is:'IS',et:'EE',lv:'LV',lt:'LT',sr:'RS',bs:'BA',mk:'MK',sq:'AL',ro:'RO',
+  bg:'BG',mt:'MT',ga:'IE',lb:'LU'};
+function guessHome(langs,allowed){
+  for(const tag of (Array.isArray(langs)?langs:[])){
+    if(typeof tag!=='string') continue;
+    const [lng,...rest]=tag.split('-'), region=rest.find(x=>/^[A-Za-z]{2}$/.test(x));
+    const byRegion=region&&region.toUpperCase(), byLang=LANG_COUNTRY[lng.toLowerCase()];
+    if(byRegion&&allowed.includes(byRegion)) return byRegion;
+    if(byLang&&allowed.includes(byLang)&&(!byRegion||!Object.prototype.hasOwnProperty.call(COUNTRIES,byRegion))) return byLang;
+  }
   return '';
 }

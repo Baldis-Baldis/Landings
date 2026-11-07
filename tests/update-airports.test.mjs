@@ -1,7 +1,7 @@
 // The monthly data update: CSV parsing, codes, per-country files and the guard that refuses broken data.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { parseCsv, build, run, loadCountries, fetchCsv, checkCounts, ftToM, appCode } from '../tools/update-airports.mjs';
@@ -25,10 +25,13 @@ function world({ sk = 10, at = 10 } = {}) {
   return { airports, runways, freqs };
 }
 const live = { SK: COUNTRIES.SK, AT: COUNTRIES.AT, CZ: COUNTRIES.CZ };
+// the hand-kept Czech list (VFR manual)
+const CZ_LIST = [{ code: 'LKAA', name: 'Ručně vedená plocha', lat: 50, lon: 15, elev: '1000', town: 'Obec', slz: true, cc: 'CZ' }];
 function tempRoot() {
   const dir = mkdtempSync(join(tmpdir(), 'ml-update-'));
   copyFileSync(join(ROOT, 'countries.js'), join(dir, 'countries.js'));
-  writeFileSync(join(dir, 'app.js'), 'const DATA = [{"code":"LKAA"}];\n');
+  mkdirSync(join(dir, 'data', 'countries'), { recursive: true });
+  writeFileSync(join(dir, 'data', 'countries', 'CZ.json'), JSON.stringify({ source: 'VFR manual', cc: 'CZ', airports: CZ_LIST, info: {} }));
   return dir;
 }
 // only SK, AT and CZ are live in the temporary root, whatever countries.js says later
@@ -54,10 +57,10 @@ test('codes follow the old rule: real ICAO code of the country, otherwise the id
 });
 
 test('data are split per country, Czech info is matched to the VFR codes, odd codes are listed', () => {
-  const { countries, exceptions } = build(world(), live, countryOfCode, ['LKAA']);
+  const { countries, exceptions } = build(world(), live, countryOfCode, CZ_LIST);
   assert.equal(countries.SK.airports.length, 12);
   assert.equal(countries.AT.airports.length, 10);
-  assert.equal(countries.CZ.airports, null, 'the Czech list stays in app.js');
+  assert.equal(countries.CZ.airports, CZ_LIST, 'the Czech list is taken over as it is');
   assert.deepEqual(Object.keys(countries.CZ.info), ['LKAA']);
   assert.deepEqual(countries.SK.info.LZIB.r[0], ['04/22', 3048, 45, 'asp', 1]);
   assert.deepEqual(countries.SK.info.LZIB.f, [['TWR', 'Tower', '118.300']]);
@@ -113,10 +116,33 @@ test('losing more than 20 % of runway and frequency info is refused too', () => 
 
 test('before the first per-country run, the old combined file is the baseline', async () => {
   const dir = tempRoot(); onlyLive(dir);
-  mkdirSync(join(dir, 'data'));
+  const before = snapshot(dir);
   writeFileSync(join(dir, 'data', 'airports-eu.json'), JSON.stringify({ airports: Array.from({ length: 20 }, (_, i) => ({ code: 'AT-' + i, cc: 'AT' })) }));
   await assert.rejects(run({ root: dir, getCsv: csvFrom(world({ at: 10 })), log: quiet }), /AT: airfields 20 -> 10/);
+  assert.deepEqual(snapshot(dir), before);
+});
+
+test('the Czech list is never rewritten from OurAirports, only its runways and frequencies', async () => {
+  const dir = tempRoot(); onlyLive(dir);
+  const w = world();
+  // OurAirports knows the field under another name and place, and knows more Czech fields
+  w.airports[0] = airport({ ident: 'LKAA', iso_country: 'CZ', name: 'Other name', latitude_deg: '49', longitude_deg: '14', type: 'small_airport' });
+  w.airports.push(airport({ ident: 'LKZZ', iso_country: 'CZ', name: 'Not in the manual', type: 'medium_airport' }));
+  await run({ root: dir, getCsv: csvFrom(w), log: quiet });
+  const cz = JSON.parse(readFileSync(join(dir, 'data', 'countries', 'CZ.json'), 'utf8'));
+  assert.deepEqual(cz.airports, CZ_LIST);
+  assert.equal(cz.source, 'VFR manual');
+  assert.deepEqual(Object.keys(cz.info), ['LKAA'], 'runways are added');
+  assert.ok(!JSON.stringify(cz).includes('Not in the manual'));
+});
+
+test('without the Czech list the run stops and writes nothing', async () => {
+  const dir = tempRoot(); onlyLive(dir);
+  rmSync(join(dir, 'data', 'countries', 'CZ.json'));
+  await assert.rejects(run({ root: dir, getCsv: csvFrom(world()), log: quiet }), /no Czech airfield list/);
   assert.deepEqual(snapshot(dir), {});
+  writeFileSync(join(dir, 'data', 'countries', 'CZ.json'), JSON.stringify({ airports: [] }));
+  await assert.rejects(run({ root: dir, getCsv: csvFrom(world()), log: quiet }), /no Czech airfield list/);
 });
 
 test('the published data agree with the index, and every code tells its country', () => {
@@ -127,7 +153,6 @@ test('the published data agree with the index, and every code tells its country'
     const f = JSON.parse(readFileSync(join(dir, c + '.json'), 'utf8'));
     assert.equal(f.cc, c);
     assert.equal(readFileSync(join(dir, c + '.json')).length, v.bytes);
-    if (c === 'CZ') { assert.equal(f.airports, undefined); continue; }
     assert.equal(f.airports.length, v.n);
     for (const a of f.airports) {
       assert.equal(a.cc, c);
