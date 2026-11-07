@@ -159,3 +159,26 @@ test('the analytics beacon loads on mylandings.net only and never on the admin p
   const privacy = readFileSync(join(root, 'privacy.html'), 'utf8');
   assert.equal((privacy.match(/Cloudflare Web Analytics/g) || []).length >= 2, true, 'named in Czech and English');
 });
+
+test('the brand and the legal links are in the plain HTML, for Google OAuth review', () => {
+  assert.match(page.match(/<title>([^<]*)<\/title>/)[1], /MyLandings/);
+  const footer = page.match(/<footer>([\s\S]*?)<div id="menu"/)[1];
+  assert.match(footer, /<a href="privacy\.html"[^>]*>[^<]+<\/a>/, 'privacy link outside the menu, with text');
+  assert.match(footer, /<a href="terms\.html"[^>]*>[^<]+<\/a>/, 'terms link outside the menu, with text');
+  assert.match(page, /© 2026 MyLandings/);
+  for (const file of ['privacy.html', 'terms.html']) {
+    const doc = readFileSync(join(root, file), 'utf8');
+    assert.match(doc.match(/<title>([^<]*)<\/title>/)[1], /MyLandings/, `${file} title`);
+    assert.match(doc.match(/<h1>([^<]*)<\/h1>/)[1], /MyLandings/, `${file} heading`);
+  }
+});
+
+test('the terms say who owns the app and what licence users give for their content', () => {
+  const terms = readFileSync(join(root, 'terms.html'), 'utf8');
+  assert.match(terms, /patří\s+provozovateli/);
+  assert.match(terms, /nevýhradní licenci/);
+  assert.match(terms, /Licence skončí smazáním obsahu nebo účtu/);
+  assert.match(terms, /belong to the\s+operator/);
+  assert.match(terms, /non-exclusive licence/);
+  assert.match(terms, /The licence ends when you delete the content or the account/);
+});
