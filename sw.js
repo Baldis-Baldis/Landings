@@ -1,4 +1,4 @@
-const C='landings-v37';
+const C='landings-v38';
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./app.js','./manifest.json','./icon.svg','./vendor/leaflet/leaflet.js','./vendor/leaflet/leaflet.css','./vendor/markercluster/leaflet.markercluster.js','./vendor/markercluster/MarkerCluster.css','./vendor/fonts/fonts.css','./vendor/supabase.js','./config.js','./sync.js','./backend.js','./community.js','./auth.js','./countries.js','./data/countries/index.json','./about.html','./legal.css'])));});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{

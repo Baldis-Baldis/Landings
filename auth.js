@@ -37,7 +37,7 @@
       termsLink: 'Terms of use', privacyLink: 'Privacy notice', termsAccept: 'Continue',
       termsMissing: 'Please confirm both items.',
       exportData: 'Download my data', deleteAccount: 'Delete account',
-      deleteConfirm: 'Delete the account? Landings, notes, own strips, comments and photos will be deleted. This cannot be undone.',
+      deleteConfirm: 'Delete the account? Landings, notes, custom airstrips, comments and photos will be deleted. This cannot be undone.',
       deleteConfirm2: 'Really delete? The data on this device will be removed too.',
       deleted: 'The account is deleted. It leaves the backups within 30 days.',
     },
