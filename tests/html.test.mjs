@@ -100,6 +100,29 @@ test('every form field has a name', () => {
 });
 
 
+test('the about page has no code, both languages, the mail link and the current version', () => {
+  const doc = readFileSync(join(root, 'about.html'), 'utf8');
+  assert.ok(!/<script\b/.test(doc), 'no scripts');
+  assert.match(doc, /http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">/);
+  assert.ok(!/(src|href)="https?:/.test(doc), 'nothing from other hosts');
+  assert.match(doc, /<div id="cs" lang="cs">/);
+  assert.match(doc, /<div id="en" lang="en">/);
+  assert.match(doc, /<a href="#cs">Česky<\/a> · <a href="#en">English<\/a>/);
+  assert.equal((doc.match(/<a href="mailto:support@mylandings\.net">support@mylandings\.net<\/a>/g) || []).length, 2);
+  // the version is written by hand: it must follow the service worker
+  const sw = readFileSync(join(root, 'sw.js'), 'utf8').match(/const C='([^']+)'/)[1];
+  assert.match(doc, new RegExp('<span id="appver">' + sw + '</span>'), 'about.html shows the current version');
+  assert.match(doc, /© 2026 MyLandings/);
+  assert.match(doc, /href="privacy\.html"/);
+  assert.match(doc, /href="terms\.html"/);
+  assert.match(doc.match(/<title>([^<]*)<\/title>/)[1], /MyLandings/);
+  // linked from the menu and from the footer next to privacy and terms
+  const footer = page.match(/<footer>([\s\S]*?)<div id="menu"/)[1];
+  assert.match(footer, /<a href="about\.html"[^>]*>O aplikaci<\/a> · <a href="privacy\.html"/);
+  assert.match(page.match(/<div id="menu"[\s\S]*?<\/footer>/)[0], /<a href="about\.html"/);
+  assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/about\.html'/);
+});
+
 test('the legal pages exist, carry no code and are linked from the app', () => {
   for (const file of ['privacy.html', 'terms.html']) {
     const doc = readFileSync(join(root, file), 'utf8');
