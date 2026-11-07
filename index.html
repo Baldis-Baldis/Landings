@@ -119,19 +119,52 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .leaflet-popup-content{margin:12px 14px}
 #map.popopen .leaflet-top{opacity:0;pointer-events:none;transition:opacity .15s}
 #map.popopen .leaflet-top *{pointer-events:none!important} /* the open airfield card is not covered by map buttons */
-.ccbtn{font:600 13px Barlow,sans-serif;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;flex:0 0 auto;white-space:nowrap}
-.ccbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-#ccpanel{display:none;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--paper);border-bottom:1px solid var(--line)}
-#ccpanel.on{display:flex}
-#ccpanel label{display:flex;align-items:center;gap:6px;font:600 13px Barlow,sans-serif;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer}
-#ccpanel label.sel{border-color:var(--ink);background:#E9ECF3}
-#ccpanel label.fixed{cursor:default;opacity:.85}
-#ccpanel input{margin:0;accent-color:var(--ink)}
-#ccpanel small{font-weight:500;color:var(--ink2)}
-#ccpanel .cchint{width:100%;font-size:11.5px;color:var(--ink2)}
+/* country picker: button and chips on the map, panel floats on desktop and slides up on phones */
+.ccbar{position:absolute;top:10px;left:54px;z-index:1000;display:flex;align-items:center;gap:6px;max-width:calc(100% - 110px);flex-wrap:wrap}
+.ccbtn{font:600 13px Barlow,sans-serif;height:34px;padding:0 10px;border:2px solid rgba(0,0,0,.2);background-clip:padding-box;border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ccbtn:hover{background:#f4f4f4}
+#ccchips{display:flex;gap:4px;cursor:pointer}
+.ccchip{font:700 11.5px Barlow,sans-serif;padding:3px 6px;border-radius:5px;background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.ccchip.more{background:#fff;color:var(--ink)}
+.ccsheet{position:fixed;inset:0;z-index:3000}
+.ccsheet[hidden]{display:none}
+.ccback{position:absolute;inset:0;background:rgba(27,39,64,.25)}
+.ccdlg{position:absolute;top:110px;left:60px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 140px);display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.25);outline:none;overflow:hidden}
+.cchead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px 16px}
+.cchead h3{margin:0;font:700 18px 'Barlow Condensed',Barlow,sans-serif;color:var(--ink)}
+.ccx{border:0;background:none;font-size:24px;line-height:1;color:var(--ink2);cursor:pointer;padding:2px 6px}
+.ccq{margin:0 12px 8px;padding:8px 10px;font:500 14px Barlow,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.ccpicks{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.ccpick{font:600 12.5px Barlow,sans-serif;padding:5px 10px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);cursor:pointer}
+.ccpick:hover{border-color:var(--ink)}
+.ccpick.clear{color:var(--ink2)}
+.cclist{flex:1;overflow-y:auto;padding:0 12px 8px;border-top:1px solid var(--line)}
+.ccsec{margin:10px 0 4px;font:700 11.5px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
+.ccgrp{border-bottom:1px solid var(--line)}
+.ccgrp>summary{padding:10px 2px;font:700 14px Barlow,sans-serif;color:var(--ink);cursor:pointer}
+.ccgrp>summary small{font-weight:500;color:var(--ink2)}
+.ccrow{display:flex;align-items:center;gap:8px;padding:7px 4px;font:500 14px Barlow,sans-serif;color:var(--ink);cursor:pointer;border-radius:6px}
+.ccrow:hover{background:#fff}
+.ccrow.fixed{cursor:default}
+.ccrow input{margin:0;width:16px;height:16px;accent-color:var(--ink)}
+.cccode{font:700 11px Barlow,sans-serif;padding:1px 5px;border:1px solid var(--ink2);border-radius:4px;color:var(--ink2);min-width:22px;text-align:center}
+.ccname{flex:1}
+.ccmine{font:700 12px Barlow,sans-serif;color:var(--done)}
+.ccn{font-size:12px;color:var(--ink2);min-width:28px;text-align:right}
+.ccnone{color:var(--ink2);font-size:13px}
+.ccfoot{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line)}
+.ccfoot .cchint{flex:1;font-size:11.5px;color:var(--ink2)}
+.ccdone{font:600 14px Barlow,sans-serif;padding:8px 18px;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
+@media (max-width:760px){.ccdlg{top:auto;left:0;right:0;bottom:0;width:auto;max-height:80dvh;border-radius:14px 14px 0 0;animation:ccup .2s ease-out}.ccfoot{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
+@keyframes ccup{from{transform:translateY(100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.ccdlg{animation:none}}
 .row .cc{font:600 11px Barlow,sans-serif;padding:1px 5px;border:1px solid var(--line);border-radius:4px;color:var(--ink2);margin-right:4px}
 .clu{display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(27,39,64,.85);color:#fff;font:700 12px Barlow,sans-serif;box-shadow:0 0 0 3px rgba(27,39,64,.25)}
 .clu.has{background:rgba(30,123,75,.9);box-shadow:0 0 0 3px rgba(30,123,75,.3)}
+.clu{position:relative}
+.clu.fav{background:rgba(196,146,10,.92);box-shadow:0 0 0 3px rgba(212,160,23,.35)}
+.clu.want{background:rgba(58,98,196,.92);box-shadow:0 0 0 3px rgba(58,98,196,.3)}
+.clb{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#fff;color:var(--ink);font:700 10px/16px Barlow,sans-serif;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 footer{position:relative;display:flex;align-items:center;gap:6px;padding:4px 8px calc(4px + env(safe-area-inset-bottom)) 8px;border-top:1px solid var(--line);font-size:12.5px;background:var(--paper)}
 footer .sync{flex:1 1 auto;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:500 12.5px Barlow,sans-serif;padding:6px 4px;border:0;background:none;color:var(--ink2);cursor:pointer}
 footer .sync.ok{color:var(--done)}
@@ -190,15 +223,13 @@ footer .legal a:hover{text-decoration:underline}
 <div id="app">
 <header><h1 data-i data-t="title"></h1><div class="brand" aria-label="MyLandings"><span class="word">My<span>Landings</span></span><svg width="150" height="20" viewBox="0 -3 150 20" aria-hidden="true"><defs><symbol id="lplane" viewBox="0 0 24 24"><path d="M12 1.5c.9 0 1.4.9 1.4 2.2V9l8.1 2.6c.3.1.5.4.5.7v1.1c0 .3-.3.5-.6.4L13.4 12v5.3l2.6 1.7c.2.1.3.3.3.5v.8c0 .3-.3.5-.6.4L12 19.9l-3.7.8c-.3.1-.6-.1-.6-.4v-.8c0-.2.1-.4.3-.5l2.6-1.7V12l-8 1.8c-.3.1-.6-.1-.6-.4v-1.1c0-.3.2-.6.5-.7L10.6 9V3.7c0-1.3.5-2.2 1.4-2.2z"/></symbol></defs><rect x="0" y="3" width="150" height="8" rx="1.5" fill="var(--ink)"/><g fill="#fff"><rect x="4" y="5" width="1.6" height="4"/><rect x="7" y="5" width="1.6" height="4"/><rect x="10" y="5" width="1.6" height="4"/><rect x="138.4" y="5" width="1.6" height="4"/><rect x="141.4" y="5" width="1.6" height="4"/><rect x="144.4" y="5" width="1.6" height="4"/></g><line x1="20" y1="7" x2="130" y2="7" stroke="#fff" stroke-width="1" stroke-dasharray="7 5"/><use href="#lplane" x="53" y="-4" width="22" height="22" fill="var(--done)" stroke="var(--paper)" stroke-width="1.2" transform="rotate(90 64 7)"/></svg></div><div class="count"><span id="cnt">0</span><small><span data-i data-t="of"></span> <span id="tot">0</span></small></div>
 <div class="lang"><button data-l="cs">CZ</button><button data-l="en">EN</button></div></header>
-<div id="map"></div>
+<div id="map"><div class="ccbar" id="ccbar"><button id="ccbtn" class="ccbtn" type="button"></button><span id="ccchips"></span></div></div>
 <div class="side">
 <div class="tools">
 <input id="q" type="search">
 <select id="f"><option value="all" data-i data-t="all"></option><option value="icao" data-i data-t="icaoOnly"></option><option value="slz" data-i data-t="slzOnly"></option><option value="custom" data-i data-t="customOnly"></option><option value="done" data-i data-t="doneOnly"></option><option value="todo" data-i data-t="todoOnly"></option><option value="fav" data-i data-t="favOnly"></option><option value="want" data-i data-t="wantOnly"></option></select>
-<button id="ccbtn" class="ccbtn" type="button"></button>
 <button id="addbtn" class="addbtn" title="">+</button>
 </div>
-<div id="ccpanel"></div>
 <div class="legend"><span><i style="background:var(--icao)"></i><span data-i data-t="icao"></span></span><span><i style="background:var(--slz)"></i><span data-i data-t="slz"></span></span><span><i style="background:var(--custom)"></i><span data-i data-t="custom"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinG)" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg><span data-i data-t="landed"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinWant)" stroke="#fff" stroke-width="1.4"/><circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#213F8F"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#213F8F"/></svg><span data-i data-t="want"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinGold)" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg><span data-i data-t="fav"></span></span></div>
 <p id="addhint" style="display:none;margin:0;padding:6px 14px;font-size:12.5px;background:#FFF3E0;color:var(--ink)" data-i data-t="addHint"></p>
 <div id="list"></div>
@@ -214,8 +245,10 @@ footer .legal a:hover{text-decoration:underline}
 <form id="authnickform" hidden><label><span data-a="nick"></span><input id="authnick" minlength="3" maxlength="30" required autocomplete="off"></label><p class="authhint" data-a="nickHint"></p><button type="submit" data-a="save"></button></form>
 <button id="authexport" type="button" data-a="exportData" hidden></button><button id="authdelete" type="button" data-a="deleteAccount" hidden></button><button id="authout" type="button" data-a="signOut" hidden></button><button id="authclose" type="button" data-a="close"></button></dialog>
 <div id="lightbox"><img alt=""><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div></div>
+<div id="ccsheet" class="ccsheet" hidden><div class="ccback"></div><div class="ccdlg" role="dialog" aria-modal="true" aria-labelledby="cctitle" tabindex="-1"><div class="cchead"><h3 id="cctitle" data-i data-t="countries"></h3><button type="button" class="ccx" aria-label="Zavřít">×</button></div><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div><div class="cclist"></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div></div>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/markercluster/leaflet.markercluster.js"></script>
+<script src="countries.js"></script>
 <script src="app.js"></script>
 <script src="vendor/supabase.js"></script>
 <script src="config.js"></script>

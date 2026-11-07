@@ -1,5 +1,7 @@
 # Monthly refresh of foreign airfields, runways and frequencies from OurAirports.
 # Runs on the 2nd of every month and can be started by hand (Actions -> Update airfield data -> Run workflow).
+# The script checks the data before writing (failed download, empty files, a country losing more than 20 %)
+# and then fails without writing, so nothing is committed.
 name: Update airfield data
 
 on:
@@ -18,26 +20,27 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # pinned to the commit of actions/checkout v5.1.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      # Node comes with the runner image; the script has no dependencies
+      - name: Test the update script
+        run: node --version && node --test tests/update-airports.test.mjs
 
       - name: Download and rebuild data
-        run: python update_airports.py
+        run: node tools/update-airports.mjs
 
       - name: Commit if something changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/airports-eu.json data/airport-info.json
+          git add data/countries/
           if git diff --cached --quiet; then
             echo "No changes in OurAirports data."
             exit 0
           fi
           git commit -m "Monthly airfield data update (OurAirports)"
-          # the app may have synced landings meanwhile - rebase onto it and retry a few times
+          # the app may have changed meanwhile - rebase onto it and retry a few times
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push && exit 0
             sleep 10

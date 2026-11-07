@@ -11,4 +11,5 @@ Third-party components keep their own licences and are not covered by this notic
 - vendor/markercluster (Leaflet.markercluster, MIT), see vendor/markercluster/LICENSE
 - vendor/supabase.js (supabase-js, MIT), see vendor/supabase.LICENSE
 - vendor/fonts (Barlow and Barlow Condensed, SIL Open Font License 1.1), see vendor/fonts/LICENSE
-Airfield data in data/airports-eu.json and data/airport-info.json come from OurAirports (public domain).
+Airfield data in data/countries/ (and the older data/airports-eu.json and data/airport-info.json) come from
+OurAirports (public domain).

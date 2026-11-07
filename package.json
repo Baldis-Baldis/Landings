@@ -5,7 +5,7 @@
   "scripts": {
     "test:db": "node supabase/tests/run.mjs",
     "test:db:mutations": "node supabase/tests/mutation-check.mjs",
-    "test:backend": "node --test tests/backend.test.mjs tests/community.test.mjs tests/admin.test.mjs tests/check-secrets.test.mjs tests/auth.test.mjs tests/sw.test.mjs tests/html.test.mjs tests/sync.test.mjs tests/account.test.mjs",
+    "test:backend": "node --test tests/backend.test.mjs tests/community.test.mjs tests/admin.test.mjs tests/check-secrets.test.mjs tests/auth.test.mjs tests/sw.test.mjs tests/html.test.mjs tests/sync.test.mjs tests/account.test.mjs tests/update-airports.test.mjs",
     "serve": "node tools/serve.mjs",
     "check:secrets": "node tools/check-secrets.mjs --all"
   },

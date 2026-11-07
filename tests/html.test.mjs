@@ -61,7 +61,7 @@ test('every local file the page loads exists', () => {
 
 test('the airport update still finds the Czech list', () => {
   assert.match(html, /const DATA = (\[.*?\]);/s);
-  assert.match(readFileSync(join(root, 'update_airports.py'), 'utf8'), /os\.path\.join\(ROOT, "app\.js"\)/);
+  assert.match(readFileSync(join(root, 'tools/update-airports.mjs'), 'utf8'), /readFileSync\(join\(root, 'app\.js'\)/);
 });
 
 test('a guest downloads nothing and the GitHub sync is gone', () => {
@@ -181,4 +181,46 @@ test('the terms say who owns the app and what licence users give for their conte
   assert.match(terms, /belong to the\s+operator/);
   assert.match(terms, /non-exclusive licence/);
   assert.match(terms, /The licence ends when you delete the content or the account/);
+});
+
+// --- country picker ---
+const countriesSrc = readFileSync(join(root, 'countries.js'), 'utf8');
+const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_PICKS,COUNTRY_REGIONS,countryOfCode})');
+
+test('country data come only from whitelisted codes', () => {
+  assert.match(html, /const CCS=Object\.keys\(COUNTRIES\)\.filter\(c=>COUNTRIES\[c\]\.live\)/);
+  assert.match(html, /if\(!CCS\.includes\(c\)\) return Promise\.reject\(new Error\('unknown country'\)\);\s*if\(!ccLoading\[c\]\) ccLoading\[c\]=fetch\('data\/countries\/'\+c\+'\.json'\)/);
+  assert.deepEqual(html.match(/fetch\('data\/[^)]*\)/g), ["fetch('data/countries/'+c+'.json')", "fetch('data/countries/index.json')"], 'country file and index are the only data URLs');
+  // a stored selection keeps only whitelisted codes, in whitelist order, with CZ first
+  assert.match(html, /selCC=\['CZ',\.\.\.CCS\.filter\(c=>c!=='CZ'&&x\.includes\(c\)\)\]/);
+  for (const c of Object.keys(C.COUNTRIES)) assert.match(c, /^[A-Z]{2}$/);
+  for (const list of Object.values(C.COUNTRY_PICKS)) for (const c of list) assert.ok(C.COUNTRIES[c], c);
+  for (const c of Object.values(C.COUNTRIES)) assert.ok(C.COUNTRY_REGIONS.includes(c.r));
+});
+
+test('the country panel never writes markup from names, search text or data', () => {
+  const start = html.indexOf('// --- country picker'), end = html.indexOf('function style(a)');
+  const picker = html.slice(start, end);
+  assert.ok(start > 0 && end > start);
+  assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML/.test(picker), 'textContent only');
+  assert.match(picker, /ccQ\.oninput=renderCCList/);
+});
+
+test('the country of a code comes from its prefix or the index, never from odd input', () => {
+  assert.equal(C.countryOfCode('LZIB'), 'SK');
+  assert.equal(C.countryOfCode('EDDM'), 'DE');
+  assert.equal(C.countryOfCode('ETSI'), 'DE');
+  assert.equal(C.countryOfCode('AT-0009'), 'AT');
+  assert.equal(C.countryOfCode('CZ-0052', { 'CZ-0052': 'SK' }), 'SK');
+  assert.equal(C.countryOfCode('ETT1'), '');
+  assert.equal(C.countryOfCode('XX-0001'), '', 'not a known country');
+  assert.equal(C.countryOfCode('LZIB', { LZIB: 'ZZ' }), 'SK', 'an exception must name a known country');
+  assert.equal(C.countryOfCode('__proto__', {}), '');
+  assert.equal(C.countryOfCode(undefined), '');
+});
+
+test('the page loads the country list before the app and the worker keeps it offline', () => {
+  assert.ok(page.indexOf('<script src="countries.js">') > 0 && page.indexOf('<script src="countries.js">') < page.indexOf('<script src="app.js">'));
+  assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/countries\.js'/);
+  assert.ok(!/airports-eu\.json|airport-info\.json/.test(html), 'the old combined files are no longer used');
 });
