@@ -154,7 +154,8 @@
   }
 
   const MAX_PHOTOS = 3;
-  const PHOTO_SOURCE = /^(https:\/\/raw\.githubusercontent\.com\/|data:image\/)/;
+  // Only photos inside the file: the old GitHub copies are gone, and a link that never loads would wait forever.
+  const PHOTO_SOURCE = /^data:image\//;
   const sourcePics = o => (o?.pics || (o?.photo ? [{ url: o.photo, path: o.photoPath }] : []));
 
   // Adds a backup file to an account. Repeating it changes nothing: what the account already holds wins,

@@ -12,11 +12,11 @@
  },
  "photos": {
   "LKHK": { "pics": [
-   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-a.jpg", "path": "photos/sample-a.jpg" },
-   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-b.jpg", "path": "photos/sample-b.jpg" }
+   { "url": "data:image/jpeg;base64,aAAA", "path": "photos/sample-a.jpg" },
+   { "url": "data:image/jpeg;base64,bAAA", "path": "photos/sample-b.jpg" }
   ], "ts": 1767225600001 },
   "LKBE": { "pics": [
-   { "url": "https://raw.githubusercontent.com/example/example/main/photos/sample-c.jpg", "path": "photos/sample-c.jpg" }
+   { "url": "data:image/jpeg;base64,cAAA", "path": "photos/sample-c.jpg" }
   ], "ts": 1767225600000 }
  },
  "custom": {},

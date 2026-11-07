@@ -188,12 +188,14 @@ test('an import takes only known fields and trusted photo sources', async () => 
   const data = {
     visited: { LKBE: { date: '2026-01-01', note: 'n', ts: 5, evil: '<x>' }, LKHK: 'nonsense' },
     flags: { LKBE: { fav: true, ts: 5, evil: 1 }, LKHK: { other: 1 } },
-    photos: { LKBE: { pics: [{ url: 'https://evil.example/a.jpg' }, { url: 'javascript:x' }, { url: 'https://raw.githubusercontent.com/a/b.jpg', path: 'photos/b.jpg' }] } },
+    photos: { LKBE: { pics: [{ url: 'https://evil.example/a.jpg' }, { url: 'javascript:x' },
+      { url: 'https://raw.githubusercontent.com/a/b.jpg', path: 'photos/b.jpg' }, { url: 'data:image/jpeg;base64,AAAA', path: 'photos/c.jpg' }] } },
   };
   const { state, added } = await core.mergeImport(data, emptyState(), stable);
   assert.deepEqual(plain(state.visited), { LKBE: { date: '2026-01-01', note: 'n', ts: 5 } });
   assert.deepEqual(plain(state.flags), { LKBE: { fav: true, ts: 5 } });
-  assert.deepEqual(plain(state.photos.LKBE.pics), [{ url: 'https://raw.githubusercontent.com/a/b.jpg', pid: 'id:photo:photos/b.jpg' }]);
+  // the old GitHub copies are gone, so only photos inside the file count
+  assert.deepEqual(plain(state.photos.LKBE.pics), [{ url: 'data:image/jpeg;base64,AAAA', pid: 'id:photo:photos/c.jpg' }]);
   assert.deepEqual(plain(added), { landings: 1, flags: 1, photos: 1, strips: 0 });
 });
 

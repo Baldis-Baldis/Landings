@@ -64,10 +64,22 @@ test('the airport update still finds the Czech list', () => {
   assert.match(readFileSync(join(root, 'update_airports.py'), 'utf8'), /os\.path\.join\(ROOT, "app\.js"\)/);
 });
 
-test('a guest downloads nothing and an account never uses GitHub', () => {
-  assert.match(html, /if\(!account&&!ghToken\(\)\)\{ setSync\('',syncLabel\(\)\); return; \}/);
-  assert.match(html, /function ghToken\(\)\{ return account\?''/);
-  assert.ok(html.indexOf('if(!account&&!ghToken()){ setSync') < html.indexOf('await ghGetState()'));
+test('a guest downloads nothing and the GitHub sync is gone', () => {
+  assert.match(html, /if\(!account\)\{ setSync\('',syncLabel\(\)\); return; \}/);
+  for (const gone of ['api.github.com', 'ghToken', 'ghUpload', 'data/landings.json', 'id="gh"']) {
+    assert.ok(!html.includes(gone) && !page.includes(gone), gone);
+  }
+  const csp = page.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.ok(!/github/.test(csp), 'no GitHub host in the CSP');
+});
+
+test('a token left by the old GitHub sync is removed on start', () => {
+  const removed = [];
+  const line = html.match(/try\{ localStorage\.removeItem\('gh-token'\); \}catch\(e\)\{\}/);
+  assert.ok(line, 'the removal is in app.js');
+  vm.runInNewContext(line[0], { localStorage: { removeItem: k => removed.push(k) } });
+  assert.deepEqual(removed, ['gh-token']);
+  assert.ok(html.indexOf(line[0]) < html.indexOf('applyLang();\n'), 'before the app starts');
 });
 
 // Checked in headless Edge: without this, Leaflet takes a click on a swapped button for a map click
@@ -84,13 +96,6 @@ test('every form field has a name', () => {
   assert.equal((community.match(/el\('(input|select|textarea)'/g) || []).length, (community.match(/\.name = '/g) || []).length);
 });
 
-test('only photo paths can reach the GitHub delete call', () => {
-  const guard = new RegExp(html.match(/!\/(\^photos.*?\$)\/\.test\(a\.photoPath/)[1]);
-  assert.ok(guard.test('photos/kunovice-mvmbfr12.jpg'));
-  for (const path of ['index.html', 'photos/../index.html', 'photos/a.jpg?x', 'data/landings.json', '.github/workflows/x.yml', 'photos/a/b.jpg']) {
-    assert.equal(guard.test(path), false, path);
-  }
-});
 
 test('the legal pages exist, carry no code and are linked from the app', () => {
   for (const file of ['privacy.html', 'terms.html']) {
