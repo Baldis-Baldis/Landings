@@ -297,7 +297,7 @@ window.leaveAccount=async signOut=>{
 
 let map=null; const markers={};
 // target inside the want pin (white 9, blue 6.6, white 4.4, blue 2.2 in a 30x40 box, scaled to 24x34)
-const WANT_TARGET='<circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#1B2740"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#1B2740"/>';
+const WANT_TARGET='<circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#213F8F"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#213F8F"/>';
 // small want pin for the card button and the list
 const WANT_ICON=`<svg class="wantic" viewBox="0 0 24 34" aria-hidden="true"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinWant)" stroke="#fff" stroke-width="1.4"/>${WANT_TARGET}</svg>`;
 try{
@@ -662,7 +662,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v32'; // matches the cache name in sw.js
+const APP_VERSION='landings-v33'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;
