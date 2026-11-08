@@ -14,7 +14,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.t));
   document.getElementById('q').placeholder=t('search');
-  document.querySelector('#ccsheet .ccq').placeholder=t('ccSearch'); document.querySelector('#ccsheet .ccx').setAttribute('aria-label',t('ccClose'));
+  document.querySelector('#ccsheet .ccq').placeholder=t('ccSearch'); document.querySelector('#ccsheet .ccx').setAttribute('aria-label',t('ccClose')); document.querySelector('#cardsheet .csx').setAttribute('aria-label',t('ccClose'));
   document.getElementById('addbtn').title=t('addTitle');
   const mb2=document.getElementById('morebtn'); if(mb2) mb2.title=mb2.ariaLabel=t('more');
   document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
@@ -22,7 +22,7 @@ function applyLang(){
   render(); if(typeof renderCC==='function') renderCC(); if(typeof renderAuth==='function') renderAuth();
   const mb=document.getElementById('maponlybtn'); if(mb){ const on=document.getElementById('app').classList.contains('maponly'); mb.title=mb.ariaLabel=t(on?'showList':'mapOnly'); }
 }
-document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lang',lang);applyLang();if(map)map.closePopup();});
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lang',lang);applyLang();if(map)map.closePopup();if(sheetOpen&&sheetA)fillSheet(sheetA);});
 
 // Keys of the guest mode. A signed-in account gets its own copies, see useAccount.
 const STATE_KEYS={KEY:'visited-cz-airfields',CKEY:'custom-airfields',PKEY:'airfield-photos',FKEY:'airfield-flags',TKEY:'sync-tombstones'};
@@ -153,7 +153,7 @@ function compressImage(file,maxW=900,quality=0.72){
 // keep the card as a builder function, so it is always rebuilt in the current language.
 // Rebuild only after the current tap has finished: replacing the tapped button mid-click
 // makes Leaflet treat it as a click on the map and close the card.
-function refreshMarkerPopup(a){ setTimeout(()=>{ const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); },0); }
+function refreshCard(a){ setTimeout(()=>{ if(sheetOpen&&sheetA&&sheetA.code===a.code) fillSheet(a); else { const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); } },0); }
 
 // The GitHub sync is gone. A token left by an old version is removed, it must not stay in the browser.
 try{ localStorage.removeItem('gh-token'); }catch(e){}
@@ -165,12 +165,12 @@ function canon(o){ if(Array.isArray(o)) return '['+o.map(canon).join(',')+']'; i
 function applyState(s){
   visited=s.visited; tomb=s.tomb; photos=s.photos||{}; flags=s.flags||{};
   // update custom strips in place so open popups keep working
-  Object.keys(custom).forEach(code=>{ if(!s.custom[code]){ delete custom[code]; if(map&&markers[code]){ map.removeLayer(markers[code]); delete markers[code]; } } });
+  Object.keys(custom).forEach(code=>{ if(!s.custom[code]){ if(sheetOpen&&sheetA&&sheetA.code===code) closeSheet(); delete custom[code]; if(map&&markers[code]){ map.removeLayer(markers[code]); delete markers[code]; } } });
   Object.entries(s.custom).forEach(([code,a])=>{
     if(custom[code]){
       if(canon(custom[code])!==canon(a)){
         const o=custom[code]; Object.keys(o).forEach(k=>delete o[k]); Object.assign(o,a);
-        if(markers[code]){ markers[code].setLatLng([o.lat,o.lon]); if(!markers[code].isPopupOpen()) refreshMarkerPopup(o); }
+        if(markers[code]){ markers[code].setLatLng([o.lat,o.lon]); if(!isCardOpen(o)) refreshCard(o); }
       }
     } else { custom[code]=a; if(map) addMarker(a); }
   });
@@ -319,15 +319,16 @@ window.leaveAccount=async signOut=>{
 };
 
 let map=null; const markers={};
+const MAP_CREDIT='© OpenStreetMap · seznam letišť: VFR příručka ŘLP ČR (WEF '+vfrDate('wef')+') · údaje: OurAirports';
 // target inside the want pin (white 9, blue 6.6, white 4.4, blue 2.2 in a 30x40 box, scaled to 24x34)
 const WANT_TARGET='<circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#213F8F"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#213F8F"/>';
 // small want pin for the card button and the list
 const WANT_ICON=`<svg class="wantic" viewBox="0 0 24 34" aria-hidden="true"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinWant)" stroke="#fff" stroke-width="1.4"/>${WANT_TARGET}</svg>`;
 try{
   map=L.map('map').setView([49.8,15.5],7);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap · seznam letišť: VFR příručka ŘLP ČR (WEF '+vfrDate('wef')+') · údaje: OurAirports'}).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:MAP_CREDIT}).addTo(map);
   allData().forEach(addMarker);
-  map.on('click',e=>{ if(addMode) placeCustom(e.latlng.lat,e.latlng.lng); });
+  map.on('click',e=>{ if(addMode) placeCustom(e.latlng.lat,e.latlng.lng); else if(sheetOpen) closeSheet(); });
   // button in the map: hide the list panel to browse the map full screen
   const MapOnly=L.Control.extend({options:{position:'topright'},onAdd(){
     const d=L.DomUtil.create('div','leaflet-bar'); const b=L.DomUtil.create('button','mapbtn',d); b.type='button'; b.id='maponlybtn';
@@ -401,10 +402,15 @@ function wantsPin(a){ return !!pinKind(a); }
 function newMarker(a){
   const landed=wantsPin(a);
   const m=landed?L.marker([a.lat,a.lon],{icon:pinIcon(pinKind(a)),keyboard:false,riseOnHover:true})
-                :L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2});
+                :L.circleMarker([a.lat,a.lon],{radius:kind(a)==='icao'?7:5,weight:2,bubblingMouseEvents:false});
   m._code=a.code; m._hidden=false; m._pin=landed; m._pk=pinKind(a);
-  m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]});
+  m.on('click',()=>openCard(a));
   return m;
+}
+// The popup is bound on first use. Its own click toggle is taken off: every opening goes through openCard.
+function popupOn(m,a){
+  if(!m.getPopup()){ m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]}); m.off('click',m._openPopup,m); }
+  m.openPopup();
 }
 // the home country is drawn airfield by airfield like Czechia always was; other countries, and a home country
 // too big for that, go into clusters
@@ -417,21 +423,106 @@ function addMarker(a,batch){
 }
 function swapMarker(a){
   const old=markers[a.code]; if(!old) return;
-  const wasOpen=old.isPopupOpen&&old.isPopupOpen(), hidden=old._hidden;
+  const wasOpen=!!(old.isPopupOpen&&old.isPopupOpen()), hidden=old._hidden;
   const m=newMarker(a); m._hidden=hidden; markers[a.code]=m;
   if(clustered(a)){ const c=clusterLayer(); if(c.hasLayer(old)) c.removeLayer(old); if(!hidden) c.addLayer(m); }
   else { if(old._map) map.removeLayer(old); if(!hidden) m.addTo(map); }
-  if(wasOpen&&!hidden) setTimeout(()=>{ if(m._map) m.openPopup(); },0);
+  if(wasOpen&&!hidden) setTimeout(()=>{ if(m._map) popupOn(m,a); },0);
 }
 function showOnMap(a){
   const m=markers[a.code]; if(!map||!m) return;
+  const opener=document.activeElement;
   if(cluster&&cluster.hasLayer&&cluster.hasLayer(m)){
     // above zoom 10 clusters split up; wait until the marker is really on the map, then open it
     map.setView([a.lat,a.lon],12,{animate:false});
-    let n=0; const tryOpen=()=>{ if(m._map) m.openPopup(); else if(n++<40) setTimeout(tryOpen,50); }; tryOpen();
+    let n=0; const tryOpen=()=>{ if(m._map) openCard(a,opener); else if(n++<40) setTimeout(tryOpen,50); }; tryOpen();
   }
-  else { map.setView([a.lat,a.lon],12); m.openPopup(); }
+  else { map.setView([a.lat,a.lon],12,{animate:!useSheet()}); openCard(a,opener); }
 }
+// --- the airfield card: a popup on the map on wide screens, a sheet sliding up from below on phones ---
+// Every opening goes through openCard. The sheet uses the same layout breakpoint as the page (899 px).
+const sheetMQ=window.matchMedia('(max-width: 899px)');
+const sheet=document.getElementById('cardsheet'), sheetBody=sheet.querySelector('.csbody');
+let sheetA=null, sheetOpen=false, sheetPushed=false, sheetReturn=null, sheetState='half';
+function useSheet(){ return sheetMQ.matches; }
+function isCardOpen(a){ if(sheetOpen&&sheetA&&sheetA.code===a.code) return true; const m=markers[a.code]; return !!(m&&m.isPopupOpen&&m.isPopupOpen()); }
+function openCard(a,opener){
+  const m=markers[a.code];
+  if(!useSheet()){ if(m&&m._map) popupOn(m,a); return; }
+  if(map) map.closePopup();
+  openSheet(a,opener);
+}
+function cardMeta(a){
+  if(a.custom) return a.short||'';
+  return [a.code,a.town,a.elev?a.elev+' ft':'',a.cc&&a.cc!==home&&COUNTRIES[a.cc]?ccName(a.cc):''].filter(Boolean).join(' · ');
+}
+function fillSheet(a){
+  const top=sheetBody.scrollTop;
+  sheet.querySelector('#cstitle').textContent=a.name;
+  sheet.querySelector('.csmeta').textContent=cardMeta(a);
+  sheetBody.textContent=''; sheetBody.appendChild(popup(a));
+  sheetBody.scrollTop=top;
+}
+// heights: half is 55 % of the screen, full leaves a small gap at the top (dvh units follow the Safari toolbar)
+function sheetHeights(){ const vh=window.innerHeight; return {half:Math.round(vh*0.55),full:Math.max(Math.round(vh*0.55),vh-Math.max(8,parseFloat(getComputedStyle(sheet).getPropertyValue('--cstop'))||8))}; }
+function setSheetHeight(px){ sheet.style.height=px+'px'; }
+// keep the airfield visible in the strip of map above the sheet
+function panAboveSheet(a){
+  if(!map) return;
+  const mr=map.getContainer().getBoundingClientRect(), top=window.innerHeight-sheet.getBoundingClientRect().height;
+  const visBottom=Math.min(mr.bottom,top); if(visBottom-mr.top<60) return;
+  const p=map.latLngToContainerPoint([a.lat,a.lon]);
+  map.panBy([p.x-mr.width/2,p.y-(visBottom-mr.top)/2],{animate:true});
+}
+function openSheet(a,opener){
+  const fresh=!sheetOpen;
+  sheetA=a; fillSheet(a);
+  if(fresh){
+    sheetReturn=opener&&opener!==document.body?opener:null;
+    sheet.hidden=false; sheetOpen=true; sheetState='half'; document.body.classList.add('cardopen');
+    setSheetHeight(0); sheet.getBoundingClientRect();
+    try{ history.pushState({card:1},''); sheetPushed=true; }catch(e){ sheetPushed=false; }
+  } else sheetBody.scrollTop=0;
+  setSheetHeight(sheetHeights()[sheetState]);
+  sheet.querySelector('#cstitle').focus({preventScroll:true});
+  setTimeout(()=>panAboveSheet(a),230);
+}
+function closeSheet(fromHistory){
+  if(!sheetOpen) return;
+  sheetOpen=false; document.body.classList.remove('cardopen');
+  setSheetHeight(0);
+  setTimeout(()=>{ if(!sheetOpen){ sheet.hidden=true; sheetBody.textContent=''; sheetA=null; } },230);
+  if(sheetPushed&&!fromHistory){ sheetPushed=false; history.back(); } else sheetPushed=false;
+  const back=sheetReturn&&document.contains(sheetReturn)?sheetReturn:(map?map.getContainer():null);
+  sheetReturn=null; if(back) try{ back.focus({preventScroll:true}); }catch(e){}
+}
+// back gesture or button closes the sheet instead of leaving the app
+window.addEventListener('popstate',()=>{ if(sheetOpen){ sheetPushed=false; closeSheet(true); } });
+sheet.querySelector('.csx').onclick=()=>closeSheet();
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheetOpen&&!lb.classList.contains('on')&&ccSheet.hidden) closeSheet(); });
+// drag the grip or the header: up to full height, down to half or closed
+(()=>{
+  let y0=0,h0=0,drag=false,lastY=0,lastT=0,v=0;
+  const grab=sheet.querySelectorAll('.csgrip,.cshead');
+  const down=e=>{ if(e.target.closest('.csx')) return; drag=true; y0=lastY=e.clientY; lastT=e.timeStamp; v=0; h0=sheet.getBoundingClientRect().height; sheet.classList.add('drag'); e.currentTarget.setPointerCapture(e.pointerId); };
+  const move=e=>{ if(!drag) return; const {full}=sheetHeights(); setSheetHeight(Math.max(0,Math.min(full,h0-(e.clientY-y0)))); const dt=e.timeStamp-lastT; if(dt>0) v=(e.clientY-lastY)/dt; lastY=e.clientY; lastT=e.timeStamp; };
+  const up=()=>{
+    if(!drag) return; drag=false; sheet.classList.remove('drag');
+    const h=sheet.getBoundingClientRect().height, {half,full}=sheetHeights();
+    if(v>0.8||h<half*0.6){ closeSheet(); return; }
+    sheetState=(v<-0.8||h>(half+full)/2)?'full':'half';
+    setSheetHeight(sheetHeights()[sheetState]);
+    if(sheetState==='half'&&sheetA) setTimeout(()=>panAboveSheet(sheetA),230);
+  };
+  grab.forEach(g=>{ g.addEventListener('pointerdown',down); g.addEventListener('pointermove',move); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up); });
+})();
+window.addEventListener('resize',()=>{ if(sheetOpen) setSheetHeight(sheetHeights()[sheetState]); });
+// crossing the breakpoint (rotating the phone) moves an open card between the sheet and the popup
+sheetMQ.addEventListener('change',()=>{
+  if(useSheet()){ if(!map) return; const m=Object.values(markers).find(x=>x.isPopupOpen&&x.isPopupOpen()); if(!m) return; const a=allData().find(x=>x.code===m._code); map.closePopup(); if(a) openSheet(a,null); }
+  else if(sheetOpen&&sheetA){ const a=sheetA; closeSheet(); const m=markers[a.code]; if(m&&m._map) popupOn(m,a); }
+});
+sheet.querySelector('.csattr').textContent=(typeof MAP_CREDIT==='string'?'Leaflet | '+MAP_CREDIT:'');
 function dropMarker(code){
   const m=markers[code]; if(!m) return;
   if(cluster&&cluster.hasLayer&&cluster.hasLayer(m)) cluster.removeLayer(m); else if(m._map) map.removeLayer(m);
@@ -602,7 +693,7 @@ function refreshClusters(){ if(cluster&&cluster.refreshClusters) cluster.refresh
 const today=()=>new Date().toISOString().slice(0,10);
 function popup(a){
   const v=visited[a.code]||{}, isCustom=!!a.custom;
-  const d=document.createElement('div');d.className='pop';
+  const d=document.createElement('div');d.className='pop'+(isCustom?' custom':'');
   let html='';
   html+= isCustom ? `<input type="text" name="cname" class="cname" value="${esc(a.name)}" placeholder="${esc(t('addName'))}">` : `<b>${esc(a.name)}</b>`;
   html+= isCustom ? `<input type="text" name="cshort" class="cshort" maxlength="8" value="${esc(a.short||'')}" placeholder="${esc(t('shortPh'))}">`
@@ -627,7 +718,7 @@ function popup(a){
     sec.addEventListener('click',e=>e.stopPropagation());
     d.appendChild(sec);
   }
-  if(!isCustom&&!airInfo[a.code]&&CCS.includes(a.cc)&&!ccLoading[a.cc]) loadCountry(a.cc).then(()=>{ if(airInfo[a.code]&&markers[a.code]&&markers[a.code].isPopupOpen()) refreshMarkerPopup(a); }).catch(()=>{});
+  if(!isCustom&&!airInfo[a.code]&&CCS.includes(a.cc)&&!ccLoading[a.cc]) loadCountry(a.cc).then(()=>{ if(airInfo[a.code]&&isCardOpen(a)) refreshCard(a); }).catch(()=>{});
   const det=d.querySelector('details.ai');
   if(det) det.addEventListener('toggle',()=>{
     if(det.open===aiOpen) return; // the browser also fires 'toggle' when a card is built already open
@@ -648,8 +739,8 @@ function popup(a){
     del.onclick=()=>{ if(confirm(t('delConfirm'))) deleteCustom(a); };
     d.appendChild(del);
   }
-  d.querySelector('.flag.fav').onclick=()=>{ toggleFlag(a,'fav'); refreshMarkerPopup(a); };
-  d.querySelector('.flag.want').onclick=()=>{ toggleFlag(a,'want'); refreshMarkerPopup(a); };
+  d.querySelector('.flag.fav').onclick=()=>{ toggleFlag(a,'fav'); refreshCard(a); };
+  d.querySelector('.flag.want').onclick=()=>{ toggleFlag(a,'want'); refreshCard(a); };
   const fileInp=d.querySelector('.cphoto');
   if(fileInp) fileInp.onchange=async()=>{
     const files=[...fileInp.files].slice(0,MAXPH-getPics(a).length); if(!files.length) return;
@@ -661,7 +752,7 @@ function popup(a){
         setPics(a,[...cur,pic]);
       }catch(err){ status(t('bad')); }
     }
-    refreshMarkerPopup(a); render();
+    refreshCard(a); render();
   };
   d.querySelectorAll('.gal img').forEach(img=>img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i));
   d.querySelectorAll('.pubpic').forEach(b=>b.onclick=async()=>{
@@ -671,13 +762,13 @@ function popup(a){
       await window.backend.setPhotoPublic(p.id,!p.pub);
       const {pub,...rest}=p;
       setPics(a,cur.map(x=>x===p?(pub?rest:{...rest,pub:true}):x));
-      refreshMarkerPopup(a);
+      refreshCard(a);
     }catch(e){ console.warn('share',e); status(t(e&&e.code==='P0001'?'commLimit':'commFail')); }
   });
   d.querySelectorAll('.rmpic').forEach(b=>b.onclick=()=>{
     const cur=getPics(a), i=+b.dataset.i, gone=cur[i]; if(!gone) return;
     setPics(a,cur.filter((_,j)=>j!==i));
-    refreshMarkerPopup(a); render();
+    refreshCard(a); render();
   });
   return d;
 }
@@ -716,7 +807,7 @@ function placeCustom(lat,lon){
   const a={code,name:t('newStripDefault'),lat:Math.round(lat*100000)/100000,lon:Math.round(lon*100000)/100000,elev:'',town:'',custom:true,desc:'',pics:[]};
   custom[code]=a; saveCustom(a); refreshTotal();
   if(!['all','custom','todo'].includes(f.value)) f.value='all'; // a new strip must stay visible on the map
-  if(map){ addMarker(a); map.setView([lat,lon],13); markers[code].openPopup(); }
+  if(map){ addMarker(a); map.setView([lat,lon],13); openCard(a); }
   addMode=false; addBtn.classList.remove('on'); addHint.style.display='none';
   document.getElementById('map').classList.remove('addmode');
   render();
@@ -727,6 +818,7 @@ function deleteCustom(a){
   if(visited[a.code]){ delete visited[a.code]; tomb['v:'+a.code]=now; }
   if(flags[a.code]){ delete flags[a.code]; tomb['f:'+a.code]=now; localStorage.setItem(FKEY,JSON.stringify(flags)); }
   saveCustom(); save();
+  if(sheetOpen&&sheetA&&sheetA.code===a.code) closeSheet();
   if(map&&markers[a.code]){ map.removeLayer(markers[a.code]); delete markers[a.code]; }
   refreshTotal(); render();
 }
@@ -810,7 +902,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v38'; // matches the cache name in sw.js
+const APP_VERSION='landings-v39'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

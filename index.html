@@ -72,6 +72,23 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .pop .flag.fav.on{background:#FFF6D6;border-color:var(--fav);color:#7A5C00}
 .pop .flag.want.on{background:#E8EFFB;border-color:var(--want);color:#213F8F}
 .wantic{display:inline-block;width:10px;height:14px;vertical-align:-2px}
+/* airfield card as a sheet from below on narrow screens (same breakpoint as the stacked layout) */
+.cardsheet{--cstop:max(8px,env(safe-area-inset-top));position:fixed;left:0;right:0;bottom:0;z-index:1500;height:0;display:flex;flex-direction:column;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.22);transition:height .22s ease-out;overflow:hidden}
+.cardsheet[hidden]{display:none}
+.cardsheet.drag{transition:none}
+.csgrip{flex:0 0 auto;display:flex;justify-content:center;padding:8px 0 4px;touch-action:none;cursor:grab}
+.csgrip span{width:40px;height:5px;border-radius:3px;background:#C9CED8}
+.cshead{flex:0 0 auto;display:flex;align-items:flex-start;gap:8px;padding:0 10px 8px 16px;border-bottom:1px solid var(--line);touch-action:none;cursor:grab}
+.cstext{flex:1;min-width:0}
+.cshead h2{margin:0;font:700 20px/1.2 'Barlow Condensed',Barlow,sans-serif;color:var(--ink);outline:none;overflow-wrap:anywhere}
+.csmeta{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.csx{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;background:var(--paper);font-size:20px;line-height:1;color:var(--ink2);cursor:pointer}
+.csbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 16px}
+.csbody .pop{min-width:0}
+.csbody .pop:not(.custom)>b:first-child,.csbody .pop:not(.custom)>.m{display:none}
+.csattr{flex:0 0 auto;padding:4px 16px calc(4px + env(safe-area-inset-bottom));font-size:10.5px;color:var(--ink2);border-top:1px solid var(--line);background:var(--paper)}
+body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attribution{visibility:hidden}
+@media (prefers-reduced-motion:reduce){.cardsheet{transition:none}}
 .pop details.ai{margin:0 0 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
 .pop details.ai summary{cursor:pointer;padding:6px 8px;font:600 12.5px Barlow,sans-serif;color:var(--ink);list-style:none;display:flex;gap:6px;align-items:baseline}
 .pop details.ai summary::-webkit-details-marker{display:none}
@@ -259,6 +276,7 @@ footer .legal a:hover{text-decoration:underline}
 <form id="authnickform" hidden><label><span data-a="nick"></span><input id="authnick" minlength="3" maxlength="30" required autocomplete="off"></label><p class="authhint" data-a="nickHint"></p><button type="submit" data-a="save"></button></form>
 <button id="authexport" type="button" data-a="exportData" hidden></button><button id="authdelete" type="button" data-a="deleteAccount" hidden></button><button id="authout" type="button" data-a="signOut" hidden></button><button id="authclose" type="button" data-a="close"></button></dialog>
 <div id="lightbox"><img alt=""><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div></div>
+<div id="cardsheet" class="cardsheet" hidden role="dialog" aria-labelledby="cstitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cstitle" tabindex="-1"></h2><div class="csmeta"></div></div><button type="button" class="csx" aria-label="×">×</button></div><div class="csbody"></div><div class="csattr"></div></div>
 <div id="ccsheet" class="ccsheet" hidden><div class="ccback"></div><div class="ccdlg" role="dialog" aria-modal="true" aria-labelledby="cctitle" tabindex="-1"><div class="cchead"><h3 id="cctitle" data-i data-t="countries"></h3><button type="button" class="ccx" aria-label="Zavřít">×</button></div><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div><div class="cclist"></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div></div>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/markercluster/leaflet.markercluster.js"></script>

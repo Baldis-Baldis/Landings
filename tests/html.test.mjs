@@ -299,3 +299,36 @@ test('the last selected country cannot be switched off', () => {
   assert.match(html, /if\(!selCC\.length\) selCC=\[c\];/);
   assert.match(html, /none\.onclick=\(\)=>\{ selCC=\[home\];/);
 });
+
+// --- airfield card as a sheet on narrow screens ---
+test('every card opening goes through openCard, the popup toggle is taken off', () => {
+  assert.equal((html.match(/\.openPopup\(\)/g) || []).length, 1, 'only popupOn opens a popup');
+  assert.equal((html.match(/\.bindPopup\(/g) || []).length, 1);
+  assert.match(html, /m\.bindPopup\([^\n]*\); m\.off\('click',m\._openPopup,m\);/);
+  assert.match(html, /m\.on\('click',\(\)=>openCard\(a\)\);/);
+  assert.ok(!/refreshMarkerPopup/.test(html));
+  assert.match(html, /bubblingMouseEvents:false/, 'a tap on a marker must not reach the map and close the sheet');
+});
+
+test('the sheet uses the layout breakpoint, the back gesture, Esc and returns the focus', () => {
+  assert.match(html, /window\.matchMedia\('\(max-width: 899px\)'\)/);
+  assert.match(page, /@media \(min-width:900px\)/, 'the same breakpoint as the stacked layout');
+  assert.match(html, /history\.pushState\(\{card:1\},''\)/);
+  assert.match(html, /window\.addEventListener\('popstate',\(\)=>\{ if\(sheetOpen\)\{ sheetPushed=false; closeSheet\(true\); \} \}\);/);
+  assert.match(html, /if\(sheetPushed&&!fromHistory\)\{ sheetPushed=false; history\.back\(\); \}/, 'closing by hand takes the history entry back');
+  assert.match(html, /e\.key==='Escape'&&sheetOpen&&!lb\.classList\.contains\('on'\)/);
+  assert.match(html, /sheet\.querySelector\('#cstitle'\)\.focus\(\{preventScroll:true\}\)/);
+  assert.match(html, /back\.focus\(\{preventScroll:true\}\)/);
+});
+
+test('the sheet markup: dialog, title, close button, map credit, safe area, hidden controls', () => {
+  assert.match(page, /<div id="cardsheet" class="cardsheet" hidden role="dialog" aria-labelledby="cstitle">/);
+  assert.match(page, /<h2 id="cstitle" tabindex="-1"><\/h2>/);
+  assert.match(page, /<button type="button" class="csx"/);
+  assert.match(page, /\.csattr\{[^}]*env\(safe-area-inset-bottom\)/);
+  assert.match(page, /body\.cardopen \.ccbar,body\.cardopen \.homehint,body\.cardopen \.leaflet-control-attribution\{visibility:hidden\}/);
+  assert.match(html, /sheet\.querySelector\('\.csattr'\)\.textContent=/, 'the map credit stays visible in the sheet');
+  // texts in the sheet header go in as text
+  assert.match(html, /sheet\.querySelector\('#cstitle'\)\.textContent=a\.name;/);
+  assert.match(html, /sheet\.querySelector\('\.csmeta'\)\.textContent=cardMeta\(a\);/);
+});
