@@ -73,9 +73,9 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .pop .flag.want.on{background:#E8EFFB;border-color:var(--want);color:#213F8F}
 .wantic{display:inline-block;width:10px;height:14px;vertical-align:-2px}
 /* airfield card as a sheet from below on narrow screens (same breakpoint as the stacked layout) */
-.cardsheet{--cstop:max(8px,env(safe-area-inset-top));position:fixed;left:0;right:0;bottom:0;z-index:1500;height:0;display:flex;flex-direction:column;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.22);transition:height .22s ease-out;overflow:hidden}
-.cardsheet[hidden]{display:none}
-.cardsheet.drag{transition:none}
+.sheet{--cstop:max(8px,env(safe-area-inset-top));position:fixed;left:0;right:0;bottom:0;z-index:1500;height:0;display:flex;flex-direction:column;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.22);transition:height .22s ease-out;overflow:hidden}
+.sheet[hidden]{display:none}
+.sheet.drag{transition:none}
 .csgrip{flex:0 0 auto;display:flex;justify-content:center;padding:8px 0 4px;touch-action:none;cursor:grab}
 .csgrip span{width:40px;height:5px;border-radius:3px;background:#C9CED8}
 .cshead{flex:0 0 auto;display:flex;align-items:flex-start;gap:8px;padding:0 10px 8px 16px;border-bottom:1px solid var(--line);touch-action:none;cursor:grab}
@@ -84,11 +84,11 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .csmeta{font-size:12.5px;color:var(--ink2);margin-top:2px}
 .csx{flex:0 0 auto;width:34px;height:34px;border:0;border-radius:50%;background:var(--paper);font-size:20px;line-height:1;color:var(--ink2);cursor:pointer}
 .csbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 16px}
-.csbody .pop{min-width:0}
+.cardsheet .csbody .pop{min-width:0}
 .csbody .pop:not(.custom)>b:first-child,.csbody .pop:not(.custom)>.m{display:none}
 .csattr{flex:0 0 auto;padding:4px 16px calc(4px + env(safe-area-inset-bottom));font-size:10.5px;color:var(--ink2);border-top:1px solid var(--line);background:var(--paper)}
 body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attribution{visibility:hidden}
-@media (prefers-reduced-motion:reduce){.cardsheet{transition:none}}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
 .pop details.ai{margin:0 0 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
 .pop details.ai summary{cursor:pointer;padding:6px 8px;font:600 12.5px Barlow,sans-serif;color:var(--ink);list-style:none;display:flex;gap:6px;align-items:baseline}
 .pop details.ai summary::-webkit-details-marker{display:none}
@@ -143,19 +143,19 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 #ccchips{display:flex;gap:4px;cursor:pointer}
 .ccchip{font:700 11.5px Barlow,sans-serif;padding:3px 6px;border-radius:5px;background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .ccchip.more{background:#fff;color:var(--ink)}
-.ccsheet{position:fixed;inset:0;z-index:3000}
-.ccsheet[hidden]{display:none}
-.ccback{position:absolute;inset:0;background:rgba(27,39,64,.25)}
-.ccdlg{position:absolute;top:110px;left:60px;width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 140px);display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.25);outline:none;overflow:hidden}
-.cchead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px 16px}
-.cchead h3{margin:0;font:700 18px 'Barlow Condensed',Barlow,sans-serif;color:var(--ink)}
-.ccx{border:0;background:none;font-size:24px;line-height:1;color:var(--ink2);cursor:pointer;padding:2px 6px}
-.ccq{margin:0 12px 8px;padding:8px 10px;font:500 14px Barlow,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
-.ccpicks{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.ccq{display:block;width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;font:500 14px Barlow,sans-serif;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.ccpicks{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 8px}
 .ccpick{font:600 12.5px Barlow,sans-serif;padding:5px 10px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);cursor:pointer}
 .ccpick:hover{border-color:var(--ink)}
 .ccpick.clear{color:var(--ink2)}
-.cclist{flex:1;overflow-y:auto;padding:0 12px 8px;border-top:1px solid var(--line)}
+.ccback{position:fixed;inset:0;z-index:1400;background:transparent}
+.ccback[hidden]{display:none}
+.cctop{flex:0 0 auto;padding:10px 12px 0}
+.ccsheet .csbody{padding:0 12px 8px;border-top:1px solid var(--line)}
+/* wide screens: a floating window in the style of the card popup (radius, shadow, header with the round x) */
+.ccsheet.win{top:110px;left:60px;right:auto;bottom:auto;width:min(380px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 140px);border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.4);transition:none}
+.ccsheet.win .csgrip{display:none}
+.ccsheet.win .cshead{cursor:default;padding-top:12px;touch-action:auto}
 .ccsec{margin:10px 0 4px;font:700 11.5px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
 .ccgrp{border-bottom:1px solid var(--line)}
 .ccgrp>summary{padding:10px 2px;font:700 14px Barlow,sans-serif;color:var(--ink);cursor:pointer}
@@ -170,7 +170,7 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .ccoffer{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:0 0 6px 28px;padding:6px 8px;font-size:12.5px;color:var(--ink2);background:#fff;border:1px dashed var(--line);border-radius:8px}
 .ccadd{font:600 12px Barlow,sans-serif;padding:3px 8px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);cursor:pointer}
 .ccadd.all{border-color:var(--ink)}
-.cchomehint{margin:0 12px 8px;font-size:12.5px;color:var(--ink2)}
+.cchomehint{margin:0 0 8px;font-size:12.5px;color:var(--ink2)}
 .ccchip.home::before{content:'⌂ '}
 .homehint{position:absolute;bottom:44px;left:10px;right:10px;margin:0 auto;max-width:420px;z-index:1000;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;font:500 13px Barlow,sans-serif;color:var(--ink);background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .homehint[hidden]{display:none}
@@ -183,12 +183,9 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .ccmine{font:700 12px Barlow,sans-serif;color:var(--done)}
 .ccn{font-size:12px;color:var(--ink2);min-width:28px;text-align:right}
 .ccnone{color:var(--ink2);font-size:13px}
-.ccfoot{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line)}
+.ccfoot{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
 .ccfoot .cchint{flex:1;font-size:11.5px;color:var(--ink2)}
 .ccdone{font:600 14px Barlow,sans-serif;padding:8px 18px;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
-@media (max-width:760px){.ccdlg{top:auto;left:0;right:0;bottom:0;width:auto;max-height:80dvh;border-radius:14px 14px 0 0;animation:ccup .2s ease-out}.ccfoot{padding-bottom:max(8px,env(safe-area-inset-bottom))}}
-@keyframes ccup{from{transform:translateY(100%)}to{transform:none}}
-@media (prefers-reduced-motion:reduce){.ccdlg{animation:none}}
 .row .cc{font:600 11px Barlow,sans-serif;padding:1px 5px;border:1px solid var(--line);border-radius:4px;color:var(--ink2);margin-right:4px}
 .clu{display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(27,39,64,.85);color:#fff;font:700 12px Barlow,sans-serif;box-shadow:0 0 0 3px rgba(27,39,64,.25)}
 .clu.has{background:rgba(30,123,75,.9);box-shadow:0 0 0 3px rgba(30,123,75,.3)}
@@ -251,7 +248,7 @@ footer .legal a:hover{text-decoration:underline}
 /* Phones: outside the map the page only scrolls, neither a double tap nor two fingers zoom it (wish of the owner,
    8. 11. 2026). The viewport meta stays without maximum-scale, so the iOS Magnifier and browser zoom settings still work.
    The map keeps its own gestures from Leaflet's rules. Fields need at least 16 px, iOS Safari zooms on focus otherwise. */
-html,body,header,.side,#list,footer,.cardsheet,.csbody,.ccsheet,.ccdlg,button,a,label,summary,input,select,textarea{touch-action:pan-x pan-y}
+html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,select,textarea{touch-action:pan-x pan-y}
 @media (max-width:899px){input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{font-size:16px!important}}
 </style>
 </head>
@@ -281,11 +278,13 @@ html,body,header,.side,#list,footer,.cardsheet,.csbody,.ccsheet,.ccdlg,button,a,
 <form id="authnickform" hidden><label><span data-a="nick"></span><input id="authnick" minlength="3" maxlength="30" required autocomplete="off"></label><p class="authhint" data-a="nickHint"></p><button type="submit" data-a="save"></button></form>
 <button id="authexport" type="button" data-a="exportData" hidden></button><button id="authdelete" type="button" data-a="deleteAccount" hidden></button><button id="authout" type="button" data-a="signOut" hidden></button><button id="authclose" type="button" data-a="close"></button></dialog>
 <div id="lightbox"><img alt=""><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div></div>
-<div id="cardsheet" class="cardsheet" hidden role="dialog" aria-labelledby="cstitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cstitle" tabindex="-1"></h2><div class="csmeta"></div></div><button type="button" class="csx" aria-label="×">×</button></div><div class="csbody"></div><div class="csattr"></div></div>
-<div id="ccsheet" class="ccsheet" hidden><div class="ccback"></div><div class="ccdlg" role="dialog" aria-modal="true" aria-labelledby="cctitle" tabindex="-1"><div class="cchead"><h3 id="cctitle" data-i data-t="countries"></h3><button type="button" class="ccx" aria-label="Zavřít">×</button></div><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div><div class="cclist"></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div></div>
+<div id="cardsheet" class="sheet cardsheet" hidden role="dialog" aria-labelledby="cstitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cstitle" tabindex="-1"></h2><div class="csmeta"></div></div><button type="button" class="csx" aria-label="×">×</button></div><div class="csbody"></div><div class="csattr"></div></div>
+<div id="ccback" class="ccback" hidden></div>
+<div id="ccsheet" class="sheet ccsheet" hidden role="dialog" aria-labelledby="cctitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cctitle" tabindex="-1" data-i data-t="ccTitle"></h2></div><button type="button" class="csx ccx" aria-label="Zavřít">×</button></div><div class="cctop"><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div></div><div class="csbody"><div class="cclist"></div></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/markercluster/leaflet.markercluster.js"></script>
 <script src="countries.js"></script>
+<script src="sheet.js"></script>
 <script src="app.js"></script>
 <script src="vendor/supabase.js"></script>
 <script src="config.js"></script>

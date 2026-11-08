@@ -310,19 +310,48 @@ test('every card opening goes through openCard, the popup toggle is taken off', 
   assert.match(html, /bubblingMouseEvents:false/, 'a tap on a marker must not reach the map and close the sheet');
 });
 
+// the shared bottom sheet (sheet.js) used by the card and the country picker
+const sheetJs = readFileSync(join(root, 'sheet.js'), 'utf8');
 test('the sheet uses the layout breakpoint, the back gesture, Esc and returns the focus', () => {
-  assert.match(html, /window\.matchMedia\('\(max-width: 899px\)'\)/);
+  assert.match(sheetJs, /window\.matchMedia\('\(max-width: 899px\)'\)/);
   assert.match(page, /@media \(min-width:900px\)/, 'the same breakpoint as the stacked layout');
-  assert.match(html, /history\.pushState\(\{card:1\},''\)/);
-  assert.match(html, /window\.addEventListener\('popstate',\(\)=>\{ if\(popOwn>0\)\{ popOwn--; return; \} if\(sheetOpen\)\{ sheetPushed=false; closeSheet\(true\); \} \}\);/);
-  assert.match(html, /if\(sheetPushed&&!fromHistory\)\{ sheetPushed=false; popOwn\+\+; history\.back\(\); \}/, 'closing by hand takes the history entry back, and its late popstate is ignored');
-  assert.match(html, /e\.key==='Escape'&&sheetOpen&&!lb\.classList\.contains\('on'\)/);
-  assert.match(html, /sheet\.querySelector\('#cstitle'\)\.focus\(\{preventScroll:true\}\)/);
-  assert.match(html, /back\.focus\(\{preventScroll:true\}\)/);
+  assert.match(sheetJs, /if\(!pushed\)\{ try\{ history\.pushState\(\{sheet:1\},''\); pushed=true; \}/);
+  assert.match(sheetJs, /window\.addEventListener\('popstate',\(\)=>\{ if\(popOwn>0\)\{ popOwn--; return; \} if\(current\)\{ pushed=false; current\.close\(true\); \} \}\);/);
+  assert.match(sheetJs, /if\(pushed&&!fromHistory\)\{ pushed=false; popOwn\+\+; history\.back\(\); \}/, 'closing by hand takes the history entry back, and its late popstate is ignored');
+  assert.match(sheetJs, /e\.key==='Escape'&&current&&!lightboxOpen\(\)/);
+  assert.match(sheetJs, /if\(title\) title\.focus\(\{preventScroll:true\}\);/);
+  assert.match(sheetJs, /back\.focus\(\{preventScroll:true\}\)/);
+  assert.ok(!/popstate|pushState|history\.back/.test(html), 'history handling lives only in sheet.js');
+  assert.match(page, /<script src="sheet\.js"><\/script>\n<script src="app\.js">/);
+  assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/sheet\.js'/);
+});
+
+test('one sheet at a time: opening one hands the history entry over, nothing piles up', () => {
+  assert.match(sheetJs, /if\(current&&current!==s\) current\.close\(false,true\);/);
+  assert.match(sheetJs, /if\(!handover&&!current\)\{/, 'a hand-over neither goes back nor pushes');
+  assert.equal((sheetJs.match(/history\.pushState/g) || []).length, 1);
+  // the card and the country picker both use it, no copied sheet code in app.js
+  assert.match(html, /const cardSheet=Sheets\.make\(sheet,/);
+  assert.match(html, /const ccPanel=Sheets\.make\(ccSheet,\{window:true,/);
+  assert.ok(!/setPointerCapture|sheetHeights|visualViewport/.test(html));
+});
+
+test('the country sheet: title, search and quick picks under the header, Done at the bottom, keyboard room', () => {
+  assert.match(page, /<div id="ccsheet" class="sheet ccsheet" hidden role="dialog" aria-labelledby="cctitle"><div class="csgrip"[^>]*><span><\/span><\/div><div class="cshead"><div class="cstext"><h2 id="cctitle" tabindex="-1" data-i data-t="ccTitle"><\/h2>/);
+  assert.match(page, /<div class="cctop">[^]*?<input type="search" class="ccq"[^>]*><div class="ccpicks"><\/div><\/div><div class="csbody"><div class="cclist"><\/div><\/div><div class="ccfoot">/);
+  assert.match(page, /\.ccfoot\{[^}]*env\(safe-area-inset-bottom\)/);
+  assert.match(html, /ccTitle:'Zobrazené země'/);
+  assert.match(html, /ccTitle:'Countries'/);
+  assert.match(html, /ccQ\.addEventListener\('focus',\(\)=>ccPanel\.expand\(\)\);/, 'typing takes the full height');
+  assert.match(sheetJs, /window\.visualViewport\.addEventListener\('resize'/, 'the sheet follows the visible area above the keyboard');
+  assert.match(sheetJs, /bottom:Math\.max\(0,Math\.round\(ih-vv\.height-vv\.offsetTop\)\)/);
+  // desktop: a window styled like the card popup
+  assert.match(page, /\.ccsheet\.win\{[^}]*border-radius:12px;box-shadow:0 3px 14px rgba\(0,0,0,\.4\)/);
+  assert.match(page, /\.ccsheet\.win \.csgrip\{display:none\}/);
 });
 
 test('the sheet markup: dialog, title, close button, map credit, safe area, hidden controls', () => {
-  assert.match(page, /<div id="cardsheet" class="cardsheet" hidden role="dialog" aria-labelledby="cstitle">/);
+  assert.match(page, /<div id="cardsheet" class="sheet cardsheet" hidden role="dialog" aria-labelledby="cstitle">/);
   assert.match(page, /<h2 id="cstitle" tabindex="-1"><\/h2>/);
   assert.match(page, /<button type="button" class="csx"/);
   assert.match(page, /\.csattr\{[^}]*env\(safe-area-inset-bottom\)/);
@@ -336,7 +365,7 @@ test('the sheet markup: dialog, title, close button, map credit, safe area, hidd
 test('phones: outside the map the page only scrolls, the viewport meta stays open, fields of 16 px, the map keeps its gestures', () => {
   const vp = page.match(/<meta name="viewport" content="([^"]+)">/)[1];
   assert.ok(!/maximum-scale|user-scalable/.test(vp), 'no viewport lock, the Magnifier and zoom settings must keep working: ' + vp);
-  assert.match(page, /html,body,header,\.side,#list,footer,\.cardsheet,\.csbody,\.ccsheet,\.ccdlg,button,a,label,summary,input,select,textarea\{touch-action:pan-x pan-y\}/);
+  assert.match(page, /html,body,header,\.side,#list,footer,\.sheet,\.csbody,button,a,label,summary,input,select,textarea\{touch-action:pan-x pan-y\}/);
   assert.match(page, /@media \(max-width:899px\)\{input:not\(\[type=checkbox\]\):not\(\[type=radio\]\):not\(\[type=file\]\),select,textarea\{font-size:16px!important\}\}/);
   // the map container is not listed: Leaflet sets its own touch-action for pinch and double-tap zoom
   const rule = page.match(/([^}\n]*)\{touch-action:pan-x pan-y\}/)[1];
@@ -350,7 +379,7 @@ test('phones: outside the map the page only scrolls, the viewport meta stays ope
 test('nothing is laid out wider than the screen on purpose', () => {
   // wide rows scroll inside their own box instead of widening the page
   assert.match(page, /\.legend\{[^}]*overflow-x:auto/);
-  assert.match(page, /\.cardsheet\{[^}]*left:0;right:0;[^}]*overflow:hidden/);
-  assert.match(page, /\.ccdlg\{[^}]*width:min\(380px,calc\(100vw - 32px\)\)/);
+  assert.match(page, /\.sheet\{[^}]*left:0;right:0;[^}]*overflow:hidden/);
+  assert.match(page, /\.ccsheet\.win\{[^}]*width:min\(380px,calc\(100vw - 32px\)\)/);
   assert.ok(!/[{;]\s*(min-)?width:\s*(1\d{3}|[4-9]\d\d)px/.test(page.match(/<style>([\s\S]*?)<\/style>/)[1]), 'no fixed width beyond a phone');
 });

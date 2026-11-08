@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SCRIPTS = ['app.js', 'auth.js', 'community.js', 'backend.js', 'sync.js', 'admin.js', 'countries.js', 'analytics.js', 'config.js', 'sw.js'];
+const SCRIPTS = ['app.js', 'sheet.js', 'auth.js', 'community.js', 'backend.js', 'sync.js', 'admin.js', 'countries.js', 'analytics.js', 'config.js', 'sw.js'];
 
 // A small JavaScript scanner: strings, templates with nested expressions, comments and regex literals.
 export function placeholdersInPlainStrings(src) {
@@ -105,6 +105,7 @@ function boot() {
   ctx.window = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   vm.runInContext(readFileSync(join(root, 'countries.js'), 'utf8'), ctx);
+  vm.runInContext(readFileSync(join(root, 'sheet.js'), 'utf8'), ctx);
   vm.runInContext(readFileSync(join(root, 'app.js'), 'utf8'), ctx);
   return { ctx, html, run: code => vm.runInContext(code, ctx) };
 }

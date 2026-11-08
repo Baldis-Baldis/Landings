@@ -1,6 +1,6 @@
 const T={
- cs:{title:'Kde jsem přistál',of:'z',all:'Vše',icaoOnly:'Jen ICAO letiště',slzOnly:'Jen SLZ plochy',customOnly:'Jen vlastní plochy',doneOnly:'Přistál jsem',todoOnly:'Ještě ne',icao:'ICAO letiště',slz:'SLZ / UL plocha',custom:'Vlastní / neveřejná',landed:'Přistál jsem',export:'Export zálohy',import:'Import',search:'Hledat název nebo kód (LKPR, Kunovice…)',here:'Přistál jsem tady',note:'Poznámka',saved:'Uloženo',imported:'Import hotov',importedAccount:a=>`Převedeno: přistání ${a.landings}, příznaky ${a.flags}, fotky ${a.photos}, plochy ${a.strips}`,bad:'Neplatný soubor',addTitle:'Přidat vlastní plochu',addHint:'Klepnutím na mapu umísti novou plochu, pak ji doplň.',addName:'Název plochy:',addNoName:'Přidání zrušeno – chybí název.',del:'Smazat plochu',delConfirm:'Opravdu smazat tuto vlastní plochu?',newStripDefault:'Nová plocha',shortPh:'Zkratka (např. VLAS)',descPh:'Poznámky k ploše (povrch, délka dráhy, kontakt, PPR…)',photoLabel:'Přidat fotku',more:'Další možnosti',aiTitle:'Dráhy a frekvence',runways:'Dráhy',freqs:'Frekvence',lit:'osvětlená',aiNote:'Jen pro informaci – zdroj OurAirports, může být neúplné nebo zastaralé. Vždy ověř v AIP / VFR příručce.',surf:{asp:'asfalt',con:'beton',grs:'tráva',grv:'štěrk',paved:'zpevněná'},mapOnly:'Jen mapa – schovat seznam',showList:'Zobrazit seznam',countries:'Země',ccSearch:'Hledat zemi…',ccMine:'Moje a vybrané',ccNone:'Žádná země neodpovídá',ccClear:'Zrušit vše',ccDone:'Hotovo',ccClose:'Zavřít',ccPicks:{near:'Sousedé',alps:'Alpy',adriatic:'Jadran'},ccNbOf:'Sousedé',ccAddAll:'Přidat vše',homeHint:'Vyberte svou domovskou zemi',homePick:'Vybrat',homeSet:'Nastavit jako domovskou zemi',homeIs:'Domovská země',homePanelHint:'Domovskou zemi nastavíte domečkem ⌂ u země.',ccRegions:{central:'Střední Evropa',west:'Západní Evropa',south:'Jižní Evropa',north:'Severní Evropa',east:'Balkán a východ'},ccHint:'Výchozí výběr je domovská země. Česká letiště jsou podle VFR příručky ŘLP ČR, ostatní z databáze OurAirports – u malých ploch můžou být neúplná.',loading:'Načítám letiště…',loadFail:'Zahraniční letiště se nepodařilo načíst',termsMenu:'Podmínky použití',termsShort:'Podmínky',aboutShort:'O aplikaci',aboutMenu:'O aplikaci',privacyShort:'Soukromí',privacyMenu:'Ochrana osobních údajů',feedback:'Napsat nám',admin:'Správa',fbHint:'Návrh, chyba nebo pochvala. Odpověď z aplikace nepřijde, pokud ji chcete, napište na support@mylandings.net.',fbSend:'Odeslat',fbClose:'Zavřít',fbThanks:'Díky, vzkaz je odeslaný.',fbLimit:'Dnes už bylo vzkazů dost, zkuste to zítra.',commReport:'Nahlásit',commReportSend:'Odeslat hlášení',commReportDetails:'Podrobnosti (nepovinné)',commReported:'Nahlášeno, děkujeme.',commAlready:'Už jste to nahlásili.',reason_spam:'Spam',reason_offensive:'Urážlivé',reason_illegal:'Nezákonné',reason_privacy:'Soukromí',reason_copyright:'Autorská práva',reason_other:'Jiné',community:'Od pilotů',commLoading:'Načítám…',commFail:'Nepodařilo se. Zkuste to znovu.',commLimit:'Limit je vyčerpaný, nebo chybí přezdívka.',commEmpty:'Zatím tu nic není.',commSignIn:'Přidávat může jen přihlášený pilot.',commUnknown:'Pilot',commYou:'Vy',commPublic:'veřejné',commPrivate:'soukromé',commHidden:'skryté správcem',commMakePublic:'Zveřejnit',commMakePrivate:'Skrýt',commDelete:'Smazat',commDeleteConfirm:'Smazat komentář?',commPlaceholder:'Komentář',commShare:'Veřejné, uvidí všichni',commSend:'Přidat',publishConfirm:'Zveřejnit? Uvidí to všichni včetně nepřihlášených, spolu s vaší přezdívkou.',maxPhotos:'Max. 3 fotky',fav:'Oblíbené',want:'Chci navštívit',favOnly:'★ Oblíbené',wantOnly:'◎ Chci navštívit',removePhoto:'Odebrat fotku',storageFull:'Úložiště je plné – zkus menší fotku nebo smaž starší záznamy',syncing:'Synchronizuji…',synced:'Synchronizováno',syncErr:'Sync selhal – zkus ⟳',enet:'Nelze se spojit se serverem (offline?)',ephoto:'Fotku se nepodařilo nahrát, zkusím to znovu',readOnly:'Uloženo jen v tomto zařízení',leaveUnsent:'Některé změny se ještě neodeslaly a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',leavePhotos:'Některé fotky se ještě nenahrály a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',syncTitle:'Synchronizovat teď',dateFmt:d=>{const[y,m,x]=d.split('-');return`${+x}. ${+m}. ${y}`},src:'Seznam českých letišť a ploch podle VFR příručky ŘLP ČR (stav k {date}). Souřadnice, dráhy, frekvence a zahraniční letiště: OurAirports. Pouze informativní údaje – nepoužívat k navigaci ani plánování letu. Vlastní plochy si přidáváš sám.'},
- en:{title:"Where I've landed",of:'of',all:'All',icaoOnly:'ICAO airports only',slzOnly:'Ultralight airstrips only',customOnly:'Custom airstrips only',doneOnly:'Landed',todoOnly:'Not yet',icao:'ICAO airport',slz:'Ultralight airstrip',custom:'Custom / private',landed:'Landed',export:'Export backup',import:'Import',search:'Search name or code (LKPR, Kunovice…)',here:'I landed here',note:'Note',saved:'Saved',imported:'Import done',importedAccount:a=>`Added: landings ${a.landings}, flags ${a.flags}, photos ${a.photos}, airstrips ${a.strips}`,bad:'Invalid file',addTitle:'Add a custom airstrip',addHint:'Tap the map to place the new airstrip, then fill it in.',addName:'Airstrip name:',addNoName:'Cancelled – no name given.',del:'Delete airstrip',delConfirm:'Delete this custom airstrip?',newStripDefault:'New airstrip',shortPh:'Short code (e.g. VLAS)',descPh:'Notes on the airstrip (surface, runway length, contact, PPR…)',photoLabel:'Add photo',more:'More options',aiTitle:'Runways & frequencies',runways:'Runways',freqs:'Frequencies',lit:'lighted',aiNote:'For information only – source OurAirports, may be incomplete or outdated. Always check the AIP / VFR manual.',surf:{asp:'asphalt',con:'concrete',grs:'grass',grv:'gravel',paved:'paved'},mapOnly:'Map only – hide the list',showList:'Show the list',countries:'Countries',ccSearch:'Search country…',ccMine:'Mine and selected',ccNone:'No country matches',ccClear:'Clear all',ccDone:'Done',ccClose:'Close',ccPicks:{near:'Neighbours',alps:'Alps',adriatic:'Adriatic'},ccNbOf:'Neighbours',ccAddAll:'Add all',homeHint:'Choose your home country',homePick:'Choose',homeSet:'Set as home country',homeIs:'Home country',homePanelHint:'Set your home country with the house ⌂ next to it.',ccRegions:{central:'Central Europe',west:'Western Europe',south:'Southern Europe',north:'Northern Europe',east:'Balkans and east'},ccHint:'Your home country is the default selection. Czech airfields follow the ANS CR VFR Manual, others come from the OurAirports database – small airfields may be incomplete.',loading:'Loading airfields…',loadFail:'Could not load foreign airfields',termsMenu:'Terms of use',termsShort:'Terms',aboutShort:'About',aboutMenu:'About MyLandings',privacyShort:'Privacy',privacyMenu:'Privacy',feedback:'Write to us',admin:'Admin',fbHint:'An idea, a bug or praise. The app cannot reply, write to support@mylandings.net if you want an answer.',fbSend:'Send',fbClose:'Close',fbThanks:'Thanks, the message is sent.',fbLimit:'Enough messages for today, please try tomorrow.',commReport:'Report',commReportSend:'Send report',commReportDetails:'Details (optional)',commReported:'Reported, thank you.',commAlready:'You already reported this.',reason_spam:'Spam',reason_offensive:'Offensive',reason_illegal:'Illegal',reason_privacy:'Privacy',reason_copyright:'Copyright',reason_other:'Other',community:'From pilots',commLoading:'Loading…',commFail:'That failed. Please try again.',commLimit:'Limit reached, or the nickname is missing.',commEmpty:'Nothing here yet.',commSignIn:'Only signed-in pilots can add here.',commUnknown:'Pilot',commYou:'You',commPublic:'public',commPrivate:'private',commHidden:'hidden by the admin',commMakePublic:'Publish',commMakePrivate:'Hide',commDelete:'Delete',commDeleteConfirm:'Delete this comment?',commPlaceholder:'Comment',commShare:'Public, visible to everyone',commSend:'Add',publishConfirm:'Publish? Everyone will see it, including guests, together with your nickname.',maxPhotos:'Max. 3 photos',fav:'Favourite',want:'Want to visit',favOnly:'★ Favourites',wantOnly:'◎ Want to visit',removePhoto:'Remove photo',storageFull:'Storage full – try a smaller photo or delete older entries',syncing:'Syncing…',synced:'Synced',syncErr:'Sync failed – tap ⟳',enet:'Cannot reach the server (offline?)',ephoto:'Could not upload a photo, will retry',readOnly:'Saved on this device only',leaveUnsent:'Some changes were not sent yet and signing out removes them from this device. Sign out anyway?',leavePhotos:'Some photos were not uploaded yet and signing out removes them from this device. Sign out anyway?',syncTitle:'Sync now',dateFmt:d=>{const[y,m,x]=d.split('-');return`${y}-${m}-${x}`},src:'List of Czech aerodromes and ultralight airstrips based on the ŘLP ČR VFR Manual (as of {date}). Coordinates, runways, frequencies and foreign aerodromes: OurAirports. For information only – not for navigation or flight planning. Custom airstrips are added by you.'}
+ cs:{title:'Kde jsem přistál',of:'z',all:'Vše',icaoOnly:'Jen ICAO letiště',slzOnly:'Jen SLZ plochy',customOnly:'Jen vlastní plochy',doneOnly:'Přistál jsem',todoOnly:'Ještě ne',icao:'ICAO letiště',slz:'SLZ / UL plocha',custom:'Vlastní / neveřejná',landed:'Přistál jsem',export:'Export zálohy',import:'Import',search:'Hledat název nebo kód (LKPR, Kunovice…)',here:'Přistál jsem tady',note:'Poznámka',saved:'Uloženo',imported:'Import hotov',importedAccount:a=>`Převedeno: přistání ${a.landings}, příznaky ${a.flags}, fotky ${a.photos}, plochy ${a.strips}`,bad:'Neplatný soubor',addTitle:'Přidat vlastní plochu',addHint:'Klepnutím na mapu umísti novou plochu, pak ji doplň.',addName:'Název plochy:',addNoName:'Přidání zrušeno – chybí název.',del:'Smazat plochu',delConfirm:'Opravdu smazat tuto vlastní plochu?',newStripDefault:'Nová plocha',shortPh:'Zkratka (např. VLAS)',descPh:'Poznámky k ploše (povrch, délka dráhy, kontakt, PPR…)',photoLabel:'Přidat fotku',more:'Další možnosti',aiTitle:'Dráhy a frekvence',runways:'Dráhy',freqs:'Frekvence',lit:'osvětlená',aiNote:'Jen pro informaci – zdroj OurAirports, může být neúplné nebo zastaralé. Vždy ověř v AIP / VFR příručce.',surf:{asp:'asfalt',con:'beton',grs:'tráva',grv:'štěrk',paved:'zpevněná'},mapOnly:'Jen mapa – schovat seznam',showList:'Zobrazit seznam',countries:'Země',ccTitle:'Zobrazené země',ccSearch:'Hledat zemi…',ccMine:'Moje a vybrané',ccNone:'Žádná země neodpovídá',ccClear:'Zrušit vše',ccDone:'Hotovo',ccClose:'Zavřít',ccPicks:{near:'Sousedé',alps:'Alpy',adriatic:'Jadran'},ccNbOf:'Sousedé',ccAddAll:'Přidat vše',homeHint:'Vyberte svou domovskou zemi',homePick:'Vybrat',homeSet:'Nastavit jako domovskou zemi',homeIs:'Domovská země',homePanelHint:'Domovskou zemi nastavíte domečkem ⌂ u země.',ccRegions:{central:'Střední Evropa',west:'Západní Evropa',south:'Jižní Evropa',north:'Severní Evropa',east:'Balkán a východ'},ccHint:'Výchozí výběr je domovská země. Česká letiště jsou podle VFR příručky ŘLP ČR, ostatní z databáze OurAirports – u malých ploch můžou být neúplná.',loading:'Načítám letiště…',loadFail:'Zahraniční letiště se nepodařilo načíst',termsMenu:'Podmínky použití',termsShort:'Podmínky',aboutShort:'O aplikaci',aboutMenu:'O aplikaci',privacyShort:'Soukromí',privacyMenu:'Ochrana osobních údajů',feedback:'Napsat nám',admin:'Správa',fbHint:'Návrh, chyba nebo pochvala. Odpověď z aplikace nepřijde, pokud ji chcete, napište na support@mylandings.net.',fbSend:'Odeslat',fbClose:'Zavřít',fbThanks:'Díky, vzkaz je odeslaný.',fbLimit:'Dnes už bylo vzkazů dost, zkuste to zítra.',commReport:'Nahlásit',commReportSend:'Odeslat hlášení',commReportDetails:'Podrobnosti (nepovinné)',commReported:'Nahlášeno, děkujeme.',commAlready:'Už jste to nahlásili.',reason_spam:'Spam',reason_offensive:'Urážlivé',reason_illegal:'Nezákonné',reason_privacy:'Soukromí',reason_copyright:'Autorská práva',reason_other:'Jiné',community:'Od pilotů',commLoading:'Načítám…',commFail:'Nepodařilo se. Zkuste to znovu.',commLimit:'Limit je vyčerpaný, nebo chybí přezdívka.',commEmpty:'Zatím tu nic není.',commSignIn:'Přidávat může jen přihlášený pilot.',commUnknown:'Pilot',commYou:'Vy',commPublic:'veřejné',commPrivate:'soukromé',commHidden:'skryté správcem',commMakePublic:'Zveřejnit',commMakePrivate:'Skrýt',commDelete:'Smazat',commDeleteConfirm:'Smazat komentář?',commPlaceholder:'Komentář',commShare:'Veřejné, uvidí všichni',commSend:'Přidat',publishConfirm:'Zveřejnit? Uvidí to všichni včetně nepřihlášených, spolu s vaší přezdívkou.',maxPhotos:'Max. 3 fotky',fav:'Oblíbené',want:'Chci navštívit',favOnly:'★ Oblíbené',wantOnly:'◎ Chci navštívit',removePhoto:'Odebrat fotku',storageFull:'Úložiště je plné – zkus menší fotku nebo smaž starší záznamy',syncing:'Synchronizuji…',synced:'Synchronizováno',syncErr:'Sync selhal – zkus ⟳',enet:'Nelze se spojit se serverem (offline?)',ephoto:'Fotku se nepodařilo nahrát, zkusím to znovu',readOnly:'Uloženo jen v tomto zařízení',leaveUnsent:'Některé změny se ještě neodeslaly a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',leavePhotos:'Některé fotky se ještě nenahrály a odhlášením se z tohoto zařízení smažou. Přesto se odhlásit?',syncTitle:'Synchronizovat teď',dateFmt:d=>{const[y,m,x]=d.split('-');return`${+x}. ${+m}. ${y}`},src:'Seznam českých letišť a ploch podle VFR příručky ŘLP ČR (stav k {date}). Souřadnice, dráhy, frekvence a zahraniční letiště: OurAirports. Pouze informativní údaje – nepoužívat k navigaci ani plánování letu. Vlastní plochy si přidáváš sám.'},
+ en:{title:"Where I've landed",of:'of',all:'All',icaoOnly:'ICAO airports only',slzOnly:'Ultralight airstrips only',customOnly:'Custom airstrips only',doneOnly:'Landed',todoOnly:'Not yet',icao:'ICAO airport',slz:'Ultralight airstrip',custom:'Custom / private',landed:'Landed',export:'Export backup',import:'Import',search:'Search name or code (LKPR, Kunovice…)',here:'I landed here',note:'Note',saved:'Saved',imported:'Import done',importedAccount:a=>`Added: landings ${a.landings}, flags ${a.flags}, photos ${a.photos}, airstrips ${a.strips}`,bad:'Invalid file',addTitle:'Add a custom airstrip',addHint:'Tap the map to place the new airstrip, then fill it in.',addName:'Airstrip name:',addNoName:'Cancelled – no name given.',del:'Delete airstrip',delConfirm:'Delete this custom airstrip?',newStripDefault:'New airstrip',shortPh:'Short code (e.g. VLAS)',descPh:'Notes on the airstrip (surface, runway length, contact, PPR…)',photoLabel:'Add photo',more:'More options',aiTitle:'Runways & frequencies',runways:'Runways',freqs:'Frequencies',lit:'lighted',aiNote:'For information only – source OurAirports, may be incomplete or outdated. Always check the AIP / VFR manual.',surf:{asp:'asphalt',con:'concrete',grs:'grass',grv:'gravel',paved:'paved'},mapOnly:'Map only – hide the list',showList:'Show the list',countries:'Countries',ccTitle:'Countries',ccSearch:'Search country…',ccMine:'Mine and selected',ccNone:'No country matches',ccClear:'Clear all',ccDone:'Done',ccClose:'Close',ccPicks:{near:'Neighbours',alps:'Alps',adriatic:'Adriatic'},ccNbOf:'Neighbours',ccAddAll:'Add all',homeHint:'Choose your home country',homePick:'Choose',homeSet:'Set as home country',homeIs:'Home country',homePanelHint:'Set your home country with the house ⌂ next to it.',ccRegions:{central:'Central Europe',west:'Western Europe',south:'Southern Europe',north:'Northern Europe',east:'Balkans and east'},ccHint:'Your home country is the default selection. Czech airfields follow the ANS CR VFR Manual, others come from the OurAirports database – small airfields may be incomplete.',loading:'Loading airfields…',loadFail:'Could not load foreign airfields',termsMenu:'Terms of use',termsShort:'Terms',aboutShort:'About',aboutMenu:'About MyLandings',privacyShort:'Privacy',privacyMenu:'Privacy',feedback:'Write to us',admin:'Admin',fbHint:'An idea, a bug or praise. The app cannot reply, write to support@mylandings.net if you want an answer.',fbSend:'Send',fbClose:'Close',fbThanks:'Thanks, the message is sent.',fbLimit:'Enough messages for today, please try tomorrow.',commReport:'Report',commReportSend:'Send report',commReportDetails:'Details (optional)',commReported:'Reported, thank you.',commAlready:'You already reported this.',reason_spam:'Spam',reason_offensive:'Offensive',reason_illegal:'Illegal',reason_privacy:'Privacy',reason_copyright:'Copyright',reason_other:'Other',community:'From pilots',commLoading:'Loading…',commFail:'That failed. Please try again.',commLimit:'Limit reached, or the nickname is missing.',commEmpty:'Nothing here yet.',commSignIn:'Only signed-in pilots can add here.',commUnknown:'Pilot',commYou:'You',commPublic:'public',commPrivate:'private',commHidden:'hidden by the admin',commMakePublic:'Publish',commMakePrivate:'Hide',commDelete:'Delete',commDeleteConfirm:'Delete this comment?',commPlaceholder:'Comment',commShare:'Public, visible to everyone',commSend:'Add',publishConfirm:'Publish? Everyone will see it, including guests, together with your nickname.',maxPhotos:'Max. 3 photos',fav:'Favourite',want:'Want to visit',favOnly:'★ Favourites',wantOnly:'◎ Want to visit',removePhoto:'Remove photo',storageFull:'Storage full – try a smaller photo or delete older entries',syncing:'Syncing…',synced:'Synced',syncErr:'Sync failed – tap ⟳',enet:'Cannot reach the server (offline?)',ephoto:'Could not upload a photo, will retry',readOnly:'Saved on this device only',leaveUnsent:'Some changes were not sent yet and signing out removes them from this device. Sign out anyway?',leavePhotos:'Some photos were not uploaded yet and signing out removes them from this device. Sign out anyway?',syncTitle:'Sync now',dateFmt:d=>{const[y,m,x]=d.split('-');return`${y}-${m}-${x}`},src:'List of Czech aerodromes and ultralight airstrips based on the ŘLP ČR VFR Manual (as of {date}). Coordinates, runways, frequencies and foreign aerodromes: OurAirports. For information only – not for navigation or flight planning. Custom airstrips are added by you.'}
 };
 let lang=localStorage.getItem('lang')||(navigator.language.startsWith('cs')?'cs':'en');
 // effective date of the VFR manual the Czech list follows; shown in the menu and the map credit
@@ -22,7 +22,7 @@ function applyLang(){
   render(); if(typeof renderCC==='function') renderCC(); if(typeof renderAuth==='function') renderAuth();
   const mb=document.getElementById('maponlybtn'); if(mb){ const on=document.getElementById('app').classList.contains('maponly'); mb.title=mb.ariaLabel=t(on?'showList':'mapOnly'); }
 }
-document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lang',lang);applyLang();if(map)map.closePopup();if(sheetOpen&&sheetA)fillSheet(sheetA);});
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{lang=b.dataset.l;localStorage.setItem('lang',lang);applyLang();if(map)map.closePopup();if(cardSheet.isOpen()&&sheetA)fillSheet(sheetA);});
 
 // Keys of the guest mode. A signed-in account gets its own copies, see useAccount.
 const STATE_KEYS={KEY:'visited-cz-airfields',CKEY:'custom-airfields',PKEY:'airfield-photos',FKEY:'airfield-flags',TKEY:'sync-tombstones'};
@@ -153,7 +153,7 @@ function compressImage(file,maxW=900,quality=0.72){
 // keep the card as a builder function, so it is always rebuilt in the current language.
 // Rebuild only after the current tap has finished: replacing the tapped button mid-click
 // makes Leaflet treat it as a click on the map and close the card.
-function refreshCard(a){ setTimeout(()=>{ if(sheetOpen&&sheetA&&sheetA.code===a.code) fillSheet(a); else { const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); } },0); }
+function refreshCard(a){ setTimeout(()=>{ if(cardSheet.isOpen()&&sheetA&&sheetA.code===a.code) fillSheet(a); else { const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); } },0); }
 
 // The GitHub sync is gone. A token left by an old version is removed, it must not stay in the browser.
 try{ localStorage.removeItem('gh-token'); }catch(e){}
@@ -165,7 +165,7 @@ function canon(o){ if(Array.isArray(o)) return '['+o.map(canon).join(',')+']'; i
 function applyState(s){
   visited=s.visited; tomb=s.tomb; photos=s.photos||{}; flags=s.flags||{};
   // update custom strips in place so open popups keep working
-  Object.keys(custom).forEach(code=>{ if(!s.custom[code]){ if(sheetOpen&&sheetA&&sheetA.code===code) closeSheet(); delete custom[code]; if(map&&markers[code]){ map.removeLayer(markers[code]); delete markers[code]; } } });
+  Object.keys(custom).forEach(code=>{ if(!s.custom[code]){ if(cardSheet.isOpen()&&sheetA&&sheetA.code===code) cardSheet.close(); delete custom[code]; if(map&&markers[code]){ map.removeLayer(markers[code]); delete markers[code]; } } });
   Object.entries(s.custom).forEach(([code,a])=>{
     if(custom[code]){
       if(canon(custom[code])!==canon(a)){
@@ -328,7 +328,7 @@ try{
   map=L.map('map').setView([49.8,15.5],7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:MAP_CREDIT}).addTo(map);
   allData().forEach(addMarker);
-  map.on('click',e=>{ if(addMode) placeCustom(e.latlng.lat,e.latlng.lng); else if(sheetOpen) closeSheet(); });
+  map.on('click',e=>{ if(addMode) placeCustom(e.latlng.lat,e.latlng.lng); else if(cardSheet.isOpen()) cardSheet.close(); });
   // button in the map: hide the list panel to browse the map full screen
   const MapOnly=L.Control.extend({options:{position:'topright'},onAdd(){
     const d=L.DomUtil.create('div','leaflet-bar'); const b=L.DomUtil.create('button','mapbtn',d); b.type='button'; b.id='maponlybtn';
@@ -440,12 +440,15 @@ function showOnMap(a){
   else { map.setView([a.lat,a.lon],12,{animate:!useSheet()}); openCard(a,opener); }
 }
 // --- the airfield card: a popup on the map on wide screens, a sheet sliding up from below on phones ---
-// Every opening goes through openCard. The sheet uses the same layout breakpoint as the page (899 px).
-const sheetMQ=window.matchMedia('(max-width: 899px)');
+// Every opening goes through openCard. The sheet itself (heights, drag, history, Esc, focus) is in sheet.js.
 const sheet=document.getElementById('cardsheet'), sheetBody=sheet.querySelector('.csbody');
-let sheetA=null, sheetOpen=false, sheetPushed=false, sheetReturn=null, sheetState='half', popOwn=0;
+let sheetA=null;
+const cardSheet=Sheets.make(sheet,{bodyClass:'cardopen',
+  focusBack:()=>map?map.getContainer():null,
+  onHidden:()=>{ if(!cardSheet.isOpen()){ sheetBody.textContent=''; sheetA=null; } },
+  onSettle:st=>{ if(st==='half'&&sheetA) setTimeout(()=>panAboveSheet(sheetA),230); }});
 function useSheet(){ return sheetMQ.matches; }
-function isCardOpen(a){ if(sheetOpen&&sheetA&&sheetA.code===a.code) return true; const m=markers[a.code]; return !!(m&&m.isPopupOpen&&m.isPopupOpen()); }
+function isCardOpen(a){ if(cardSheet.isOpen()&&sheetA&&sheetA.code===a.code) return true; const m=markers[a.code]; return !!(m&&m.isPopupOpen&&m.isPopupOpen()); }
 function openCard(a,opener){
   const m=markers[a.code];
   if(!useSheet()){ if(m&&m._map) popupOn(m,a); return; }
@@ -463,9 +466,6 @@ function fillSheet(a){
   sheetBody.textContent=''; sheetBody.appendChild(popup(a));
   sheetBody.scrollTop=top;
 }
-// heights: half is 55 % of the screen, full leaves a small gap at the top (dvh units follow the Safari toolbar)
-function sheetHeights(){ const vh=window.innerHeight; return {half:Math.round(vh*0.55),full:Math.max(Math.round(vh*0.55),vh-Math.max(8,parseFloat(getComputedStyle(sheet).getPropertyValue('--cstop'))||8))}; }
-function setSheetHeight(px){ sheet.style.height=px+'px'; }
 // keep the airfield visible in the strip of map above the sheet
 function panAboveSheet(a){
   if(!map) return;
@@ -475,53 +475,15 @@ function panAboveSheet(a){
   map.panBy([p.x-mr.width/2,p.y-(visBottom-mr.top)/2],{animate:true});
 }
 function openSheet(a,opener){
-  const fresh=!sheetOpen;
-  sheetA=a; fillSheet(a);
-  if(fresh){
-    sheetReturn=opener&&opener!==document.body?opener:null;
-    sheet.hidden=false; sheetOpen=true; sheetState='half'; document.body.classList.add('cardopen');
-    setSheetHeight(0); sheet.getBoundingClientRect();
-    try{ history.pushState({card:1},''); sheetPushed=true; }catch(e){ sheetPushed=false; }
-  } else sheetBody.scrollTop=0;
-  setSheetHeight(sheetHeights()[sheetState]);
-  sheet.querySelector('#cstitle').focus({preventScroll:true});
+  const again=cardSheet.isOpen();
+  sheetA=a; fillSheet(a); if(again) sheetBody.scrollTop=0;
+  cardSheet.show(opener);
   setTimeout(()=>panAboveSheet(a),230);
 }
-function closeSheet(fromHistory){
-  if(!sheetOpen) return;
-  sheetOpen=false; document.body.classList.remove('cardopen');
-  setSheetHeight(0);
-  setTimeout(()=>{ if(!sheetOpen){ sheet.hidden=true; sheetBody.textContent=''; sheetA=null; } },230);
-  // history.back() lands later (slowly in Safari): its popstate must not close a card opened meanwhile
-  if(sheetPushed&&!fromHistory){ sheetPushed=false; popOwn++; history.back(); } else sheetPushed=false;
-  const back=sheetReturn&&document.contains(sheetReturn)?sheetReturn:(map?map.getContainer():null);
-  sheetReturn=null; if(back) try{ back.focus({preventScroll:true}); }catch(e){}
-}
-// back gesture or button closes the sheet instead of leaving the app
-window.addEventListener('popstate',()=>{ if(popOwn>0){ popOwn--; return; } if(sheetOpen){ sheetPushed=false; closeSheet(true); } });
-sheet.querySelector('.csx').onclick=()=>closeSheet();
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheetOpen&&!lb.classList.contains('on')&&ccSheet.hidden) closeSheet(); });
-// drag the grip or the header: up to full height, down to half or closed
-(()=>{
-  let y0=0,h0=0,drag=false,lastY=0,lastT=0,v=0;
-  const grab=sheet.querySelectorAll('.csgrip,.cshead');
-  const down=e=>{ if(e.target.closest('.csx')) return; drag=true; y0=lastY=e.clientY; lastT=e.timeStamp; v=0; h0=sheet.getBoundingClientRect().height; sheet.classList.add('drag'); e.currentTarget.setPointerCapture(e.pointerId); };
-  const move=e=>{ if(!drag) return; const {full}=sheetHeights(); setSheetHeight(Math.max(0,Math.min(full,h0-(e.clientY-y0)))); const dt=e.timeStamp-lastT; if(dt>0) v=(e.clientY-lastY)/dt; lastY=e.clientY; lastT=e.timeStamp; };
-  const up=()=>{
-    if(!drag) return; drag=false; sheet.classList.remove('drag');
-    const h=sheet.getBoundingClientRect().height, {half,full}=sheetHeights();
-    if(v>0.8||h<half*0.6){ closeSheet(); return; }
-    sheetState=(v<-0.8||h>(half+full)/2)?'full':'half';
-    setSheetHeight(sheetHeights()[sheetState]);
-    if(sheetState==='half'&&sheetA) setTimeout(()=>panAboveSheet(sheetA),230);
-  };
-  grab.forEach(g=>{ g.addEventListener('pointerdown',down); g.addEventListener('pointermove',move); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up); });
-})();
-window.addEventListener('resize',()=>{ if(sheetOpen) setSheetHeight(sheetHeights()[sheetState]); });
 // crossing the breakpoint (rotating the phone) moves an open card between the sheet and the popup
 sheetMQ.addEventListener('change',()=>{
   if(useSheet()){ if(!map) return; const m=Object.values(markers).find(x=>x.isPopupOpen&&x.isPopupOpen()); if(!m) return; const a=allData().find(x=>x.code===m._code); map.closePopup(); if(a) openSheet(a,null); }
-  else if(sheetOpen&&sheetA){ const a=sheetA; closeSheet(); const m=markers[a.code]; if(m&&m._map) popupOn(m,a); }
+  else if(cardSheet.isOpen()&&sheetA){ const a=sheetA; cardSheet.close(); const m=markers[a.code]; if(m&&m._map) popupOn(m,a); }
 });
 sheet.querySelector('.csattr').textContent=(typeof MAP_CREDIT==='string'?'Leaflet | '+MAP_CREDIT:'');
 function dropMarker(code){
@@ -570,8 +532,10 @@ async function applyCountries(){
   }
   syncForeignMarkers(); allData().forEach(style); refreshClusters(); refreshTotal(); render(); renderCC(); renderHomeHint();
 }
-// --- country picker: button with chips on the map, panel (floating window, bottom sheet on phones) ---
-const ccBtn=document.getElementById('ccbtn'), ccChips=document.getElementById('ccchips'), ccSheet=document.getElementById('ccsheet');
+// --- country picker: button with chips on the map, panel (bottom sheet on phones, floating window on desktop) ---
+const ccBtn=document.getElementById('ccbtn'), ccChips=document.getElementById('ccchips'), ccSheet=document.getElementById('ccsheet'), ccBack=document.getElementById('ccback');
+// the same sheet as the card on phones, a floating window on wide screens; a tap outside closes it
+const ccPanel=Sheets.make(ccSheet,{window:true,bodyClass:'ccopen',focusBack:()=>ccBtn,onOpen:()=>{ ccBack.hidden=false; },onClose:()=>{ ccBack.hidden=true; }});
 const ccList=ccSheet.querySelector('.cclist'), ccQ=ccSheet.querySelector('.ccq'), ccPicks=ccSheet.querySelector('.ccpicks');
 let ccTop=[], ccOffer='';
 const ccOpen=new Set(); // regions left open while the panel redraws
@@ -657,7 +621,7 @@ function renderCC(){
   ccChips.textContent='';
   selCC.slice(0,4).forEach(c=>ccChips.append(el('span','ccchip'+(c===home&&homeKnown?' home':''),c)));
   if(selCC.length>4) ccChips.append(el('span','ccchip more','+'+(selCC.length-4)));
-  if(!ccSheet.hidden){ ccSheet.querySelector('.cchomehint').hidden=homeKnown; renderCCPicks(); renderCCList(); }
+  if(ccPanel.isOpen()){ ccSheet.querySelector('.cchomehint').hidden=homeKnown; renderCCPicks(); renderCCList(); }
 }
 // a quiet hint on the map while the home country is only assumed; closing it is remembered
 const homeHint=document.getElementById('homehint');
@@ -670,17 +634,17 @@ homeHint.querySelector('.hhx').onclick=()=>{ try{ localStorage.setItem(HINTKEY,'
 function openCC(){
   const mine=landingsByCountry();
   ccTop=CCS.filter(c=>c===home||selCC.includes(c)||mine[c]); ccOffer=''; ccOpen.clear();
-  ccQ.value=''; ccSheet.hidden=false; document.body.classList.add('ccopen');
-  renderCC(); ccSheet.querySelector('.ccdlg').focus();
-  if(!ccIndex) loadCCIndex().then(()=>{ if(!ccSheet.hidden){ ccTop=CCS.filter(c=>c===home||selCC.includes(c)||landingsByCountry()[c]); renderCCList(); } }).catch(()=>{});
+  ccQ.value=''; ccPanel.show(document.activeElement);
+  renderCC();
+  if(!ccIndex) loadCCIndex().then(()=>{ if(ccPanel.isOpen()){ ccTop=CCS.filter(c=>c===home||selCC.includes(c)||landingsByCountry()[c]); renderCCList(); } }).catch(()=>{});
 }
-function closeCC(){ if(ccSheet.hidden) return; ccSheet.hidden=true; document.body.classList.remove('ccopen'); ccBtn.focus(); }
+function closeCC(){ ccPanel.close(); }
 ccBtn.onclick=openCC; ccChips.onclick=openCC;
 ccQ.oninput=renderCCList;
-ccSheet.querySelector('.ccback').onclick=closeCC;
-ccSheet.querySelector('.ccx').onclick=closeCC;
+// typing a country: the sheet takes the full height, so the keyboard cannot hide the list
+ccQ.addEventListener('focus',()=>ccPanel.expand());
+ccBack.onclick=closeCC;
 ccSheet.querySelector('.ccdone').onclick=closeCC;
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeCC(); });
 function style(a){
   let m=markers[a.code]; if(!m) return;
   const v=visited[a.code], colors={icao:'#C4177C',slz:'#2C64B5',custom:'#8A5A2B'};
@@ -819,7 +783,7 @@ function deleteCustom(a){
   if(visited[a.code]){ delete visited[a.code]; tomb['v:'+a.code]=now; }
   if(flags[a.code]){ delete flags[a.code]; tomb['f:'+a.code]=now; localStorage.setItem(FKEY,JSON.stringify(flags)); }
   saveCustom(); save();
-  if(sheetOpen&&sheetA&&sheetA.code===a.code) closeSheet();
+  if(cardSheet.isOpen()&&sheetA&&sheetA.code===a.code) cardSheet.close();
   if(map&&markers[a.code]){ map.removeLayer(markers[a.code]); delete markers[a.code]; }
   refreshTotal(); render();
 }
@@ -903,7 +867,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v41'; // matches the cache name in sw.js
+const APP_VERSION='landings-v42'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;
