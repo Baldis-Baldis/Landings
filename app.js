@@ -868,7 +868,7 @@ function render(){
   }).forEach(a=>{
     const v=visited[a.code], k=kind(a);
     const r=document.createElement('div');r.className='row'+(v?' done':'');
-    r.innerHTML=`<input type="checkbox" name="visited" ${v?'checked':''}><div><div class="name">${esc(a.name)}${(flags[a.code]||{}).fav?'<span class="ic fav">★</span>':''}${(flags[a.code]||{}).want?'<span class="ic want">${WANT_ICON}</span>':''}</div><div class="meta">${a.cc&&a.cc!==home?`<span class="cc">${esc(a.cc)}</span>`:''}<span class="code ${k}">${k==='custom'?esc(a.short||'—'):esc(a.code)}</span> ${esc(a.town||'')}${getPics(a).length?' 📷'+(getPics(a).length>1?getPics(a).length:''):''}</div></div><div class="date">${v&&v.date?esc(t('dateFmt')(String(v.date))):''}</div>`;
+    r.innerHTML=`<input type="checkbox" name="visited" ${v?'checked':''}><div><div class="name">${esc(a.name)}${(flags[a.code]||{}).fav?'<span class="ic fav">★</span>':''}${(flags[a.code]||{}).want?'<span class="ic want">'+WANT_ICON+'</span>':''}</div><div class="meta">${a.cc&&a.cc!==home?`<span class="cc">${esc(a.cc)}</span>`:''}<span class="code ${k}">${k==='custom'?esc(a.short||'—'):esc(a.code)}</span> ${esc(a.town||'')}${getPics(a).length?' 📷'+(getPics(a).length>1?getPics(a).length:''):''}</div></div><div class="date">${v&&v.date?esc(t('dateFmt')(String(v.date))):''}</div>`;
     const cb=r.querySelector('input');
     cb.onclick=e=>{e.stopPropagation(); cb.checked?set(a,{date:today(),note:''}):set(a,null);};
     r.onclick=()=>showOnMap(a);
@@ -903,7 +903,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v40'; // matches the cache name in sw.js
+const APP_VERSION='landings-v41'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

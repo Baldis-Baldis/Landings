@@ -333,13 +333,13 @@ test('the sheet markup: dialog, title, close button, map credit, safe area, hidd
   assert.match(html, /sheet\.querySelector\('\.csmeta'\)\.textContent=cardMeta\(a\);/);
 });
 
-test('phones: no double-tap zoom, pinch zoom stays, fields of 16 px, the map keeps its gestures', () => {
+test('phones: outside the map the page only scrolls, the viewport meta stays open, fields of 16 px, the map keeps its gestures', () => {
   const vp = page.match(/<meta name="viewport" content="([^"]+)">/)[1];
-  assert.ok(!/maximum-scale|user-scalable/.test(vp), 'pinch zoom must stay: ' + vp);
-  assert.match(page, /html,body,\.side,#list,\.cardsheet,\.csbody,\.ccsheet,\.ccdlg,button,a,label,summary,input,select,textarea\{touch-action:manipulation\}/);
+  assert.ok(!/maximum-scale|user-scalable/.test(vp), 'no viewport lock, the Magnifier and zoom settings must keep working: ' + vp);
+  assert.match(page, /html,body,header,\.side,#list,footer,\.cardsheet,\.csbody,\.ccsheet,\.ccdlg,button,a,label,summary,input,select,textarea\{touch-action:pan-x pan-y\}/);
   assert.match(page, /@media \(max-width:899px\)\{input:not\(\[type=checkbox\]\):not\(\[type=radio\]\):not\(\[type=file\]\),select,textarea\{font-size:16px!important\}\}/);
   // the map container is not listed: Leaflet sets its own touch-action for pinch and double-tap zoom
-  const rule = page.match(/([^}\n]*)\{touch-action:manipulation\}/)[1];
+  const rule = page.match(/([^}\n]*)\{touch-action:pan-x pan-y\}/)[1];
   assert.ok(!/#map|leaflet/.test(rule));
   assert.match(readFileSync(join(root, 'vendor/leaflet/leaflet.css'), 'utf8'), /touch-action: none/);
   // the sheet's grip and header keep touch-action:none for dragging
