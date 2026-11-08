@@ -248,6 +248,10 @@ footer .legal a:hover{text-decoration:underline}
 #authwho:empty{display:none}
 .author{font-size:12.5px;text-align:center;color:var(--ink2);margin:14px 0 10px}
 #authcaptcha{margin-bottom:4px}
+/* Phones: a double tap must not zoom the whole page (pinch zoom stays for accessibility; the map keeps
+   its own gestures from Leaflet's rules). Fields need at least 16 px, iOS Safari zooms the page on focus otherwise. */
+html,body,.side,#list,.cardsheet,.csbody,.ccsheet,.ccdlg,button,a,label,summary,input,select,textarea{touch-action:manipulation}
+@media (max-width:899px){input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{font-size:16px!important}}
 </style>
 </head>
 <body>

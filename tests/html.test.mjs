@@ -314,8 +314,8 @@ test('the sheet uses the layout breakpoint, the back gesture, Esc and returns th
   assert.match(html, /window\.matchMedia\('\(max-width: 899px\)'\)/);
   assert.match(page, /@media \(min-width:900px\)/, 'the same breakpoint as the stacked layout');
   assert.match(html, /history\.pushState\(\{card:1\},''\)/);
-  assert.match(html, /window\.addEventListener\('popstate',\(\)=>\{ if\(sheetOpen\)\{ sheetPushed=false; closeSheet\(true\); \} \}\);/);
-  assert.match(html, /if\(sheetPushed&&!fromHistory\)\{ sheetPushed=false; history\.back\(\); \}/, 'closing by hand takes the history entry back');
+  assert.match(html, /window\.addEventListener\('popstate',\(\)=>\{ if\(popOwn>0\)\{ popOwn--; return; \} if\(sheetOpen\)\{ sheetPushed=false; closeSheet\(true\); \} \}\);/);
+  assert.match(html, /if\(sheetPushed&&!fromHistory\)\{ sheetPushed=false; popOwn\+\+; history\.back\(\); \}/, 'closing by hand takes the history entry back, and its late popstate is ignored');
   assert.match(html, /e\.key==='Escape'&&sheetOpen&&!lb\.classList\.contains\('on'\)/);
   assert.match(html, /sheet\.querySelector\('#cstitle'\)\.focus\(\{preventScroll:true\}\)/);
   assert.match(html, /back\.focus\(\{preventScroll:true\}\)/);
@@ -331,4 +331,26 @@ test('the sheet markup: dialog, title, close button, map credit, safe area, hidd
   // texts in the sheet header go in as text
   assert.match(html, /sheet\.querySelector\('#cstitle'\)\.textContent=a\.name;/);
   assert.match(html, /sheet\.querySelector\('\.csmeta'\)\.textContent=cardMeta\(a\);/);
+});
+
+test('phones: no double-tap zoom, pinch zoom stays, fields of 16 px, the map keeps its gestures', () => {
+  const vp = page.match(/<meta name="viewport" content="([^"]+)">/)[1];
+  assert.ok(!/maximum-scale|user-scalable/.test(vp), 'pinch zoom must stay: ' + vp);
+  assert.match(page, /html,body,\.side,#list,\.cardsheet,\.csbody,\.ccsheet,\.ccdlg,button,a,label,summary,input,select,textarea\{touch-action:manipulation\}/);
+  assert.match(page, /@media \(max-width:899px\)\{input:not\(\[type=checkbox\]\):not\(\[type=radio\]\):not\(\[type=file\]\),select,textarea\{font-size:16px!important\}\}/);
+  // the map container is not listed: Leaflet sets its own touch-action for pinch and double-tap zoom
+  const rule = page.match(/([^}\n]*)\{touch-action:manipulation\}/)[1];
+  assert.ok(!/#map|leaflet/.test(rule));
+  assert.match(readFileSync(join(root, 'vendor/leaflet/leaflet.css'), 'utf8'), /touch-action: none/);
+  // the sheet's grip and header keep touch-action:none for dragging
+  assert.match(page, /\.csgrip\{[^}]*touch-action:none/);
+  assert.match(page, /\.cshead\{[^}]*touch-action:none/);
+});
+
+test('nothing is laid out wider than the screen on purpose', () => {
+  // wide rows scroll inside their own box instead of widening the page
+  assert.match(page, /\.legend\{[^}]*overflow-x:auto/);
+  assert.match(page, /\.cardsheet\{[^}]*left:0;right:0;[^}]*overflow:hidden/);
+  assert.match(page, /\.ccdlg\{[^}]*width:min\(380px,calc\(100vw - 32px\)\)/);
+  assert.ok(!/[{;]\s*(min-)?width:\s*(1\d{3}|[4-9]\d\d)px/.test(page.match(/<style>([\s\S]*?)<\/style>/)[1]), 'no fixed width beyond a phone');
 });

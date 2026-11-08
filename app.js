@@ -443,7 +443,7 @@ function showOnMap(a){
 // Every opening goes through openCard. The sheet uses the same layout breakpoint as the page (899 px).
 const sheetMQ=window.matchMedia('(max-width: 899px)');
 const sheet=document.getElementById('cardsheet'), sheetBody=sheet.querySelector('.csbody');
-let sheetA=null, sheetOpen=false, sheetPushed=false, sheetReturn=null, sheetState='half';
+let sheetA=null, sheetOpen=false, sheetPushed=false, sheetReturn=null, sheetState='half', popOwn=0;
 function useSheet(){ return sheetMQ.matches; }
 function isCardOpen(a){ if(sheetOpen&&sheetA&&sheetA.code===a.code) return true; const m=markers[a.code]; return !!(m&&m.isPopupOpen&&m.isPopupOpen()); }
 function openCard(a,opener){
@@ -492,12 +492,13 @@ function closeSheet(fromHistory){
   sheetOpen=false; document.body.classList.remove('cardopen');
   setSheetHeight(0);
   setTimeout(()=>{ if(!sheetOpen){ sheet.hidden=true; sheetBody.textContent=''; sheetA=null; } },230);
-  if(sheetPushed&&!fromHistory){ sheetPushed=false; history.back(); } else sheetPushed=false;
+  // history.back() lands later (slowly in Safari): its popstate must not close a card opened meanwhile
+  if(sheetPushed&&!fromHistory){ sheetPushed=false; popOwn++; history.back(); } else sheetPushed=false;
   const back=sheetReturn&&document.contains(sheetReturn)?sheetReturn:(map?map.getContainer():null);
   sheetReturn=null; if(back) try{ back.focus({preventScroll:true}); }catch(e){}
 }
 // back gesture or button closes the sheet instead of leaving the app
-window.addEventListener('popstate',()=>{ if(sheetOpen){ sheetPushed=false; closeSheet(true); } });
+window.addEventListener('popstate',()=>{ if(popOwn>0){ popOwn--; return; } if(sheetOpen){ sheetPushed=false; closeSheet(true); } });
 sheet.querySelector('.csx').onclick=()=>closeSheet();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheetOpen&&!lb.classList.contains('on')&&ccSheet.hidden) closeSheet(); });
 // drag the grip or the header: up to full height, down to half or closed
@@ -902,7 +903,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v39'; // matches the cache name in sw.js
+const APP_VERSION='landings-v40'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;
