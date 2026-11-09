@@ -381,3 +381,62 @@ test('nothing is laid out wider than the screen on purpose', () => {
   assert.match(page, /\.ccsheet\.win\{[^}]*width:min\(380px,calc\(100vw - 32px\)\)/);
   assert.ok(!/[{;]\s*(min-)?width:\s*(1\d{3}|[4-9]\d\d)px/.test(page.match(/<style>([\s\S]*?)<\/style>/)[1]), 'no fixed width beyond a phone');
 });
+
+// --- phase 2: quick picks, whole regions, neighbours of new countries ---
+test('only "Neighbours" and "Clear all" are quick picks; regions have select all and clear', () => {
+  assert.deepEqual(Object.keys(C.COUNTRY_PICKS), ['near']);
+  assert.ok(!/alps|adriatic|Alpy|Jadran|Adriatic/.test(html + countriesSrc), 'the misleading picks are gone');
+  assert.match(html, /ra\.onclick=e=>\{ e\.preventDefault\(\); e\.stopPropagation\(\); selectRegion\(all\); \};/);
+  assert.match(html, /rn\.onclick=e=>\{ e\.preventDefault\(\); e\.stopPropagation\(\); clearRegion\(all\); \};/);
+  assert.match(html, /const all=CCS\.filter\(c=>COUNTRIES\[c\]\.r===r\)/, 'only countries with data');
+  assert.match(html, /function clearRegion\(list\)\{[^\n]*if\(!selCC\.length\) selCC=\[home\];/, 'one country always stays');
+});
+
+test('selecting a region asks first above 1 MB of new downloads', () => {
+  const code = html.slice(html.indexOf('const BIG_DOWNLOAD'), html.indexOf('// clearing a region'));
+  const run = (index, loaded, answer) => {
+    const asked = []; let added = null;
+    const ctx = { ccData: Object.fromEntries(loaded.map(c => [c, []])), ccIndex: { countries: index }, lang: 'cs', t: k => (k === 'ccBig' ? (n, mb) => `${n}|${mb}` : k),
+      confirm: q => { asked.push(q); return answer; }, addCountries: l => { added = l; }, loadCCIndex: async () => {} };
+    vm.createContext(ctx); vm.runInContext(code, ctx);
+    return vm.runInContext('selectRegion(["A","B","C"])', ctx).then(() => ({ asked, added }));
+  };
+  return Promise.all([
+    run({ A: { n: 500, bytes: 600000 }, B: { n: 400, bytes: 500000 }, C: { n: 1, bytes: 1000 } }, [], false)
+      .then(r => { assert.equal(r.asked.length, 1); assert.match(r.asked[0], /^901\|1\.0$/); assert.equal(r.added, null, 'declined'); }),
+    run({ A: { n: 500, bytes: 600000 }, B: { n: 400, bytes: 500000 }, C: { n: 1, bytes: 1000 } }, ['A'], false)
+      .then(r => { assert.equal(r.asked.length, 0, 'what is loaded already does not count'); assert.deepEqual([...r.added], ['A', 'B', 'C']); }),
+  ]);
+});
+
+test('no region is over 1 MB with today\'s data, and every new country offers its neighbours with data', () => {
+  const idx = JSON.parse(readFileSync(join(root, 'data/countries/index.json'), 'utf8'));
+  for (const r of C.COUNTRY_REGIONS) {
+    const bytes = Object.keys(idx.countries).filter(c => C.COUNTRIES[c].r === r).reduce((s, c) => s + idx.countries[c].bytes, 0);
+    assert.ok(bytes < 1024 * 1024, r + ': ' + bytes);
+  }
+  const live = Object.keys(C.COUNTRIES).filter(c => C.COUNTRIES[c].live);
+  const offer = c => [...C.COUNTRY_NEIGHBOURS[c].filter(x => live.includes(x))];
+  assert.deepEqual(offer('FR'), ['BE', 'LU', 'DE', 'CH', 'IT', 'ES'], 'MC and AD have no data');
+  assert.deepEqual(offer('IT'), ['FR', 'CH', 'AT', 'SI', 'SM']);
+  assert.deepEqual(offer('ME'), ['HR', 'BA', 'RS', 'XK', 'AL']);
+  for (const c of live) for (const x of offer(c)) assert.ok(live.includes(x));
+  // the offer in the panel uses the same filter
+  assert.match(html, /const nb=\(COUNTRY_NEIGHBOURS\[c\]\|\|\[\]\)\.filter\(x=>CCS\.includes\(x\)&&!selCC\.includes\(x\)\);/);
+});
+
+test('the about page counts the other countries with data', () => {
+  const doc = readFileSync(join(root, 'about.html'), 'utf8');
+  const others = Object.keys(C.COUNTRIES).filter(c => C.COUNTRIES[c].live && c !== 'CZ').length;
+  assert.match(doc, new RegExp(`Letiště ve ${others} dalších evropských zemích`));
+  assert.match(doc, new RegExp(`Airfields in ${others} other European countries`));
+});
+
+test('the list draws in chunks of 200 and keeps its length after a change', () => {
+  assert.match(html, /const LIST_CHUNK=200;/);
+  assert.match(html, /list\.addEventListener\('scroll',\(\)=>\{ if\(listShown<listRows\.length&&list\.scrollTop\+list\.clientHeight>list\.scrollHeight-600\) moreRows\(LIST_CHUNK\); \},\{passive:true\}\);/);
+  assert.match(html, /keep=key===listKey\?Math\.max\(LIST_CHUNK,listShown\):LIST_CHUNK;/);
+  assert.match(html, /moreRows\(keep\);/);
+  // the count still covers all data, not only the drawn rows
+  assert.match(html, /document\.getElementById\('cnt'\)\.textContent=data\.filter\(a=>visited\[a\.code\]\)\.length;/);
+});

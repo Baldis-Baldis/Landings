@@ -1,6 +1,7 @@
 // Countries the app knows. This is the only source of country codes: data file URLs and the country panel are
 // built from these keys, never from user input. Read by the app and by tools/update-airports.mjs.
 // live: data/countries/XX.json exists and the country can be picked. icao: ICAO prefixes of the country.
+// LI, MC and AD have heliports only in OurAirports, no airfield, so they are not live (they stay for the neighbours).
 // When two countries share a prefix the first one listed wins; the updater lists the others in index.json.
 const COUNTRIES={
   CZ:{cs:'Česko',en:'Czechia',r:'central',icao:['LK'],live:1},
@@ -8,43 +9,43 @@ const COUNTRIES={
   AT:{cs:'Rakousko',en:'Austria',r:'central',icao:['LO'],live:1},
   DE:{cs:'Německo',en:'Germany',r:'central',icao:['ED','ET'],live:1},
   PL:{cs:'Polsko',en:'Poland',r:'central',icao:['EP'],live:1},
-  HU:{cs:'Maďarsko',en:'Hungary',r:'central',icao:['LH']},
-  SI:{cs:'Slovinsko',en:'Slovenia',r:'central',icao:['LJ']},
-  CH:{cs:'Švýcarsko',en:'Switzerland',r:'central',icao:['LS']},
+  HU:{cs:'Maďarsko',en:'Hungary',r:'central',icao:['LH'],live:1},
+  SI:{cs:'Slovinsko',en:'Slovenia',r:'central',icao:['LJ'],live:1},
+  CH:{cs:'Švýcarsko',en:'Switzerland',r:'central',icao:['LS'],live:1},
   LI:{cs:'Lichtenštejnsko',en:'Liechtenstein',r:'central',icao:['LS']},
-  FR:{cs:'Francie',en:'France',r:'west',icao:['LF']},
-  BE:{cs:'Belgie',en:'Belgium',r:'west',icao:['EB']},
-  NL:{cs:'Nizozemsko',en:'Netherlands',r:'west',icao:['EH']},
-  LU:{cs:'Lucembursko',en:'Luxembourg',r:'west',icao:['EL']},
-  GB:{cs:'Spojené království',en:'United Kingdom',r:'west',icao:['EG']},
-  IE:{cs:'Irsko',en:'Ireland',r:'west',icao:['EI']},
+  FR:{cs:'Francie',en:'France',r:'west',icao:['LF'],live:1},
+  BE:{cs:'Belgie',en:'Belgium',r:'west',icao:['EB'],live:1},
+  NL:{cs:'Nizozemsko',en:'Netherlands',r:'west',icao:['EH'],live:1},
+  LU:{cs:'Lucembursko',en:'Luxembourg',r:'west',icao:['EL'],live:1},
+  GB:{cs:'Spojené království',en:'United Kingdom',r:'west',icao:['EG'],live:1},
+  IE:{cs:'Irsko',en:'Ireland',r:'west',icao:['EI'],live:1},
   MC:{cs:'Monako',en:'Monaco',r:'west',icao:['LN']},
-  IT:{cs:'Itálie',en:'Italy',r:'south',icao:['LI']},
-  SM:{cs:'San Marino',en:'San Marino',r:'south',icao:['LI']},
-  ES:{cs:'Španělsko',en:'Spain',r:'south',icao:['LE','GC','GE']},
-  PT:{cs:'Portugalsko',en:'Portugal',r:'south',icao:['LP']},
+  IT:{cs:'Itálie',en:'Italy',r:'south',icao:['LI'],live:1},
+  SM:{cs:'San Marino',en:'San Marino',r:'south',icao:['LI'],live:1},
+  ES:{cs:'Španělsko',en:'Spain',r:'south',icao:['LE','GC','GE'],live:1},
+  PT:{cs:'Portugalsko',en:'Portugal',r:'south',icao:['LP'],live:1},
   AD:{cs:'Andorra',en:'Andorra',r:'south',icao:['LE']},
-  MT:{cs:'Malta',en:'Malta',r:'south',icao:['LM']},
-  GR:{cs:'Řecko',en:'Greece',r:'south',icao:['LG']},
-  CY:{cs:'Kypr',en:'Cyprus',r:'south',icao:['LC']},
-  HR:{cs:'Chorvatsko',en:'Croatia',r:'south',icao:['LD']},
-  DK:{cs:'Dánsko',en:'Denmark',r:'north',icao:['EK']},
-  SE:{cs:'Švédsko',en:'Sweden',r:'north',icao:['ES']},
-  NO:{cs:'Norsko',en:'Norway',r:'north',icao:['EN']},
-  FI:{cs:'Finsko',en:'Finland',r:'north',icao:['EF']},
-  IS:{cs:'Island',en:'Iceland',r:'north',icao:['BI']},
-  EE:{cs:'Estonsko',en:'Estonia',r:'north',icao:['EE']},
-  LV:{cs:'Lotyšsko',en:'Latvia',r:'north',icao:['EV']},
-  LT:{cs:'Litva',en:'Lithuania',r:'north',icao:['EY']},
-  RS:{cs:'Srbsko',en:'Serbia',r:'east',icao:['LY']},
-  BA:{cs:'Bosna a Hercegovina',en:'Bosnia and Herzegovina',r:'east',icao:['LQ']},
-  ME:{cs:'Černá Hora',en:'Montenegro',r:'east',icao:['LY']},
-  MK:{cs:'Severní Makedonie',en:'North Macedonia',r:'east',icao:['LW']},
-  AL:{cs:'Albánie',en:'Albania',r:'east',icao:['LA']},
-  XK:{cs:'Kosovo',en:'Kosovo',r:'east',icao:['BK']},
-  RO:{cs:'Rumunsko',en:'Romania',r:'east',icao:['LR']},
-  BG:{cs:'Bulharsko',en:'Bulgaria',r:'east',icao:['LB']},
-  MD:{cs:'Moldavsko',en:'Moldova',r:'east',icao:['LU']}
+  MT:{cs:'Malta',en:'Malta',r:'south',icao:['LM'],live:1},
+  GR:{cs:'Řecko',en:'Greece',r:'south',icao:['LG'],live:1},
+  CY:{cs:'Kypr',en:'Cyprus',r:'south',icao:['LC'],live:1},
+  HR:{cs:'Chorvatsko',en:'Croatia',r:'south',icao:['LD'],live:1},
+  DK:{cs:'Dánsko',en:'Denmark',r:'north',icao:['EK'],live:1},
+  SE:{cs:'Švédsko',en:'Sweden',r:'north',icao:['ES'],live:1},
+  NO:{cs:'Norsko',en:'Norway',r:'north',icao:['EN'],live:1},
+  FI:{cs:'Finsko',en:'Finland',r:'north',icao:['EF'],live:1},
+  IS:{cs:'Island',en:'Iceland',r:'north',icao:['BI'],live:1},
+  EE:{cs:'Estonsko',en:'Estonia',r:'north',icao:['EE'],live:1},
+  LV:{cs:'Lotyšsko',en:'Latvia',r:'north',icao:['EV'],live:1},
+  LT:{cs:'Litva',en:'Lithuania',r:'north',icao:['EY'],live:1},
+  RS:{cs:'Srbsko',en:'Serbia',r:'east',icao:['LY'],live:1},
+  BA:{cs:'Bosna a Hercegovina',en:'Bosnia and Herzegovina',r:'east',icao:['LQ'],live:1},
+  ME:{cs:'Černá Hora',en:'Montenegro',r:'east',icao:['LY'],live:1},
+  MK:{cs:'Severní Makedonie',en:'North Macedonia',r:'east',icao:['LW'],live:1},
+  AL:{cs:'Albánie',en:'Albania',r:'east',icao:['LA'],live:1},
+  XK:{cs:'Kosovo',en:'Kosovo',r:'east',icao:['BK'],live:1},
+  RO:{cs:'Rumunsko',en:'Romania',r:'east',icao:['LR'],live:1},
+  BG:{cs:'Bulharsko',en:'Bulgaria',r:'east',icao:['LB'],live:1},
+  MD:{cs:'Moldavsko',en:'Moldova',r:'east',icao:['LU'],live:1}
 };
 const COUNTRY_REGIONS=['central','west','south','north','east'];
 // land neighbours within this list (a neighbour outside it, e.g. UA or TR, is left out)
@@ -62,7 +63,7 @@ const COUNTRY_NEIGHBOURS={
   RO:['HU','RS','BG','MD'], BG:['RO','RS','MK','GR'], MD:['RO']
 };
 // "near" means the neighbours of the home country, see COUNTRY_NEIGHBOURS
-const COUNTRY_PICKS={near:null,alps:['AT','CH','DE','IT','SI','FR','LI'],adriatic:['SI','HR','IT','ME','AL']};
+const COUNTRY_PICKS={near:null};
 // country of a foreign airfield code without loading its data: listed exception, "XX-" ident or ICAO prefix
 function countryOfCode(code,exceptions){
   if(typeof code!=='string') return '';

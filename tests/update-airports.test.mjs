@@ -162,3 +162,31 @@ test('the published data agree with the index, and every code tells its country'
   }
   for (const c of Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live)) assert.ok(idx.countries[c], c + ' has data');
 });
+
+test('phase 2 keeps every airfield code that existed before it, country by country', () => {
+  const before = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/codes-before-phase2.json'), 'utf8'));
+  for (const [c, codes] of Object.entries(before)) {
+    const now = JSON.parse(readFileSync(join(ROOT, 'data', 'countries', c + '.json'), 'utf8')).airports.map(a => a.code);
+    for (const code of codes) assert.ok(now.includes(code), `${c}: ${code} is gone`);
+  }
+});
+
+test('all 39 countries with data are live, the three without airfields are not', () => {
+  const live = Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live);
+  assert.equal(live.length, 39);
+  for (const c of ['LI', 'MC', 'AD']) assert.ok(!COUNTRIES[c].live, c + ' has heliports only');
+  const idx = JSON.parse(readFileSync(join(ROOT, 'data', 'countries', 'index.json'), 'utf8'));
+  assert.deepEqual(Object.keys(idx.countries).sort(), live.sort());
+  for (const c of live) assert.ok(idx.countries[c].n > 0, c + ' has airfields');
+  // the old combined files are gone
+  assert.ok(!existsSync(join(ROOT, 'data', 'airports-eu.json')) && !existsSync(join(ROOT, 'data', 'airport-info.json')));
+});
+
+test('the guard covers every live country: a new country losing all airfields is refused', () => {
+  const live = Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live);
+  const prev = Object.fromEntries(live.map(c => [c, { airports: 10, info: 5 }]));
+  for (const c of live) {
+    const now = { [c]: { airports: [], info: {} } };
+    assert.throws(() => checkCounts(prev, now), new RegExp(c + ': airfields 10 -> 0'));
+  }
+});
