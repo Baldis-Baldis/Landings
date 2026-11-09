@@ -62,8 +62,6 @@ const COUNTRY_NEIGHBOURS={
   MK:['RS','XK','AL','GR','BG'], AL:['ME','XK','MK','GR'], XK:['RS','ME','AL','MK'],
   RO:['HU','RS','BG','MD'], BG:['RO','RS','MK','GR'], MD:['RO']
 };
-// "near" means the neighbours of the home country, see COUNTRY_NEIGHBOURS
-const COUNTRY_PICKS={near:null};
 // country of a foreign airfield code without loading its data: listed exception, "XX-" ident or ICAO prefix
 function countryOfCode(code,exceptions){
   if(typeof code!=='string') return '';

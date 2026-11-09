@@ -137,3 +137,65 @@ test('the legend in the page has the pins, never a raw "${"', () => {
   assert.ok(!page.includes('${'), 'raw placeholder in index.html');
   for (const f of ['about.html', 'privacy.html', 'terms.html', 'admin.html']) assert.ok(!readFileSync(join(root, f), 'utf8').includes('${'), f);
 });
+
+// --- country panel: the "Neighbours (home)" group, rendered with the stub DOM ---
+function panel() {
+  const b = boot();
+  const idx = JSON.parse(readFileSync(join(root, 'data/countries/index.json'), 'utf8'));
+  // every live country counts as loaded, so no download is awaited
+  b.run(`for (const c of CCS) ccData[c] = []; ccIndex = ${JSON.stringify({ countries: idx.countries, exceptions: idx.exceptions })};
+    ccPanel.show(null);`);
+  const walk = (n, out = []) => { if (!n || typeof n !== 'object') return out; out.push(n); for (const c of n.children || []) walk(c, out); return out; };
+  const groups = () => b.run('ccList.children').filter(n => n.tagName === 'DETAILS')
+    .map(d => ({ key: d.dataset.group, open: d.open, title: d.children[0].textContent, inputs: walk(d).filter(n => n.name === 'cc') }));
+  const draw = code => { b.run(`ccList.children.length = 0; ${code || ''} renderCCList();`); return groups(); };
+  return { ...b, draw, groups, walk };
+}
+const codes = g => g.inputs.map(i => i.value);
+
+test('the Neighbours group lists the land neighbours of the home country with data, first among the groups', () => {
+  const p = panel();
+  const cases = { CZ: ['DE', 'AT', 'SK', 'PL'], DE: ['DK', 'PL', 'CZ', 'AT', 'CH', 'FR', 'LU', 'BE', 'NL'], FR: ['BE', 'LU', 'DE', 'CH', 'IT', 'ES'] };
+  for (const [home, want] of Object.entries(cases)) {
+    const g = p.draw(`home='${home}'; homeKnown=true; selCC=['${home}']; ccTop=['${home}']; ccOpen.clear(); ccOpen.add('near');`);
+    assert.equal(g[0].key, 'near', home + ': first group');
+    assert.deepEqual(codes(g[0]), want, home);
+    assert.ok(g[0].title.startsWith('Sousedé (' + p.run(`ccName('${home}')`) + ')'), g[0].title);
+    assert.equal(g[0].open, true, 'open by default');
+    assert.equal(g.filter(x => x.key === 'near').length, 1);
+  }
+  // Iceland has no land neighbour with data: no group
+  const is = p.draw(`home='IS'; selCC=['IS']; ccTop=['IS'];`);
+  assert.ok(!is.some(x => x.key === 'near'));
+  assert.ok(is.length > 0, 'the regions are still there');
+});
+
+test('changing the home country with the house redraws the Neighbours group at once', () => {
+  const p = panel();
+  p.draw(`home='CZ'; homeKnown=true; selCC=['CZ']; ccTop=['CZ'];`);
+  p.run(`ccList.children.length = 0; setHome('FR');`);
+  const g = p.groups();
+  assert.equal(p.run('home'), 'FR');
+  assert.deepEqual(codes(g.find(x => x.key === 'near')), ['BE', 'LU', 'DE', 'CH', 'IT', 'ES']);
+});
+
+test('the Neighbours group shows selected neighbours too, and its checkboxes agree with the other rows', () => {
+  const p = panel();
+  p.draw(`home='CZ'; homeKnown=true; selCC=['CZ','DE']; ccTop=['CZ','DE'];`);
+  const all = () => p.walk({ children: p.run('ccList.children') }).filter(n => n.name === 'cc');
+  const de = () => all().filter(i => i.value === 'DE');
+  assert.equal(de().length, 2, 'DE in "Mine and selected" and in Neighbours');
+  assert.ok(de().every(i => i.checked));
+  // switch DE off in the Neighbours group
+  const nearDe = p.groups().find(x => x.key === 'near').inputs.find(i => i.value === 'DE');
+  nearDe.checked = false;
+  p.run('ccList.children.length = 0;'); nearDe.onchange();
+  assert.deepEqual([...p.run('selCC')], ['CZ']);
+  assert.equal(de().length, 2);
+  assert.ok(de().every(i => !i.checked), 'every DE row follows');
+  // select all in the group, then clear: one country always stays
+  p.run(`ccList.children.length = 0; clearRegion(nearCountries());`);
+  assert.deepEqual([...p.run('selCC')], ['CZ']);
+  p.run(`ccList.children.length = 0; clearRegion(['CZ', ...nearCountries()]);`);
+  assert.deepEqual([...p.run('selCC')], ['CZ'], 'the home country stays');
+});

@@ -209,7 +209,7 @@ test('the terms say who owns the app and what licence users give for their conte
 
 // --- country picker ---
 const countriesSrc = readFileSync(join(root, 'countries.js'), 'utf8');
-const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_PICKS,COUNTRY_REGIONS,COUNTRY_NEIGHBOURS,countryOfCode,guessHome})');
+const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_REGIONS,COUNTRY_NEIGHBOURS,countryOfCode,guessHome})');
 
 test('country data come only from whitelisted codes', () => {
   assert.match(html, /const CCS=Object\.keys\(COUNTRIES\)\.filter\(c=>COUNTRIES\[c\]\.live\)/);
@@ -219,7 +219,6 @@ test('country data come only from whitelisted codes', () => {
   assert.match(html, /storedSel=CCS\.filter\(c=>x\.includes\(c\)\)/);
   assert.match(html, /const h=localStorage\.getItem\(HOMEKEY\); if\(CCS\.includes\(h\)\) home=h;/);
   for (const c of Object.keys(C.COUNTRIES)) assert.match(c, /^[A-Z]{2}$/);
-  for (const list of Object.values(C.COUNTRY_PICKS)) for (const c of list || []) assert.ok(C.COUNTRIES[c], c);
   for (const c of Object.values(C.COUNTRIES)) assert.ok(C.COUNTRY_REGIONS.includes(c.r));
 });
 
@@ -383,12 +382,13 @@ test('nothing is laid out wider than the screen on purpose', () => {
 });
 
 // --- phase 2: quick picks, whole regions, neighbours of new countries ---
-test('only "Neighbours" and "Clear all" are quick picks; regions have select all and clear', () => {
-  assert.deepEqual(Object.keys(C.COUNTRY_PICKS), ['near']);
+test('only "Clear all" stays a quick pick; regions have select all and clear', () => {
+  assert.ok(!/COUNTRY_PICKS|ccPicks:/.test(html + countriesSrc), 'no quick picks besides Clear all');
   assert.ok(!/alps|adriatic|Alpy|Jadran|Adriatic/.test(html + countriesSrc), 'the misleading picks are gone');
   assert.match(html, /ra\.onclick=e=>\{ e\.preventDefault\(\); e\.stopPropagation\(\); selectRegion\(all\); \};/);
   assert.match(html, /rn\.onclick=e=>\{ e\.preventDefault\(\); e\.stopPropagation\(\); clearRegion\(all\); \};/);
-  assert.match(html, /const all=CCS\.filter\(c=>COUNTRIES\[c\]\.r===r\)/, 'only countries with data');
+  assert.match(html, /ccGroup\(r,t\('ccRegions'\)\[r\],cs,CCS\.filter\(c=>COUNTRIES\[c\]\.r===r\),mine\)/, 'only countries with data');
+  assert.match(html, /function nearCountries\(\)\{ return \(COUNTRY_NEIGHBOURS\[home\]\|\|\[\]\)\.filter\(c=>CCS\.includes\(c\)\); \}/);
   assert.match(html, /function clearRegion\(list\)\{[^\n]*if\(!selCC\.length\) selCC=\[home\];/, 'one country always stays');
 });
 
