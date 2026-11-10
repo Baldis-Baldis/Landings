@@ -523,3 +523,23 @@ test('the photo viewer zooms the photo itself, never the page, and resets on clo
   assert.match(html, /openLightbox\(getPics\(a\)\.map\(p=>p\.url\)/);
   assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/viewer\.js'/);
 });
+
+test('every photo shows its state, the card is redrawn after an upload, new photos are private', () => {
+  assert.match(html, /refreshOpenCard\(\); \/\/ the photo now has its state button/);
+  assert.match(html, /accountBase=s\.base; accountPhotos=s\.photoIds; saveBase\(\);\n\s*refreshOpenCard\(\);/);
+  assert.match(html, /if\(account&&!p\.id\) return `<span class="picstate up" role="status">/, 'uploading state');
+  assert.match(html, /aria-label="\$\{esc\(lbl\)\}"/, 'the button says what a tap does');
+  assert.match(html, /picPrivateTap:'Soukromá fotka – klepnutím ji zveřejníte pro všechny'/);
+  assert.match(html, /picPublicTap:'Veřejná fotka – klepnutím ji skryjete'/);
+  assert.match(html, /picUploading:'nahrávám…'/);
+  // a new photo is a plain {url}: private until published, and the upload never sends is_public
+  assert.match(html, /const pic=\{url:durl\};/);
+  const backend = readFileSync(join(root, 'backend.js'), 'utf8');
+  assert.match(backend, /from\('photos'\)\.upsert\(\{ id, airfield_code, custom_airfield_id \}/);
+  assert.ok(!/upsert\(\{[^}]*is_public/.test(backend), 'no is_public on upload');
+});
+
+test('the date field is as wide as the note field everywhere', () => {
+  assert.match(page, /\.pop input\[type=date\],\.pop input\[type=text\],\.pop textarea\{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;/);
+  assert.match(page, /\.pop input\[type=date\]\{-webkit-appearance:none;appearance:none;/);
+});

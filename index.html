@@ -63,7 +63,10 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .pop b{font-size:15px}
 .pop .m{font-size:12px;color:var(--ink2);margin:2px 0 8px}
 .pop label{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px}
-.pop input[type=date],.pop input[type=text],.pop textarea{width:100%;padding:6px;border:1px solid var(--line);border-radius:4px;font:14px Barlow,sans-serif;margin-bottom:6px;font-family:Barlow,sans-serif}
+.pop input[type=date],.pop input[type=text],.pop textarea{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:6px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink);font:14px Barlow,sans-serif;margin-bottom:6px;font-family:Barlow,sans-serif}
+/* iOS gives the date field its own look and a minimum width wider than the card */
+.pop input[type=date]{-webkit-appearance:none;appearance:none;min-height:34px;text-align:left}
+.pop input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .pop .cname{font:600 15px Barlow,sans-serif}
 .pop .cshort{font:600 13px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.5px}
 .pop textarea{min-height:48px;resize:vertical}
@@ -127,6 +130,7 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .pop .addphoto input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;font-size:0}
 .pop .photolimit{font-size:12px;color:var(--ink2);margin:0 0 8px}
 .pop .gal button.pubpic{right:auto;left:2px;font-size:11px}
+.pop .gal .picstate{position:absolute;top:2px;left:2px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:rgba(0,0,0,.55);color:#fff;font:600 11px/22px Barlow,sans-serif;text-align:center}
 .pop .comm{margin-top:8px;font-size:12px;color:var(--ink2)}
 .pop .comm summary{cursor:pointer;font-weight:600}
 .pop .commbody{max-height:220px;overflow-y:auto;margin-top:4px}

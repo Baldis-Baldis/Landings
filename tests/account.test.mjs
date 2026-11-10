@@ -111,6 +111,7 @@ function device(server, store = new Map()) {
     async function photoFiles(src){ return {full:'full:'+src,thumb:'thumb:'+src}; }
     function schedulePush(){ stateGen++; }
     function showAccountMenu(){}
+    function refreshOpenCard(){ globalThis.refreshed=(globalThis.refreshed||0)+1; }
     ${canonCode}
     ${legacyPicsCode}
     function applyState(s){
@@ -471,4 +472,17 @@ test('a failed sign-out keeps the account data', async () => {
   await a.sync();
   await assert.rejects(a.ctx.window.leaveAccount(async () => { throw new Error('offline'); }));
   assert.ok([...a.store.keys()].some(k => k.startsWith('u:alice:')));
+});
+
+test('a new photo is private, and the open card is redrawn once it is uploaded', async () => {
+  const server = new Server();
+  const a = device(server);
+  await a.signIn(ALICE);
+  a.run('globalThis.refreshed = 0;');
+  a.addPhoto('LKBE', 'data:one');
+  await a.sync();
+  assert.ok(a.run('globalThis.refreshed') >= 1, 'the card is redrawn after the upload');
+  const pic = a.photos().LKBE.pics[0];
+  assert.ok(pic.id, 'uploaded');
+  assert.equal(pic.pub, undefined, 'private by default');
 });
