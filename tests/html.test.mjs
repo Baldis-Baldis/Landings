@@ -288,7 +288,8 @@ test('the home country: own choice, stored selection, landings, language, else C
   assert.equal((html.match(/localStorage\.setItem\(HOMEKEY/g) || []).length, 1);
   assert.match(html, /function setHome\(c\)\{\s*if\(!CCS\.includes\(c\)\) return;/);
   assert.match(html, /homeHint\.hidden=homeKnown\|\|closed;/);
-  assert.ok(!/geolocation/.test(html), 'no location');
+  assert.ok(!/geolocation|locateMe/.test(order), 'the home country never comes from the location');
+  assert.equal((html.match(/navigator\.geolocation/g) || []).length, 2, 'only the My location button reads it');
 });
 
 test('the last selected country cannot be switched off', () => {
@@ -474,4 +475,22 @@ test('the desktop card stays in view below the country button after every change
   assert.match(html, /img\.addEventListener\('load',fit\)/);
   assert.match(html, /m\.setPopupContent\(\(\)=>popup\(a\)\); fitPopup\(m\.getPopup\(\)\);/);
   assert.ok(!/_updateLayout|_updatePosition/.test(html), 'no private Leaflet calls');
+});
+
+test('my location is read once, only after a tap, never watched, stored or sent; home fits the home country', () => {
+  assert.equal((html.match(/navigator\.geolocation\.getCurrentPosition/g) || []).length, 1);
+  assert.ok(!/watchPosition/.test(html), 'no tracking');
+  const fn = html.slice(html.indexOf('function locateMe()'), html.indexOf('// Home: the whole home country'));
+  assert.ok(!/localStorage|fetch|backend|sendBeacon/.test(fn), 'the position stays in the page');
+  assert.match(html, /\['locbtn','◎',locateMe\],\['homebtn','⌂',goHome\]/);
+  assert.match(html, /b\.setAttribute\('aria-label',t\(k\)\)/);
+  for (const k of ["locate:'Moje poloha'", "locate:'My location'", "goHome:'Zobrazit domovskou zemi'", "goHome:'Show home country'", 'locDenied:', 'locNone:', 'locSlow:']) assert.ok(html.includes(k), k);
+  assert.match(html, /e&&e\.code===1\?'locDenied'/);
+  assert.match(html, /map\.fitBounds\(pts,\{padding:\[30,30\]\}\)/);
+  // the privacy notice says so in both languages, and the about page lists it
+  const privacy = readFileSync(join(root, 'privacy.html'), 'utf8');
+  assert.match(privacy, /Polohu zjišťujeme jen\s+po klepnutí na tlačítko Moje poloha/);
+  assert.match(privacy, /We find your location\s+only when you tap My location/);
+  const about = readFileSync(join(root, 'about.html'), 'utf8');
+  assert.match(about, /Moje poloha a návrat na domovskou zemi/);
 });
