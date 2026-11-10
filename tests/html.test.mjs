@@ -462,19 +462,25 @@ test('the photo button is in the app style, the input inside stays usable, no co
   assert.match(page, /\.pop label\.addphoto:focus-within\{outline:/);
 });
 
-test('the desktop card stays in view below the country button after every change', () => {
-  assert.match(html, /function fitPopup\(pp\)\{[\s\S]*?pp\.update\(\);[\s\S]*?const top=mr\.top\+popupTopRoom\(\)/);
-  assert.match(html, /bar=document\.getElementById\('ccbar'\)\.getBoundingClientRect\(\)/);
+test('the desktop card stays in view below the country button, without ever rebuilding itself', () => {
+  const fit = html.slice(html.indexOf('function fitPopup(pp){'), html.indexOf('// The popup is bound on first use.'));
+  // update() would call the card function again and rebuild the card: runways reopen, photos reload, scroll jumps
+  assert.ok(!/\.update\(\)/.test(fit), 'no popup.update() in fitPopup');
+  assert.match(fit, /pp\._updateLayout\(\); pp\._updatePosition\(\);/);
+  assert.match(readFileSync(join(root, 'vendor/leaflet/leaflet.js'), 'utf8'), /update:function\(\)\{this\._map&&\(this\._container\.style\.visibility="hidden",this\._updateContent\(\),this\._updateLayout\(\),this\._updatePosition\(\)/,
+    'pinned Leaflet: update() rebuilds content, the layout steps exist');
+  assert.match(fit, /const top=mr\.top\+popupTopRoom\(\)/);
   assert.match(html, /autoPanPaddingTopLeft:\[10,room\]/);
   assert.match(html, /maxHeight:Math\.max\(200,document\.getElementById\('map'\)\.clientHeight-room-60\)/);
-  // opening, runways and frequencies (toggle), From pilots (onResize), photos (load) and redraws all fit again
-  assert.match(html, /map\.on\('popupopen',e=>setTimeout\(\(\)=>fitPopup\(e\.popup\),80\)\);/);
-  assert.match(html, /const fit=\(\)=>fitPopup\(markers\[a\.code\]&&markers\[a\.code\]\.getPopup\(\)\);/);
-  assert.match(html, /aiOpen=det\.open;[^\n]*\n\s*fit\(\);/);
-  assert.match(html, /onResize:fit/);
-  assert.match(html, /img\.addEventListener\('load',fit\)/);
+  // only a real change of size fits again, once per frame; scrolling and toggling do not call it directly
+  assert.match(html, /new ResizeObserver\(fit\)/);
+  assert.match(html, /if\(w===fitW&&h===fitH\) return; fitW=w; fitH=h;/);
+  assert.match(html, /if\(fitQueued\) return; fitQueued=true;/);
+  assert.ok(!/addEventListener\('load',fit\)/.test(html), 'photos loading no longer trigger a rebuild loop');
+  assert.ok(!/addEventListener\('scroll',[^)]*fit/.test(html), 'scrolling inside the card never fits');
+  const toggle = html.slice(html.indexOf("det.addEventListener('toggle'"), html.indexOf("const cb=d.querySelector('.landed-cb')"));
+  assert.ok(!/fit\(\)|refreshCard|setPopupContent/.test(toggle), 'opening or closing the runways never redraws the card');
   assert.match(html, /m\.setPopupContent\(\(\)=>popup\(a\)\); fitPopup\(m\.getPopup\(\)\);/);
-  assert.ok(!/_updateLayout|_updatePosition/.test(html), 'no private Leaflet calls');
 });
 
 test('my location is read once, only after a tap, never watched, stored or sent; home fits the home country', () => {

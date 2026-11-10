@@ -454,9 +454,12 @@ function popupTopRoom(){
 }
 // Keep the whole desktop card in view and below the controls. Called after every change of its content
 // (opening, runways and frequencies, photos, From pilots); a card taller than the map scrolls inside.
+// Never pp.update() here: the card is bound as a function, and update() calls it again, which rebuilds the
+// whole card (open runways close again, new photos load and fit once more, the scroll jumps). Only the layout
+// (size, scrolling, position) is recomputed, with Leaflet's own steps; vendor/leaflet is pinned at 1.9.4.
 function fitPopup(pp){
   if(!map||!pp||!pp.isOpen||!pp.isOpen()) return;
-  try{ pp.update(); }catch(e){}
+  try{ pp._updateLayout(); pp._updatePosition(); }catch(e){}
   const c=pp.getElement(); if(!c) return;
   const mr=map.getContainer().getBoundingClientRect(), pr=c.getBoundingClientRect();
   const top=mr.top+popupTopRoom(), left=mr.left+10, right=mr.right-10, bottom=mr.bottom-10;
@@ -771,7 +774,20 @@ function popup(a){
   html+=`<label><input type="checkbox" name="landed" class="landed-cb" ${v.date!==undefined?'checked':''}> ${t('here')}</label>
   <input type="date" name="landed-date" class="landed-date" value="${esc(v.date||'')}"><input type="text" name="landed-note" class="landed-note" placeholder="${esc(t('note'))}" value="${esc(v.note||'')}">`;
   d.innerHTML=html;
-  const fit=()=>fitPopup(markers[a.code]&&markers[a.code].getPopup());
+  // fit only when the card really changes size (runways, photos, From pilots), once per frame; scrolling inside
+  // the card changes no size, so it never moves the map. Fitting does not change the card's size: no loop.
+  let fitW=0, fitH=0, fitQueued=false;
+  const fit=()=>{
+    if(fitQueued) return; fitQueued=true;
+    requestAnimationFrame(()=>{
+      fitQueued=false;
+      if(!d.isConnected){ if(sizeWatch) sizeWatch.disconnect(); return; }
+      const w=d.offsetWidth, h=d.offsetHeight; if(w===fitW&&h===fitH) return; fitW=w; fitH=h;
+      fitPopup(markers[a.code]&&markers[a.code].getPopup());
+    });
+  };
+  const sizeWatch=typeof ResizeObserver==='function'?new ResizeObserver(fit):null;
+  if(sizeWatch) sizeWatch.observe(d);
   if(!isCustom){
     const sec=window.community.section(a.code,{t,signedIn:()=>!!account,onResize:fit,openPhoto:openLightbox});
     // The section swaps elements while handling a click. Leaflet then finds no card above the removed
@@ -784,7 +800,6 @@ function popup(a){
   if(det) det.addEventListener('toggle',()=>{
     if(det.open===aiOpen) return; // the browser also fires 'toggle' when a card is built already open
     aiOpen=det.open; try{ localStorage.setItem('ai-open',aiOpen?'1':''); }catch(e){}
-    fit();
   });
   const cb=d.querySelector('.landed-cb'), dt=d.querySelector('.landed-date'), nt=d.querySelector('.landed-note');
   cb.onchange=()=>{ if(cb.checked){ if(!dt.value) dt.value=today(); set(a,{date:dt.value,note:nt.value}); } else set(a,null); };
@@ -815,7 +830,7 @@ function popup(a){
     }
     refreshCard(a); render();
   };
-  d.querySelectorAll('.gal img').forEach(img=>{ img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i); img.addEventListener('load',fit); });
+  d.querySelectorAll('.gal img').forEach(img=>{ img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i); });
   d.querySelectorAll('.pubpic').forEach(b=>b.onclick=async()=>{
     const cur=getPics(a), p=cur[+b.dataset.i]; if(!p) return;
     if(!p.pub&&!confirm(t('publishConfirm'))) return;
@@ -966,7 +981,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v47'; // matches the cache name in sw.js
+const APP_VERSION='landings-v48'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;
