@@ -448,3 +448,15 @@ test('the home country clusters like every other country, custom strips stay sin
   // the bubble still takes the colour of own airfields inside
   assert.match(html, /ks\.includes\('gold'\)\?' fav':ks\.includes\('green'\)\?' has':ks\.includes\('want'\)\?' want':''/);
 });
+
+test('the photo button is in the app style, the input inside stays usable, no counter until the limit', () => {
+  assert.match(html, /<label class="addphoto">\$\{t\('photoAdd'\)\}<input type="file" name="cphoto" accept="image\/\*" multiple class="cphoto"><\/label>/);
+  assert.match(html, /<div class="photolimit">\$\{t\('photoLimit'\)\}<\/div>/);
+  assert.ok(!/\(\$\{pics\.length\}\/\$\{MAXPH\}\)/.test(html), 'no (1/3) counter');
+  assert.match(html, /photoAdd:'\+ Přidat fotku'/);
+  assert.match(html, /photoLimit:'Dosažen limit fotek pro toto letiště'/);
+  assert.match(html, /photoLimit:'Photo limit reached for this airfield'/);
+  // hidden by opacity, not display:none, so it keeps focus and its label
+  assert.match(page, /\.pop \.addphoto input\{position:absolute;inset:0;[^}]*opacity:0/);
+  assert.match(page, /\.pop label\.addphoto:focus-within\{outline:/);
+});
