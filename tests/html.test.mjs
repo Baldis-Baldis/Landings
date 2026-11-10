@@ -301,7 +301,7 @@ test('the last selected country cannot be switched off', () => {
 test('every card opening goes through openCard, the popup toggle is taken off', () => {
   assert.equal((html.match(/\.openPopup\(\)/g) || []).length, 1, 'only popupOn opens a popup');
   assert.equal((html.match(/\.bindPopup\(/g) || []).length, 1);
-  assert.match(html, /m\.bindPopup\([^\n]*\); m\.off\('click',m\._openPopup,m\);/);
+  assert.match(html, /m\.bindPopup\([^\n]*\);\s*m\.off\('click',m\._openPopup,m\);/);
   assert.match(html, /m\.on\('click',\(\)=>openCard\(a\)\);/);
   assert.ok(!/refreshMarkerPopup/.test(html));
   assert.match(html, /bubblingMouseEvents:false/, 'a tap on a marker must not reach the map and close the sheet');
@@ -459,4 +459,19 @@ test('the photo button is in the app style, the input inside stays usable, no co
   // hidden by opacity, not display:none, so it keeps focus and its label
   assert.match(page, /\.pop \.addphoto input\{position:absolute;inset:0;[^}]*opacity:0/);
   assert.match(page, /\.pop label\.addphoto:focus-within\{outline:/);
+});
+
+test('the desktop card stays in view below the country button after every change', () => {
+  assert.match(html, /function fitPopup\(pp\)\{[\s\S]*?pp\.update\(\);[\s\S]*?const top=mr\.top\+popupTopRoom\(\)/);
+  assert.match(html, /bar=document\.getElementById\('ccbar'\)\.getBoundingClientRect\(\)/);
+  assert.match(html, /autoPanPaddingTopLeft:\[10,room\]/);
+  assert.match(html, /maxHeight:Math\.max\(200,document\.getElementById\('map'\)\.clientHeight-room-60\)/);
+  // opening, runways and frequencies (toggle), From pilots (onResize), photos (load) and redraws all fit again
+  assert.match(html, /map\.on\('popupopen',e=>setTimeout\(\(\)=>fitPopup\(e\.popup\),80\)\);/);
+  assert.match(html, /const fit=\(\)=>fitPopup\(markers\[a\.code\]&&markers\[a\.code\]\.getPopup\(\)\);/);
+  assert.match(html, /aiOpen=det\.open;[^\n]*\n\s*fit\(\);/);
+  assert.match(html, /onResize:fit/);
+  assert.match(html, /img\.addEventListener\('load',fit\)/);
+  assert.match(html, /m\.setPopupContent\(\(\)=>popup\(a\)\); fitPopup\(m\.getPopup\(\)\);/);
+  assert.ok(!/_updateLayout|_updatePosition/.test(html), 'no private Leaflet calls');
 });

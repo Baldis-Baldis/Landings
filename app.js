@@ -153,7 +153,7 @@ function compressImage(file,maxW=900,quality=0.72){
 // keep the card as a builder function, so it is always rebuilt in the current language.
 // Rebuild only after the current tap has finished: replacing the tapped button mid-click
 // makes Leaflet treat it as a click on the map and close the card.
-function refreshCard(a){ setTimeout(()=>{ if(cardSheet.isOpen()&&sheetA&&sheetA.code===a.code) fillSheet(a); else { const m=markers[a.code]; if(m) m.setPopupContent(()=>popup(a)); } },0); }
+function refreshCard(a){ setTimeout(()=>{ if(cardSheet.isOpen()&&sheetA&&sheetA.code===a.code) fillSheet(a); else { const m=markers[a.code]; if(m){ m.setPopupContent(()=>popup(a)); fitPopup(m.getPopup()); } } },0); }
 
 // The GitHub sync is gone. A token left by an old version is removed, it must not stay in the browser.
 try{ localStorage.removeItem('gh-token'); }catch(e){}
@@ -337,17 +337,10 @@ try{
   new MapOnly().addTo(map);
   // the country button lives inside the map container: clicks and wheel must not reach the map
   for(const id of ['ccbar','homehint']){ const e=document.getElementById(id); L.DomEvent.disableClickPropagation(e); L.DomEvent.disableScrollPropagation(e); }
-  // re-pan once the popup has its final size (photos, buttons), so it is never cut off at the top
   map.on('popupopen',()=>map.getContainer().classList.add('popopen'));
   map.on('popupclose',()=>map.getContainer().classList.remove('popopen'));
-  map.on('popupopen',e=>setTimeout(()=>{
-    try{
-      const c=e.popup.getElement(); if(!c) return;
-      const pr=c.getBoundingClientRect(), mr=map.getContainer().getBoundingClientRect();
-      const dy=pr.top-(mr.top+10), dx=Math.min(0,pr.left-(mr.left+10))||Math.max(0,pr.right-(mr.right-10));
-      if(dy<0||dx) map.panBy([dx,Math.min(0,dy)]);
-    }catch(_){}
-  },80));
+  // fit again once the card has its final size (photos, buttons)
+  map.on('popupopen',e=>setTimeout(()=>fitPopup(e.popup),80));
 }catch(e){ document.getElementById('map').innerHTML='<p style="padding:16px;color:#5B657A">Mapu se nepodařilo načíst / Map failed to load.</p>'; }
 let cluster=null;
 function clusterLayer(){
@@ -407,9 +400,32 @@ function newMarker(a){
   m.on('click',()=>openCard(a));
   return m;
 }
+// Room the desktop card must leave free at the top of the map: the country button with its chips (+ 8 px).
+function popupTopRoom(){
+  if(!map) return 10;
+  const mr=map.getContainer().getBoundingClientRect(), bar=document.getElementById('ccbar').getBoundingClientRect();
+  return bar.height?Math.max(10,Math.round(bar.bottom-mr.top)+8):10;
+}
+// Keep the whole desktop card in view and below the controls. Called after every change of its content
+// (opening, runways and frequencies, photos, From pilots); a card taller than the map scrolls inside.
+function fitPopup(pp){
+  if(!map||!pp||!pp.isOpen||!pp.isOpen()) return;
+  try{ pp.update(); }catch(e){}
+  const c=pp.getElement(); if(!c) return;
+  const mr=map.getContainer().getBoundingClientRect(), pr=c.getBoundingClientRect();
+  const top=mr.top+popupTopRoom(), left=mr.left+10, right=mr.right-10, bottom=mr.bottom-10;
+  let dx=0, dy=0;
+  if(pr.top<top) dy=pr.top-top; else if(pr.bottom>bottom) dy=Math.min(pr.bottom-bottom,pr.top-top);
+  if(pr.left<left) dx=pr.left-left; else if(pr.right>right) dx=pr.right-right;
+  if(dx||dy) map.panBy([Math.round(dx),Math.round(dy)],{animate:false});
+}
 // The popup is bound on first use. Its own click toggle is taken off: every opening goes through openCard.
 function popupOn(m,a){
-  if(!m.getPopup()){ m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]}); m.off('click',m._openPopup,m); }
+  if(!m.getPopup()){
+    const room=popupTopRoom();
+    m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-room-60),autoPanPaddingTopLeft:[10,room],autoPanPaddingBottomRight:[10,10]});
+    m.off('click',m._openPopup,m);
+  }
   m.openPopup();
 }
 // every country, the home country included, goes into clusters that split up at the same zoom;
@@ -702,7 +718,7 @@ function popup(a){
   html+=`<label><input type="checkbox" name="landed" class="landed-cb" ${v.date!==undefined?'checked':''}> ${t('here')}</label>
   <input type="date" name="landed-date" class="landed-date" value="${esc(v.date||'')}"><input type="text" name="landed-note" class="landed-note" placeholder="${esc(t('note'))}" value="${esc(v.note||'')}">`;
   d.innerHTML=html;
-  const fit=()=>{ const pp=markers[a.code]&&markers[a.code].getPopup(); if(pp&&pp.isOpen()){ try{ pp._updateLayout(); pp._updatePosition(); }catch(e){} } };
+  const fit=()=>fitPopup(markers[a.code]&&markers[a.code].getPopup());
   if(!isCustom){
     const sec=window.community.section(a.code,{t,signedIn:()=>!!account,onResize:fit,openPhoto:openLightbox});
     // The section swaps elements while handling a click. Leaflet then finds no card above the removed
@@ -746,7 +762,7 @@ function popup(a){
     }
     refreshCard(a); render();
   };
-  d.querySelectorAll('.gal img').forEach(img=>img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i));
+  d.querySelectorAll('.gal img').forEach(img=>{ img.onclick=()=>openLightbox(getPics(a).map(p=>p.url),+img.dataset.i); img.addEventListener('load',fit); });
   d.querySelectorAll('.pubpic').forEach(b=>b.onclick=async()=>{
     const cur=getPics(a), p=cur[+b.dataset.i]; if(!p) return;
     if(!p.pub&&!confirm(t('publishConfirm'))) return;
