@@ -412,10 +412,9 @@ function popupOn(m,a){
   if(!m.getPopup()){ m.bindPopup(()=>popup(a),{maxHeight:Math.max(200,document.getElementById('map').clientHeight-110),autoPanPadding:[10,10]}); m.off('click',m._openPopup,m); }
   m.openPopup();
 }
-// the home country is drawn airfield by airfield like Czechia always was; other countries, and a home country
-// too big for that, go into clusters
-const HOME_FLAT_MAX=400;
-function clustered(a){ return !!a.cc&&(a.cc!==home||(ccData[home]||[]).length>HOME_FLAT_MAX); }
+// every country, the home country included, goes into clusters that split up at the same zoom;
+// custom strips have no country and stay single
+function clustered(a){ return !!a.cc; }
 function addMarker(a,batch){
   const m=newMarker(a);
   if(clustered(a)){ if(batch) batch.push(m); else clusterLayer().addLayer(m); } else m.addTo(map);

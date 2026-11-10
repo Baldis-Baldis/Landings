@@ -440,3 +440,11 @@ test('the list draws in chunks of 200 and keeps its length after a change', () =
   // the count still covers all data, not only the drawn rows
   assert.match(html, /document\.getElementById\('cnt'\)\.textContent=data\.filter\(a=>visited\[a\.code\]\)\.length;/);
 });
+
+test('the home country clusters like every other country, custom strips stay single', () => {
+  assert.match(html, /function clustered\(a\)\{ return !!a\.cc; \}/);
+  assert.ok(!/HOME_FLAT_MAX/.test(html));
+  assert.match(html, /disableClusteringAtZoom:10/, 'one split-up zoom for all');
+  // the bubble still takes the colour of own airfields inside
+  assert.match(html, /ks\.includes\('gold'\)\?' fav':ks\.includes\('green'\)\?' has':ks\.includes\('want'\)\?' want':''/);
+});
