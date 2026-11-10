@@ -108,9 +108,14 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .pop .gal button{position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font:600 14px/1 Barlow,sans-serif;cursor:pointer;padding:0}
 .row .ic{font-size:13px;margin-left:4px}
 .row .ic.fav{color:var(--fav)}.row .ic.want{color:var(--want)}
-#lightbox{position:fixed;inset:0;z-index:9999;background:rgba(10,14,24,.92);display:none;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);cursor:zoom-out}
+/* the photo viewer: the browser must not zoom the page here, the photo zooms itself (viewer.js) */
+#lightbox{position:fixed;inset:0;z-index:9999;background:rgba(10,14,24,.92);display:none;align-items:center;justify-content:center;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);cursor:zoom-out;touch-action:none;overscroll-behavior:contain;overflow:hidden}
 #lightbox.on{display:flex}
-#lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px}
+#lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;transform-origin:0 0;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;cursor:zoom-in}
+#lightbox.zoomed img{cursor:grab}
+#lightbox button,#lightbox .lbcnt{z-index:2}
+#lightbox .lbhint{position:absolute;left:50%;bottom:calc(44px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2;padding:6px 12px;border-radius:14px;background:rgba(255,255,255,.18);color:#fff;font:500 13px Barlow,sans-serif;pointer-events:none;white-space:nowrap}
+#lightbox .lbhint[hidden]{display:none}
 #lightbox .lbnav{top:50%;transform:translateY(-50%);right:auto;display:none}
 #lightbox .lbprev{left:10px}#lightbox .lbnext{left:auto;right:10px}
 #lightbox.multi .lbnav{display:block}
@@ -284,7 +289,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <form id="authtermsform" hidden><p class="authhint" data-a="termsText"></p><label class="authcheck"><input id="authage" name="age" type="checkbox" required><span data-a="termsAge"></span></label><label class="authcheck"><input id="authterms" name="terms" type="checkbox" required><span data-a="termsAgree"></span></label><p class="authhint"><a href="terms.html" target="_blank" rel="noopener" data-a="termsLink"></a> · <a href="privacy.html" target="_blank" rel="noopener" data-a="privacyLink"></a></p><button type="submit" data-a="termsAccept"></button></form>
 <form id="authnickform" hidden><label><span data-a="nick"></span><input id="authnick" minlength="3" maxlength="30" required autocomplete="off"></label><p class="authhint" data-a="nickHint"></p><button type="submit" data-a="save"></button></form>
 <button id="authexport" type="button" data-a="exportData" hidden></button><button id="authdelete" type="button" data-a="deleteAccount" hidden></button><button id="authout" type="button" data-a="signOut" hidden></button><button id="authclose" type="button" data-a="close"></button></dialog>
-<div id="lightbox"><img alt=""><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div></div>
+<div id="lightbox"><img alt="" draggable="false"><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div><div class="lbhint" data-i data-t="photoHint" hidden></div></div>
 <div id="cardsheet" class="sheet cardsheet" hidden role="dialog" aria-labelledby="cstitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cstitle" tabindex="-1"></h2><div class="csmeta"></div></div><button type="button" class="csx" aria-label="×">×</button></div><div class="csbody"></div><div class="csattr"></div></div>
 <div id="ccback" class="ccback" hidden></div>
 <div id="ccsheet" class="sheet ccsheet" hidden role="dialog" aria-labelledby="cctitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cctitle" tabindex="-1" data-i data-t="ccTitle"></h2></div><button type="button" class="csx ccx" aria-label="Zavřít">×</button></div><div class="cctop"><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div></div><div class="csbody"><div class="cclist"></div></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div>
@@ -292,6 +297,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <script src="vendor/markercluster/leaflet.markercluster.js"></script>
 <script src="countries.js"></script>
 <script src="sheet.js"></script>
+<script src="viewer.js"></script>
 <script src="app.js"></script>
 <script src="vendor/supabase.js"></script>
 <script src="config.js"></script>

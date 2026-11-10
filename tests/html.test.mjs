@@ -314,20 +314,20 @@ test('the sheet uses the layout breakpoint, the back gesture, Esc and returns th
   assert.match(sheetJs, /window\.matchMedia\('\(max-width: 899px\)'\)/);
   assert.match(page, /@media \(min-width:900px\)/, 'the same breakpoint as the stacked layout');
   assert.match(sheetJs, /if\(!pushed\)\{ try\{ history\.pushState\(\{sheet:1\},''\); pushed=true; \}/);
-  assert.match(sheetJs, /window\.addEventListener\('popstate',\(\)=>\{ if\(popOwn>0\)\{ popOwn--; return; \} if\(current\)\{ pushed=false; current\.close\(true\); \} \}\);/);
+  assert.match(sheetJs, /window\.addEventListener\('popstate',\(\)=>\{ if\(popOwn>0\)\{ popOwn--; return; \} if\(top\)\{ const l=top; top=null; l\.onBack\(\); return; \} if\(current\)\{ pushed=false; current\.close\(true\); \} \}\);/, 'the photo layer first, then the sheet');
   assert.match(sheetJs, /if\(pushed&&!fromHistory\)\{ pushed=false; popOwn\+\+; history\.back\(\); \}/, 'closing by hand takes the history entry back, and its late popstate is ignored');
   assert.match(sheetJs, /e\.key==='Escape'&&current&&!lightboxOpen\(\)/);
   assert.match(sheetJs, /if\(title\) title\.focus\(\{preventScroll:true\}\);/);
   assert.match(sheetJs, /back\.focus\(\{preventScroll:true\}\)/);
   assert.ok(!/popstate|pushState|history\.back/.test(html), 'history handling lives only in sheet.js');
-  assert.match(page, /<script src="sheet\.js"><\/script>\n<script src="app\.js">/);
+  assert.match(page, /<script src="sheet\.js"><\/script>\n<script src="viewer\.js"><\/script>\n<script src="app\.js">/);
   assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/sheet\.js'/);
 });
 
 test('one sheet at a time: opening one hands the history entry over, nothing piles up', () => {
   assert.match(sheetJs, /if\(current&&current!==s\) current\.close\(false,true\);/);
   assert.match(sheetJs, /if\(!handover&&!current\)\{/, 'a hand-over neither goes back nor pushes');
-  assert.equal((sheetJs.match(/history\.pushState/g) || []).length, 1);
+  assert.equal((sheetJs.match(/history\.pushState/g) || []).length, 2, 'one entry for the sheets, one for the photo layer');
   // the card and the country picker both use it, no copied sheet code in app.js
   assert.match(html, /const cardSheet=Sheets\.make\(sheet,/);
   assert.match(html, /const ccPanel=Sheets\.make\(ccSheet,\{window:true,/);
@@ -493,4 +493,33 @@ test('my location is read once, only after a tap, never watched, stored or sent;
   assert.match(privacy, /We find your location\s+only when you tap My location/);
   const about = readFileSync(join(root, 'about.html'), 'utf8');
   assert.match(about, /Moje poloha a návrat na domovskou zemi/);
+});
+
+// --- photo viewer: its own zoom, the page never zooms ---
+const viewerJs = readFileSync(join(root, 'viewer.js'), 'utf8');
+test('the photo viewer zooms the photo itself, never the page, and resets on closing and on the next photo', () => {
+  assert.match(page, /#lightbox\{[^}]*touch-action:none/, 'the browser does not zoom the page in the viewer');
+  assert.match(page, /#lightbox img\{[^}]*transform-origin:0 0;touch-action:none/);
+  const vp = page.match(/<meta name="viewport" content="([^"]+)">/)[1];
+  assert.ok(!/maximum-scale|user-scalable/.test(vp));
+  assert.ok(!/document\.body\.style|documentElement\.style|body\.classList|visualViewport/.test(viewerJs), 'the viewer never touches the page');
+  assert.match(viewerJs, /const MAX=5, SLACK=80/);
+  assert.match(viewerJs, /ns=Math\.max\(1,Math\.min\(MAX,ns\)\)/);
+  assert.match(viewerJs, /function show\(\)\{ reset\(\);/, 'the next photo starts at 1x');
+  assert.match(viewerJs, /isOpen=false; lb\.classList\.remove\('on'\); reset\(\);/, 'closing resets the zoom');
+  assert.match(viewerJs, /function settle\(anim\)\{[^\n]*x=clampTo\(x,cx\); y=clampTo\(y,cy\);/, 'settles back to the edge');
+  assert.match(viewerJs, /layer=Sheets\.layer\(\(\)=>close\(true\)\);/, 'the back gesture closes it');
+  assert.match(viewerJs, /if\(e\.target===lb\) close\(\);/, 'only the dark background closes it, not the photo');
+  assert.match(viewerJs, /addEventListener\('wheel',e=>\{[^\n]*\n\s*if\(!isOpen\) return; e\.preventDefault\(\);/);
+  assert.match(viewerJs, /\{passive:false\}/);
+  // controls outside the photo, above it
+  assert.match(page, /<div id="lightbox"><img alt="" draggable="false"><button type="button" class="lbclose"/);
+  assert.match(page, /#lightbox button,#lightbox \.lbcnt\{z-index:2\}/);
+  // the hint once, only on touch screens
+  assert.match(viewerJs, /matchMedia\('\(pointer: coarse\)'\)/);
+  assert.match(viewerJs, /seen=localStorage\.getItem\(HINTKEY\)==='1'; localStorage\.setItem\(HINTKEY,'1'\);/);
+  assert.match(html, /photoHint:'Přibližte dvěma prsty, dvojité klepnutí vrátí'/);
+  // full size through the links the app already has, no new address
+  assert.match(html, /openLightbox\(getPics\(a\)\.map\(p=>p\.url\)/);
+  assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/viewer\.js'/);
 });

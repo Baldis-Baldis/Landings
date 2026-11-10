@@ -6,11 +6,11 @@
 // On wide screens a sheet made with {window:true} opens as a plain floating window (no drag, no history).
 const sheetMQ=window.matchMedia('(max-width: 899px)');
 const Sheets=(()=>{
-  let current=null, pushed=false, popOwn=0;
+  let current=null, pushed=false, popOwn=0, top=null;
   const lightboxOpen=()=>{ const lb=document.getElementById('lightbox'); return !!(lb&&lb.classList.contains('on')); };
   // back gesture or button closes the open sheet instead of leaving the app. A history.back() of our own lands
   // later (slowly in Safari), so its popstate must not close a sheet opened meanwhile.
-  window.addEventListener('popstate',()=>{ if(popOwn>0){ popOwn--; return; } if(current){ pushed=false; current.close(true); } });
+  window.addEventListener('popstate',()=>{ if(popOwn>0){ popOwn--; return; } if(top){ const l=top; top=null; l.onBack(); return; } if(current){ pushed=false; current.close(true); } });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&current&&!lightboxOpen()) current.close(); });
   window.addEventListener('resize',()=>{ if(current) current.fit(); });
   if(window.visualViewport){ window.visualViewport.addEventListener('resize',()=>{ if(current) current.fit(); }); window.visualViewport.addEventListener('scroll',()=>{ if(current) current.fit(); }); }
@@ -73,5 +73,13 @@ const Sheets=(()=>{
     root.querySelectorAll('.csgrip,.cshead').forEach(g=>{ g.addEventListener('pointerdown',down); g.addEventListener('pointermove',move); g.addEventListener('pointerup',up); g.addEventListener('pointercancel',up); });
     return s;
   }
-  return {make,current:()=>current};
+  // A layer above the sheets (the photo viewer) gets its own history entry: the back gesture closes it first,
+  // the sheet under it stays open. Closing it by hand takes the entry back, with the same guard.
+  function layer(onBack){
+    const l={onBack,pushed:false};
+    try{ history.pushState({layer:1},''); l.pushed=true; }catch(e){}
+    top=l;
+    return {close(){ if(top!==l) return; top=null; if(l.pushed){ popOwn++; history.back(); } }};
+  }
+  return {make,layer,current:()=>current};
 })();
