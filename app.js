@@ -359,13 +359,19 @@ async function goHome(){
   const pts=(ccData[home]||[]).map(a=>[a.lat,a.lon]);
   if(pts.length) map.fitBounds(pts,{padding:[30,30]});
 }
-// map credit in the current language; © OpenStreetMap stays the same in both
-const mapCredit=()=>'© OpenStreetMap · '+t('credit')(vfrDate('wef'));
+// map credit in the current language; © OpenStreetMap links to its copyright page (required by OSM) in both
+const OSM_COPYRIGHT='https://www.openstreetmap.org/copyright';
 let shownCredit='';
-// on the map (Leaflet's attribution control) and under the phone card sheet; called again on a language switch
+// a new tab for the link, without access back to the app
+function osmLink(){ const a=document.createElement('a'); a.href=OSM_COPYRIGHT; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent='© OpenStreetMap'; return a; }
+// on the map (Leaflet's attribution control takes HTML) and under the phone card sheet; called again on a language switch
 function setCredit(){
-  if(map&&map.attributionControl){ if(shownCredit) map.attributionControl.removeAttribution(shownCredit); shownCredit=mapCredit(); map.attributionControl.addAttribution(shownCredit); }
-  document.querySelector('#cardsheet .csattr').textContent='Leaflet | '+mapCredit();
+  const rest=' · '+t('credit')(vfrDate('wef'));
+  if(map&&map.attributionControl){
+    if(shownCredit) map.attributionControl.removeAttribution(shownCredit);
+    shownCredit=osmLink().outerHTML+esc(rest); map.attributionControl.addAttribution(shownCredit);
+  }
+  document.querySelector('#cardsheet .csattr').replaceChildren('Leaflet | ',osmLink(),rest);
 }
 // target inside the want pin (white 9, blue 6.6, white 4.4, blue 2.2 in a 30x40 box, scaled to 24x34)
 const WANT_TARGET='<circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#213F8F"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#213F8F"/>';
@@ -1028,7 +1034,7 @@ moreBtn.onclick=e=>{ e.stopPropagation(); setMenu(!menu.classList.contains('on')
 menu.addEventListener('click',e=>{ if(e.target.closest('button')) setMenu(false); });
 document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.contains(e.target)&&e.target!==moreBtn) setMenu(false); });
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v50'; // matches the cache name in sw.js
+const APP_VERSION='landings-v51'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

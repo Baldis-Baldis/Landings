@@ -352,11 +352,15 @@ test('the map credit follows the language, © OpenStreetMap stays the same', () 
   const credit = l => vm.runInNewContext(`(${html.match(new RegExp(`${l}:\\{title:.*?credit:(w=>'[^']*'\\+w\\+'[^']*')`))[1]})`)('03 SEP 26');
   assert.equal(credit('cs'), 'seznam letišť: VFR příručka ŘLP ČR (WEF 03 SEP 26) · údaje: OurAirports');
   assert.equal(credit('en'), 'airfield list: ANS CR VFR Manual (WEF 03 SEP 26) · data: OurAirports');
-  assert.match(html, /const mapCredit=\(\)=>'© OpenStreetMap · '\+t\('credit'\)\(vfrDate\('wef'\)\);/);
   assert.ok(!/MAP_CREDIT/.test(html), 'no fixed Czech credit');
-  // the tile layer carries no credit of its own, the control gets the current one and swaps it on a switch
+  // © OpenStreetMap links to the copyright page in a new tab without access back to the app
+  assert.match(html, /const OSM_COPYRIGHT='https:\/\/www\.openstreetmap\.org\/copyright';/);
+  assert.match(html, /a\.href=OSM_COPYRIGHT; a\.target='_blank'; a\.rel='noopener noreferrer'; a\.textContent='© OpenStreetMap';/);
+  // the tile layer carries no credit of its own, the control gets the current one and swaps it on a switch;
+  // the translated part goes into its HTML escaped
   assert.match(html, /\{maxZoom:18\}\)\.addTo\(map\);\n  setCredit\(\);/);
-  assert.match(html, /removeAttribution\(shownCredit\); shownCredit=mapCredit\(\); map\.attributionControl\.addAttribution\(shownCredit\);/);
+  assert.match(html, /const rest=' · '\+t\('credit'\)\(vfrDate\('wef'\)\);/);
+  assert.match(html, /if\(shownCredit\) map\.attributionControl\.removeAttribution\(shownCredit\);\n    shownCredit=osmLink\(\)\.outerHTML\+esc\(rest\); map\.attributionControl\.addAttribution\(shownCredit\);/);
   const applyLang = html.match(/function applyLang\(\)\{[\s\S]*?\n\}/)[0];
   assert.match(applyLang, /setCredit\(\);/);
   // labels of the photo viewer follow the language too
@@ -372,7 +376,7 @@ test('the sheet markup: dialog, title, close button, map credit, safe area, hidd
   assert.match(page, /<button type="button" class="csx"/);
   assert.match(page, /\.csattr\{[^}]*env\(safe-area-inset-bottom\)/);
   assert.match(page, /body\.cardopen \.ccbar,body\.cardopen \.homehint,body\.cardopen \.leaflet-control-attribution\{visibility:hidden\}/);
-  assert.match(html, /document\.querySelector\('#cardsheet \.csattr'\)\.textContent='Leaflet \| '\+mapCredit\(\);/, 'the map credit stays visible in the sheet');
+  assert.match(html, /document\.querySelector\('#cardsheet \.csattr'\)\.replaceChildren\('Leaflet \| ',osmLink\(\),rest\);/, 'the map credit stays visible in the sheet');
   // texts in the sheet header go in as text
   assert.match(html, /sheet\.querySelector\('#cstitle'\)\.textContent=a\.name;/);
   assert.match(html, /sheet\.querySelector\('\.csmeta'\)\.textContent=cardMeta\(a\);/);
