@@ -450,6 +450,25 @@ test('the home country clusters like every other country, custom strips stay sin
   assert.match(html, /ks\.includes\('gold'\)\?' fav':ks\.includes\('green'\)\?' has':ks\.includes\('want'\)\?' want':''/);
 });
 
+test('grouping can be switched off in the country panel and is remembered', () => {
+  assert.match(page, /<div class="cctop"><label class="ccgroup"><input type="checkbox" class="ccgroupcb" name="ccgroup" checked><span data-i data-t="ccGroup"><\/span><\/label><p class="ccmany" data-i data-t="ccMany" hidden><\/p>/);
+  assert.match(html, /ccGroup:'Seskupovat letiště',ccMany:'Mnoho letišť – mapa může být pomalejší'/);
+  assert.match(html, /ccGroup:'Group airfields',ccMany:'Many airfields – the map may be slower'/);
+  // only "off" is stored, every storage access is guarded
+  assert.match(html, /let grouping=true; try\{ grouping=localStorage\.getItem\(GROUPKEY\)!=='1'; \}catch\(e\)\{\}/);
+  assert.match(html, /try\{ if\(on\) localStorage\.removeItem\(GROUPKEY\); else localStorage\.setItem\(GROUPKEY,'1'\); \}catch\(e\)\{\}/);
+  assert.match(html, /MANY_FLAT=1500/);
+  // every place that held the clusters goes through the layer of the current mode
+  assert.match(html, /function ccLayer\(\)\{ return grouping\?clusterLayer\(\):flatLayer\(\); \}/);
+  assert.equal(html.match(/clusterLayer\(\)/g).length, 2, 'clusterLayer only in its definition and ccLayer');
+  assert.match(html, /function refreshClusters\(\)\{ if\(grouping&&/);
+  // an open desktop card is opened again after the switch, never rebuilt with update()
+  assert.match(html, /if\(open\._map\) popupOn\(open,a\);/);
+  const doc = readFileSync(join(root, 'about.html'), 'utf8');
+  assert.match(doc, /které lze v panelu Země vypnout/);
+  assert.match(doc, /which you can switch off in the Countries panel/);
+});
+
 test('the photo button is in the app style, the input inside stays usable, no counter until the limit', () => {
   assert.match(html, /<label class="addphoto">\$\{t\('photoAdd'\)\}<input type="file" name="cphoto" accept="image\/\*" multiple class="cphoto"><\/label>/);
   assert.match(html, /<div class="photolimit">\$\{t\('photoLimit'\)\}<\/div>/);

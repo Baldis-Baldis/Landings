@@ -187,6 +187,9 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .ccadd{font:600 12px Barlow,sans-serif;padding:3px 8px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);cursor:pointer}
 .ccadd.all{border-color:var(--ink)}
 .cchomehint{margin:0 0 8px;font-size:12.5px;color:var(--ink2)}
+.ccgroup{display:flex;align-items:center;gap:8px;min-height:32px;margin:0 0 4px;font:600 14px Barlow,sans-serif;color:var(--ink);cursor:pointer}
+.ccgroup input{width:16px;height:16px;margin:0;accent-color:var(--ink)}
+.ccmany{margin:-4px 0 8px 24px;font-size:12.5px;color:#9A5B00}
 .ccchip.home::before{content:'⌂ '}
 .homehint{position:absolute;bottom:44px;left:10px;right:10px;margin:0 auto;max-width:420px;z-index:1000;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;font:500 13px Barlow,sans-serif;color:var(--ink);background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .homehint[hidden]{display:none}
@@ -296,7 +299,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <div id="lightbox"><img alt="" draggable="false"><button type="button" class="lbclose" aria-label="Zavřít">×</button><button type="button" class="lbnav lbprev" aria-label="Předchozí">‹</button><button type="button" class="lbnav lbnext" aria-label="Další">›</button><div class="lbcnt"></div><div class="lbhint" data-i data-t="photoHint" hidden></div></div>
 <div id="cardsheet" class="sheet cardsheet" hidden role="dialog" aria-labelledby="cstitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cstitle" tabindex="-1"></h2><div class="csmeta"></div></div><button type="button" class="csx" aria-label="×">×</button></div><div class="csbody"></div><div class="csattr"></div></div>
 <div id="ccback" class="ccback" hidden></div>
-<div id="ccsheet" class="sheet ccsheet" hidden role="dialog" aria-labelledby="cctitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cctitle" tabindex="-1" data-i data-t="ccTitle"></h2></div><button type="button" class="csx ccx" aria-label="Zavřít">×</button></div><div class="cctop"><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div></div><div class="csbody"><div class="cclist"></div></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div>
+<div id="ccsheet" class="sheet ccsheet" hidden role="dialog" aria-labelledby="cctitle"><div class="csgrip" aria-hidden="true"><span></span></div><div class="cshead"><div class="cstext"><h2 id="cctitle" tabindex="-1" data-i data-t="ccTitle"></h2></div><button type="button" class="csx ccx" aria-label="Zavřít">×</button></div><div class="cctop"><label class="ccgroup"><input type="checkbox" class="ccgroupcb" name="ccgroup" checked><span data-i data-t="ccGroup"></span></label><p class="ccmany" data-i data-t="ccMany" hidden></p><p class="cchomehint" data-i data-t="homePanelHint" hidden></p><input type="search" class="ccq" name="ccq" autocomplete="off"><div class="ccpicks"></div></div><div class="csbody"><div class="cclist"></div></div><div class="ccfoot"><span class="cchint" data-i data-t="ccHint"></span><button type="button" class="ccdone" data-i data-t="ccDone"></button></div></div>
 <script src="vendor/leaflet/leaflet.js"></script>
 <script src="vendor/markercluster/leaflet.markercluster.js"></script>
 <script src="countries.js"></script>
