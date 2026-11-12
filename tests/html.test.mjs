@@ -348,13 +348,31 @@ test('the country sheet: title, search and quick picks under the header, Done at
   assert.match(page, /\.ccsheet\.win \.csgrip\{display:none\}/);
 });
 
+test('the map credit follows the language, © OpenStreetMap stays the same', () => {
+  const credit = l => vm.runInNewContext(`(${html.match(new RegExp(`${l}:\\{title:.*?credit:(w=>'[^']*'\\+w\\+'[^']*')`))[1]})`)('03 SEP 26');
+  assert.equal(credit('cs'), 'seznam letišť: VFR příručka ŘLP ČR (WEF 03 SEP 26) · údaje: OurAirports');
+  assert.equal(credit('en'), 'airfield list: ANS CR VFR Manual (WEF 03 SEP 26) · data: OurAirports');
+  assert.match(html, /const mapCredit=\(\)=>'© OpenStreetMap · '\+t\('credit'\)\(vfrDate\('wef'\)\);/);
+  assert.ok(!/MAP_CREDIT/.test(html), 'no fixed Czech credit');
+  // the tile layer carries no credit of its own, the control gets the current one and swaps it on a switch
+  assert.match(html, /\{maxZoom:18\}\)\.addTo\(map\);\n  setCredit\(\);/);
+  assert.match(html, /removeAttribution\(shownCredit\); shownCredit=mapCredit\(\); map\.attributionControl\.addAttribution\(shownCredit\);/);
+  const applyLang = html.match(/function applyLang\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(applyLang, /setCredit\(\);/);
+  // labels of the photo viewer follow the language too
+  assert.match(applyLang, /\.lbprev'\)\.setAttribute\('aria-label',t\('photoPrev'\)\)/);
+  assert.match(applyLang, /\.lbnext'\)\.setAttribute\('aria-label',t\('photoNext'\)\)/);
+  assert.match(applyLang, /\.lbclose'\)\.setAttribute\('aria-label',t\('ccClose'\)\)/);
+  assert.ok(!/ŘLP ČR VFR Manual/.test(html), 'English texts name the ANS CR');
+});
+
 test('the sheet markup: dialog, title, close button, map credit, safe area, hidden controls', () => {
   assert.match(page, /<div id="cardsheet" class="sheet cardsheet" hidden role="dialog" aria-labelledby="cstitle">/);
   assert.match(page, /<h2 id="cstitle" tabindex="-1"><\/h2>/);
   assert.match(page, /<button type="button" class="csx"/);
   assert.match(page, /\.csattr\{[^}]*env\(safe-area-inset-bottom\)/);
   assert.match(page, /body\.cardopen \.ccbar,body\.cardopen \.homehint,body\.cardopen \.leaflet-control-attribution\{visibility:hidden\}/);
-  assert.match(html, /sheet\.querySelector\('\.csattr'\)\.textContent=/, 'the map credit stays visible in the sheet');
+  assert.match(html, /document\.querySelector\('#cardsheet \.csattr'\)\.textContent='Leaflet \| '\+mapCredit\(\);/, 'the map credit stays visible in the sheet');
   // texts in the sheet header go in as text
   assert.match(html, /sheet\.querySelector\('#cstitle'\)\.textContent=a\.name;/);
   assert.match(html, /sheet\.querySelector\('\.csmeta'\)\.textContent=cardMeta\(a\);/);
