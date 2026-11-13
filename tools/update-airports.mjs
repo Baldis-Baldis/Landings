@@ -131,6 +131,14 @@ export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz
   return { countries: out, exceptions: Object.fromEntries(Object.entries(exceptions).sort((a, b) => lt(a[0], b[0]))) };
 }
 
+// the search index over every country: code, name and town only (no positions, no custom strips), by country.
+// The app downloads it on the first search and finds airfields of countries that are not shown.
+export function searchIndex(countries) {
+  const c = {};
+  for (const cc of Object.keys(countries).sort(lt)) c[cc] = countries[cc].airports.map(a => [a.code, a.name, a.town || '']);
+  return { v: 1, c };
+}
+
 // counts in the files we have now; before the first per-country run, the old combined files
 export function previousCounts(root) {
   const dir = join(root, 'data', 'countries'), prev = {};
@@ -197,10 +205,15 @@ export async function run({ root, getCsv = fetchCsv, today = new Date().toISOStr
   if (oldIdx) delete oldIdx.generated;
   const idxSame = oldIdx && stable(oldIdx) === stable(index);
   if (!idxSame) files[ipath] = JSON.stringify({ generated: today, ...index });
+  // the search index comes from the same checked data, so it is written only when they pass, and only on a change
+  const spath = join(dir, 'search.json'), search = JSON.stringify(searchIndex(countries));
+  let oldSearch = null; try { oldSearch = readFileSync(spath, 'utf8'); } catch {}
+  if (oldSearch !== search) files[spath] = search;
   // write through temporary files so a crash never leaves half a file behind
   for (const [p, text] of Object.entries(files)) if (text !== null) { writeFileSync(p + '.tmp', text); renameSync(p + '.tmp', p); }
   for (const [c, v] of Object.entries(index.countries)) log(`${c}: ${v.n} airfields, info ${v.info}, ${v.bytes} B${files[join(dir, c + '.json')] ? ' (updated)' : ''}`);
   log(`exceptions: ${Object.keys(exceptions).length}${idxSame ? '' : ' (index updated)'}`);
+  log(`search: ${Buffer.byteLength(search)} B${files[spath] ? ' (updated)' : ''}`);
   return { index, written: Object.keys(files).filter(p => files[p] !== null) };
 }
 

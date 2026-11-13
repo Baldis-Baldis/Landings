@@ -214,7 +214,7 @@ const C = vm.runInNewContext(countriesSrc + ';({COUNTRIES,COUNTRY_REGIONS,COUNTR
 test('country data come only from whitelisted codes', () => {
   assert.match(html, /const CCS=Object\.keys\(COUNTRIES\)\.filter\(c=>COUNTRIES\[c\]\.live\)/);
   assert.match(html, /if\(!CCS\.includes\(c\)\) return Promise\.reject\(new Error\('unknown country'\)\);\s*if\(!ccLoading\[c\]\) ccLoading\[c\]=fetch\('data\/countries\/'\+c\+'\.json'\)/);
-  assert.deepEqual(html.match(/fetch\('data\/[^)]*\)/g), ["fetch('data/countries/'+c+'.json')", "fetch('data/countries/index.json')"], 'country file and index are the only data URLs');
+  assert.deepEqual(html.match(/fetch\('data\/[^)]*\)/g), ["fetch('data/countries/'+c+'.json')", "fetch('data/countries/index.json')", "fetch('data/countries/search.json')"], 'country file, index and search index are the only data URLs');
   // a stored selection keeps only whitelisted codes, in whitelist order, with CZ first
   assert.match(html, /storedSel=CCS\.filter\(c=>x\.includes\(c\)\)/);
   assert.match(html, /const h=localStorage\.getItem\(HOMEKEY\); if\(CCS\.includes\(h\)\) home=h;/);
@@ -474,6 +474,150 @@ test('the home country clusters like every other country, custom strips stay sin
   assert.match(html, /disableClusteringAtZoom:10/, 'one split-up zoom for all');
   // the bubble still takes the colour of own airfields inside
   assert.match(html, /ks\.includes\('gold'\)\?' fav':ks\.includes\('green'\)\?' has':ks\.includes\('want'\)\?' want':''/);
+});
+
+// --- search in all countries ---
+const searchCode = html.slice(html.indexOf('const foldFields='), html.indexOf('function render(){'));
+const foldLine = html.match(/const fold=.*/)[0];
+// a tiny stand-in for elements: enough to see what text goes where
+const fakeEl = (tag, cls, text) => ({ tag, cls, text: text == null ? '' : String(text), kids: [], attrs: {},
+  append(...x) { this.kids.push(...x); }, setAttribute(k, v) { this.attrs[k] = v; } });
+const allText = n => typeof n === 'string' ? n : n.text + n.kids.map(allText).join('');
+function searchWorld(fetchImpl, selected = ['CZ']) {
+  const ctx = vm.createContext({ CCS: ['CZ', 'FR', 'DE', 'GB'], selCC: selected, renders: 0, fetch: fetchImpl, el: fakeEl, t: k => k,
+    openElsewhere: (cc, code) => { ctx.opened = cc + ':' + code; } });
+  ctx.render = () => { ctx.renders++; };
+  vm.runInContext(foldLine + '\n' + searchCode, ctx);
+  return ctx;
+}
+const INDEX = { v: 1, c: {
+  CZ: [['LKPR', 'Praha Ruzyně', 'Praha']],
+  FR: [['LFPG', 'Paris Charles de Gaulle', 'Roissy'], ['LFOE', 'Évreux-Fauville', 'Évreux'], ...Array.from({ length: 60 }, (_, i) => [`FR-${String(i).padStart(4, '0')}`, `Aérodrome ${i}`, 'Ville'])],
+  DE: [['EDDF', 'Frankfurt am Main', 'Frankfurt'], ['XFPG', 'Lfpg Lookalike', '']],
+  ZZ: [['ZZZZ', 'Not a country', '']],
+} };
+const okFetch = async () => ({ ok: true, json: async () => INDEX });
+const ticks = () => new Promise(r => setTimeout(r, 0));
+
+test('the search index downloads only on the first search, never at start', () => {
+  assert.equal(html.match(/loadSearch\(\)/g).length, 2, 'its definition and the search box only');
+  assert.match(html, /q\.oninput=\(\)=>\{ clearPeek\(\); if\(q\.value\.trim\(\)\) loadSearch\(\); render\(\); \};/);
+  assert.match(html, /sLoading=fetch\('data\/countries\/search\.json'\)/);
+  // the service worker caches it like the other country files: same origin, no exception for it
+  assert.ok(!/search\.json/.test(readFileSync(join(root, 'sw.js'), 'utf8')));
+});
+
+test('search finds airfields of other countries without accents, by code, name and town, up to 50', async () => {
+  const w = searchWorld(okFetch);
+  assert.equal(vm.runInContext("elsewhere('evreux','all')", w), null, 'nothing before the index is there');
+  vm.runInContext('loadSearch()', w); await ticks(); await ticks();
+  assert.ok(w.renders >= 1, 'the list is drawn again when the index arrives');
+  // values cross from the vm context through JSON, so arrays compare with arrays of this realm
+  const find = (s, mode = 'all') => JSON.parse(JSON.stringify(vm.runInContext(`elsewhere(${JSON.stringify(s)},${JSON.stringify(mode)})`, w)));
+  assert.deepEqual(find('evreux').hits.map(r => r.code), ['LFOE'], 'Évreux without accents, by town and name');
+  assert.deepEqual(find('frankfurt').hits.map(r => r.cc), ['DE']);
+  assert.deepEqual(find('lfpg').hits.map(r => r.code), ['LFPG', 'XFPG'], 'an exact code comes first');
+  assert.deepEqual(find('praha').hits, [], 'the shown countries are not repeated');
+  assert.deepEqual(find('not a country').hits, [], 'only whitelisted countries');
+  assert.equal(find('a'), null, 'two letters at least');
+  assert.equal(find('paris', 'fav'), null, 'other countries only with the filter All');
+  const many = find('aerodrome');
+  assert.equal(many.hits.length, 50);
+  assert.equal(many.more, true);
+  // the list itself searches the same way
+  assert.equal(vm.runInContext("searchText({name:'České Budějovice',code:'LKCS',town:'Planá'})", w).includes('ceske budejovice'), true);
+  assert.match(html, /if\(s&&!searchText\(a\)\.includes\(s\)\) return false;/);
+  assert.match(html, /const s=fold\(q\.value\.trim\(\)\), mode=f\.value;/);
+});
+
+test('search results from other countries are built from text only, with a note above 50 and offline', async () => {
+  assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML/.test(searchCode), 'textContent only');
+  const w = searchWorld(okFetch);
+  vm.runInContext('loadSearch()', w); await ticks(); await ticks();
+  const box = vm.runInContext("elsewhereBlock(elsewhere('<img src=x onerror=alert(1)>','all'))", w);
+  assert.equal(box, null, 'no hits, no block');
+  const b = vm.runInContext("elsewhereBlock(elsewhere('aerodrome','all'))", w);
+  assert.equal(b.kids[0].text, 'otherCountries');
+  assert.equal(b.kids.filter(k => k.cls === 'row elrow').length, 50);
+  assert.equal(b.kids.at(-1).text, 'searchMore');
+  const row = b.kids[1];
+  assert.match(allText(row), /^⌖Aérodrome 0FRFR-0000 Ville$/);
+  row.onclick(); assert.equal(w.opened, 'FR:FR-0000');
+  row.onkeydown({ key: 'Enter', preventDefault() {} });
+  // without the index and without a network: only the shown countries, with a note; the next search tries again
+  const off = searchWorld(async () => { throw new Error('offline'); });
+  vm.runInContext('loadSearch()', off); await ticks(); await ticks();
+  const note = vm.runInContext("elsewhereBlock(elsewhere('paris','all'))", off);
+  assert.equal(note.kids[0].text, 'searchOffline');
+  off.fetch = okFetch;
+  vm.runInContext('loadSearch()', off); await ticks(); await ticks();
+  assert.deepEqual([...vm.runInContext("elsewhere('paris','all')", off).hits.map(r => r.code)], ['LFPG']);
+});
+
+// --- the temporary marker of an airfield from a country that is not shown ---
+const peekCode = html.slice(html.indexOf('// --- an airfield of a country that is not shown'), html.indexOf('function showOnMap(a){'));
+function peekWorld(selected = ['CZ']) {
+  const A = { code: 'LFPG', name: 'Paris', lat: 49, lon: 2.5, cc: 'FR' }, B = { code: 'LFOE', name: 'Évreux', lat: 49, lon: 1.2, cc: 'FR' };
+  const marker = a => { const h = {}; return { _code: a.code, _map: null, on(e, f) { h[e] = f; }, fire(e) { if (h[e]) h[e](); }, addTo(m) { this._map = m; return this; } }; };
+  const ctx = vm.createContext({ markers: {}, sheetA: null, ccData: { FR: [A, B] }, CCS: ['CZ', 'FR'], selCC: selected, ccOffer: '', views: 0,
+    cardSheet: { isOpen: () => false, close() {} }, allData: () => [], loadCountry: async () => {}, newMarker: marker, style() {},
+    status() {}, t: k => k, document: { activeElement: null } });
+  // removing a marker closes its card, as in Leaflet
+  ctx.map = { removeLayer(m) { m._map = null; m.fire('popupclose'); }, setView() { ctx.views++; } };
+  ctx.openCard = a => { ctx.opened = a.code; };
+  ctx.showOnMap = a => { ctx.shown = a.code; };
+  ctx.applyCountries = async () => { ctx.applied = [...ctx.selCC]; };
+  vm.runInContext('let peek=null;\n' + peekCode, ctx);
+  return { ctx, A, B };
+}
+
+test('an airfield from another country shows as one temporary marker with its card, the selection stays', async () => {
+  const { ctx } = peekWorld();
+  await vm.runInContext("openElsewhere('FR','LFPG')", ctx);
+  const m = ctx.markers.LFPG;
+  assert.ok(m && m._map === ctx.map, 'one marker on the map');
+  assert.deepEqual(Object.keys(ctx.markers), ['LFPG'], 'no other airfield of that country');
+  assert.equal(ctx.opened, 'LFPG');
+  assert.equal(ctx.views, 1, 'the map moves to it');
+  assert.deepEqual([...ctx.selCC], ['CZ'], 'the selection of countries does not change');
+  assert.equal(ctx.applied, undefined);
+  assert.equal(vm.runInContext("findShown('LFPG').name", ctx), 'Paris', 'the card can find it');
+  // closing the card takes it away
+  m.fire('popupclose');
+  assert.deepEqual(Object.keys(ctx.markers), []);
+  assert.equal(m._map, null);
+  // another one replaces it, a new search removes it
+  await vm.runInContext("openElsewhere('FR','LFPG')", ctx);
+  await vm.runInContext("openElsewhere('FR','LFOE')", ctx);
+  assert.deepEqual(Object.keys(ctx.markers), ['LFOE']);
+  vm.runInContext('clearPeek()', ctx);
+  assert.deepEqual(Object.keys(ctx.markers), []);
+  // the new search calls clearPeek, opening another card and removing the country's markers do too
+  assert.match(html, /function openCard\(a,opener\)\{\n  if\(peek&&peek\.a\.code!==a\.code\) clearPeek\(\);/);
+  assert.match(html, /onHidden:\(\)=>\{ if\(!cardSheet\.isOpen\(\)\)\{ sheetBody\.textContent=''; sheetA=null; clearPeek\(\); \} \}/);
+  assert.match(html, /function dropMarker\(code\)\{\n  if\(peek&&peek\.a\.code===code\)\{ clearPeek\(\); return; \}/);
+});
+
+test('"Show all airfields" in the card adds the country; an airfield of a shown country opens as usual', async () => {
+  const { ctx, A } = peekWorld();
+  await vm.runInContext("openElsewhere('FR','LFPG')", ctx);
+  ctx.A = A;
+  await vm.runInContext('showAllOf(A)', ctx);
+  assert.deepEqual([...ctx.selCC], ['CZ', 'FR']);
+  assert.deepEqual(ctx.applied, ['CZ', 'FR']);
+  assert.deepEqual(Object.keys(ctx.markers), [], 'the temporary marker gives way to the country\'s own');
+  assert.equal(ctx.shown, 'LFPG', 'and the card opens on it');
+  const shown = peekWorld(['CZ', 'FR']);
+  await vm.runInContext("openElsewhere('FR','LFOE')", shown.ctx);
+  assert.equal(shown.ctx.shown, 'LFOE');
+  assert.deepEqual(Object.keys(shown.ctx.markers), []);
+  // the link: only for a country that is not shown, text only, the click stays in the card
+  assert.match(html, /if\(!isCustom&&CCS\.includes\(a\.cc\)&&!selCC\.includes\(a\.cc\)\)\{\n    const all=document\.createElement\('button'\); all\.type='button'; all\.className='showall'; all\.textContent=t\('showAll'\)\(ccName\(a\.cc\)\);\n    all\.onclick=e=>\{ e\.stopPropagation\(\); showAllOf\(a\); \};/);
+  assert.match(html, /showAll:c=>'Zobrazit všechna letiště: '\+c/);
+  assert.match(html, /showAll:c=>'Show all airfields: '\+c/);
+  // its marker changes with landed, favourite and want to visit like any other, and its country is in Mine & selected
+  assert.match(html, /if\(peek&&peek\.m===old\)\{ peek\.m=m; peek\.swap=true;/);
+  assert.match(html, /return CCS\.filter\(c=>c===home\|\|selCC\.includes\(c\)\|\|mine\[c\]\|\|fl\.has\(c\)\);/);
 });
 
 test('grouping can be switched off in the country panel and is remembered', () => {

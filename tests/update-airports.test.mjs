@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseCsv, build, run, loadCountries, fetchCsv, checkCounts, ftToM, appCode } from '../tools/update-airports.mjs';
+import { parseCsv, build, run, loadCountries, fetchCsv, checkCounts, ftToM, appCode, searchIndex } from '../tools/update-airports.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const { COUNTRIES, countryOfCode } = loadCountries(ROOT);
@@ -71,13 +71,47 @@ test('data are split per country, Czech info is matched to the VFR codes, odd co
 test('a run writes per-country files and an index, a second run changes nothing', async () => {
   const dir = tempRoot(); onlyLive(dir);
   const first = await run({ root: dir, getCsv: csvFrom(world()), today: '2026-11-07', log: quiet });
-  assert.equal(first.written.length, 4);
+  assert.equal(first.written.length, 5, 'three countries, the index and the search index');
   const idx = JSON.parse(readFileSync(join(dir, 'data', 'countries', 'index.json'), 'utf8'));
   assert.deepEqual(Object.keys(idx.countries), ['AT', 'CZ', 'SK']);
   assert.equal(idx.countries.CZ.n, 1);
   assert.equal(idx.countries.SK.bytes, readFileSync(join(dir, 'data', 'countries', 'SK.json')).length);
   const again = await run({ root: dir, getCsv: csvFrom(world()), today: '2026-12-02', log: quiet });
   assert.deepEqual(again.written, [], 'same data, no new commit');
+});
+
+test('a run writes the search index: code, name and town of every airfield by country, no positions', async () => {
+  const dir = tempRoot(); onlyLive(dir);
+  await run({ root: dir, getCsv: csvFrom(world()), today: '2026-11-07', log: quiet });
+  const d = join(dir, 'data', 'countries');
+  const s = JSON.parse(readFileSync(join(d, 'search.json'), 'utf8'));
+  assert.equal(s.v, 1);
+  assert.deepEqual(Object.keys(s.c), ['AT', 'CZ', 'SK']);
+  for (const c of Object.keys(s.c)) {
+    const f = JSON.parse(readFileSync(join(d, c + '.json'), 'utf8'));
+    assert.deepEqual(s.c[c], f.airports.map(a => [a.code, a.name, a.town || '']), c);
+  }
+  assert.deepEqual(s.c.CZ, [['LKAA', 'Ručně vedená plocha', 'Obec']]);
+  assert.ok(!/lat|lon|48\.1|17\.1/.test(readFileSync(join(d, 'search.json'), 'utf8')), 'no coordinates');
+  // unchanged data leave it alone, broken data never reach it
+  const again = await run({ root: dir, getCsv: csvFrom(world()), today: '2026-12-02', log: quiet });
+  assert.ok(!again.written.some(p => p.endsWith('search.json')));
+  const before = readFileSync(join(d, 'search.json'), 'utf8');
+  await assert.rejects(run({ root: dir, getCsv: csvFrom(world({ at: 0 })), log: quiet }), /AT: airfields 10 -> 0/);
+  assert.equal(readFileSync(join(d, 'search.json'), 'utf8'), before);
+});
+
+test('the published search index agrees with the country files exactly', () => {
+  const d = join(ROOT, 'data', 'countries');
+  const idx = JSON.parse(readFileSync(join(d, 'index.json'), 'utf8'));
+  const countries = Object.fromEntries(Object.keys(idx.countries).map(c => [c, { airports: JSON.parse(readFileSync(join(d, c + '.json'), 'utf8')).airports }]));
+  assert.equal(readFileSync(join(d, 'search.json'), 'utf8'), JSON.stringify(searchIndex(countries)));
+  // custom strips never get there: they are not in the data files at all
+  const s = JSON.parse(readFileSync(join(d, 'search.json'), 'utf8'));
+  for (const rows of Object.values(s.c)) for (const r of rows) {
+    assert.equal(r.length, 3, r[0]);
+    assert.ok(!/^C[0-9A-Z]{7,}$/.test(r[0]), r[0] + ' looks like a custom strip');
+  }
 });
 
 test('a failed download writes nothing', async () => {
