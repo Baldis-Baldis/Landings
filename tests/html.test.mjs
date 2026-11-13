@@ -257,6 +257,10 @@ test('every country has its land neighbours, both ways, and only from the list',
     assert.ok(C.COUNTRY_NEIGHBOURS[n].includes(c), n + ' should list ' + c);
   }
   assert.deepEqual([...C.COUNTRY_NEIGHBOURS.CZ].sort(), ['AT', 'DE', 'PL', 'SK']);
+  // Gibraltar borders Spain, the islands have no land neighbours
+  assert.deepEqual([...C.COUNTRY_NEIGHBOURS.GI], ['ES']);
+  assert.ok(C.COUNTRY_NEIGHBOURS.ES.includes('GI'));
+  for (const c of ['JE', 'GG', 'IM', 'FO']) assert.deepEqual([...C.COUNTRY_NEIGHBOURS[c]], [], c);
 });
 
 test('the home country comes from the browser language, never a guess for plain English', () => {
@@ -451,8 +455,8 @@ test('no region is over 1 MB with today\'s data, and every new country offers it
 test('the about page counts the other countries with data', () => {
   const doc = readFileSync(join(root, 'about.html'), 'utf8');
   const others = Object.keys(C.COUNTRIES).filter(c => C.COUNTRIES[c].live && c !== 'CZ').length;
-  assert.match(doc, new RegExp(`Letiště ve ${others} dalších evropských zemích`));
-  assert.match(doc, new RegExp(`Airfields in ${others} other European countries`));
+  assert.match(doc, new RegExp(`Letiště ve ${others} dalších evropských zemích a územích`));
+  assert.match(doc, new RegExp(`Airfields in ${others} more European countries and territories`));
 });
 
 test('the list draws in chunks of 200 and keeps its length after a change', () => {

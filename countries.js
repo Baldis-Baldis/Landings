@@ -3,6 +3,8 @@
 // live: data/countries/XX.json exists and the country can be picked. icao: ICAO prefixes of the country.
 // LI, MC and AD have heliports only in OurAirports, no airfield, so they are not live (they stay for the neighbours).
 // When two countries share a prefix the first one listed wins; the updater lists the others in index.json.
+// Territories (JE, GG, IM on EG, FO on EK, GI) are listed under their own name like any country, after the country
+// that owns their prefix, so they never take its codes.
 const COUNTRIES={
   CZ:{cs:'Česko',en:'Czechia',r:'central',icao:['LK'],live:1},
   SK:{cs:'Slovensko',en:'Slovakia',r:'central',icao:['LZ'],live:1},
@@ -20,11 +22,15 @@ const COUNTRIES={
   GB:{cs:'Spojené království',en:'United Kingdom',r:'west',icao:['EG'],live:1},
   IE:{cs:'Irsko',en:'Ireland',r:'west',icao:['EI'],live:1},
   MC:{cs:'Monako',en:'Monaco',r:'west',icao:['LN']},
+  JE:{cs:'Jersey',en:'Jersey',r:'west',icao:['EG'],live:1},
+  GG:{cs:'Guernsey',en:'Guernsey',r:'west',icao:['EG'],live:1},
+  IM:{cs:'Ostrov Man',en:'Isle of Man',r:'west',icao:['EG'],live:1},
   IT:{cs:'Itálie',en:'Italy',r:'south',icao:['LI'],live:1},
   SM:{cs:'San Marino',en:'San Marino',r:'south',icao:['LI'],live:1},
   ES:{cs:'Španělsko',en:'Spain',r:'south',icao:['LE','GC','GE'],live:1},
   PT:{cs:'Portugalsko',en:'Portugal',r:'south',icao:['LP'],live:1},
   AD:{cs:'Andorra',en:'Andorra',r:'south',icao:['LE']},
+  GI:{cs:'Gibraltar',en:'Gibraltar',r:'south',icao:['LX'],live:1},
   MT:{cs:'Malta',en:'Malta',r:'south',icao:['LM'],live:1},
   GR:{cs:'Řecko',en:'Greece',r:'south',icao:['LG'],live:1},
   CY:{cs:'Kypr',en:'Cyprus',r:'south',icao:['LC'],live:1},
@@ -34,6 +40,7 @@ const COUNTRIES={
   NO:{cs:'Norsko',en:'Norway',r:'north',icao:['EN'],live:1},
   FI:{cs:'Finsko',en:'Finland',r:'north',icao:['EF'],live:1},
   IS:{cs:'Island',en:'Iceland',r:'north',icao:['BI'],live:1},
+  FO:{cs:'Faerské ostrovy',en:'Faroe Islands',r:'north',icao:['EK'],live:1},
   EE:{cs:'Estonsko',en:'Estonia',r:'north',icao:['EE'],live:1},
   LV:{cs:'Lotyšsko',en:'Latvia',r:'north',icao:['EV'],live:1},
   LT:{cs:'Litva',en:'Lithuania',r:'north',icao:['EY'],live:1},
@@ -54,10 +61,10 @@ const COUNTRY_NEIGHBOURS={
   DE:['DK','PL','CZ','AT','CH','FR','LU','BE','NL'], PL:['DE','CZ','SK','LT'], HU:['AT','SK','SI','HR','RS','RO'],
   SI:['AT','IT','HU','HR'], CH:['DE','FR','IT','AT','LI'], LI:['CH','AT'],
   FR:['BE','LU','DE','CH','IT','MC','ES','AD'], BE:['FR','LU','DE','NL'], NL:['DE','BE'], LU:['BE','DE','FR'],
-  GB:['IE'], IE:['GB'], MC:['FR'],
-  IT:['FR','CH','AT','SI','SM'], SM:['IT'], ES:['FR','AD','PT'], PT:['ES'], AD:['FR','ES'], MT:[],
+  GB:['IE'], IE:['GB'], MC:['FR'], JE:[], GG:[], IM:[],
+  IT:['FR','CH','AT','SI','SM'], SM:['IT'], ES:['FR','AD','PT','GI'], PT:['ES'], AD:['FR','ES'], GI:['ES'], MT:[],
   GR:['AL','MK','BG'], CY:[], HR:['SI','HU','RS','BA','ME'],
-  DK:['DE'], SE:['NO','FI'], NO:['SE','FI'], FI:['SE','NO'], IS:[], EE:['LV'], LV:['EE','LT'], LT:['LV','PL'],
+  DK:['DE'], SE:['NO','FI'], NO:['SE','FI'], FI:['SE','NO'], IS:[], FO:[], EE:['LV'], LV:['EE','LT'], LT:['LV','PL'],
   RS:['HU','RO','BG','MK','XK','ME','BA','HR'], BA:['HR','RS','ME'], ME:['HR','BA','RS','XK','AL'],
   MK:['RS','XK','AL','GR','BG'], AL:['ME','XK','MK','GR'], XK:['RS','ME','AL','MK'],
   RO:['HU','RS','BG','MD'], BG:['RO','RS','MK','GR'], MD:['RO']

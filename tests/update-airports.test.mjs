@@ -152,8 +152,9 @@ test('the published data agree with the index, and every code tells its country'
     assert.ok(COUNTRIES[c] && COUNTRIES[c].live, c + ' is a live country');
     const f = JSON.parse(readFileSync(join(dir, c + '.json'), 'utf8'));
     assert.equal(f.cc, c);
-    assert.equal(readFileSync(join(dir, c + '.json')).length, v.bytes);
-    assert.equal(f.airports.length, v.n);
+    assert.equal(readFileSync(join(dir, c + '.json')).length, v.bytes, c + ' size');
+    assert.equal(f.airports.length, v.n, c + ' airfields');
+    assert.equal(Object.keys(f.info).length, v.info, c + ' runway and frequency info');
     for (const a of f.airports) {
       assert.equal(a.cc, c);
       assert.match(a.code, /^[A-Z0-9-]{3,12}$/);
@@ -171,15 +172,40 @@ test('phase 2 keeps every airfield code that existed before it, country by count
   }
 });
 
-test('all 39 countries with data are live, the three without airfields are not', () => {
+test('all 44 countries and territories with data are live, the three without airfields are not', () => {
   const live = Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live);
-  assert.equal(live.length, 39);
+  assert.equal(live.length, 44);
   for (const c of ['LI', 'MC', 'AD']) assert.ok(!COUNTRIES[c].live, c + ' has heliports only');
   const idx = JSON.parse(readFileSync(join(ROOT, 'data', 'countries', 'index.json'), 'utf8'));
   assert.deepEqual(Object.keys(idx.countries).sort(), live.sort());
   for (const c of live) assert.ok(idx.countries[c].n > 0, c + ' has airfields');
   // the old combined files are gone
   assert.ok(!existsSync(join(ROOT, 'data', 'airports-eu.json')) && !existsSync(join(ROOT, 'data', 'airport-info.json')));
+});
+
+test('territories have their own name and data, never the codes of the country that owns their prefix', () => {
+  const idx = JSON.parse(readFileSync(join(ROOT, 'data', 'countries', 'index.json'), 'utf8'));
+  const keys = Object.keys(COUNTRIES);
+  for (const [t, owner, prefix] of [['JE', 'GB', 'EG'], ['GG', 'GB', 'EG'], ['IM', 'GB', 'EG'], ['FO', 'DK', 'EK']]) {
+    assert.deepEqual([...COUNTRIES[t].icao], [prefix]);
+    assert.ok(keys.indexOf(owner) < keys.indexOf(t), `${owner} is listed before ${t}`);
+  }
+  assert.deepEqual([...COUNTRIES.GI.icao], ['LX']);
+  assert.equal(COUNTRIES.IM.cs, 'Ostrov Man');
+  assert.equal(COUNTRIES.FO.en, 'Faroe Islands');
+  // their airfields are told apart by the index, the owner keeps its prefix
+  const exc = { EGJA: 'GG', EGJB: 'GG', EGJJ: 'JE', EGNS: 'IM', EKVG: 'FO' };
+  for (const [code, c] of Object.entries(exc)) {
+    assert.equal(idx.exceptions[code], c);
+    assert.equal(countryOfCode(code, idx.exceptions), c);
+  }
+  assert.equal(countryOfCode('EGLL', idx.exceptions), 'GB');
+  assert.equal(countryOfCode('EKCH', idx.exceptions), 'DK');
+  assert.equal(countryOfCode('LXGB', idx.exceptions), 'GI');
+  assert.equal(countryOfCode('IM-0001', idx.exceptions), 'IM');
+  // the thirteen exceptions from before stay as they were
+  const before = { 'CZ-0052': 'SK', 'DE-0354': 'AT', FEA: 'GB', 'GB-1054': 'IE', LIKD: 'SM', 'LT-0012': 'LV', LYBR: 'ME', LYNK: 'ME', LYPG: 'ME', LYPO: 'ME', LYTV: 'ME', SU01: 'IT', VB02: 'IT' };
+  assert.deepEqual(idx.exceptions, { ...before, ...exc });
 });
 
 test('the guard covers every live country: a new country losing all airfields is refused', () => {
