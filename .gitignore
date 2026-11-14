@@ -10,6 +10,9 @@
 *.p8
 *.p12
 *.pfx
+# local secrets, e.g. API keys for data tools, read only by scripts
+*.local
+openaip-key*
 
 # Backups and database dumps
 backups/

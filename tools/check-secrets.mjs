@@ -19,6 +19,7 @@ const SECRET_PATTERNS = [
 const BLOCKED_FILES = [
   [/(^|\/)\.env(\.(?!example$)[^/]*)?$/, 'environment file'],
   [/\.(pem|key|p8|p12|pfx)$/i, 'key file'],
+  [/\.local$|(^|\/)openaip-key/i, 'local secret file'],
   [/\.(dump|backup|sql\.gz|age)$/i, 'backup or dump'],
   [/(^|\/)backups\//, 'backup folder'],
   // Notes on infrastructure and risks live in the private backup repository, never here.
