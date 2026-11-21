@@ -56,6 +56,11 @@ declare
   alice uuid := '00000000-0000-4000-8000-00000000000a';
   bob   uuid := '00000000-0000-4000-8000-00000000000b';
   admin uuid := '00000000-0000-4000-8000-00000000000c';
+  carol uuid := '00000000-0000-4000-8000-00000000000d';
+  rev_a uuid;
+  rev_c uuid;
+  ph_z  uuid := '30000000-0000-4000-8000-0000000000a9';
+  summ jsonb;
   strip uuid := '10000000-0000-4000-8000-000000000001';
   strip_p uuid := '30000000-0000-4000-8000-0000000000ff';
   priv_c uuid := '20000000-0000-4000-8000-000000000001';
@@ -72,7 +77,8 @@ begin
   perform pg_temp.sys();
   -- created_at is set here: on the project a plain insert into auth.users leaves it empty.
   insert into auth.users (id, email, created_at) values
-    (alice, 'alice@example.invalid', now()), (bob, 'bob@example.invalid', now()), (admin, 'admin@example.invalid', now());
+    (alice, 'alice@example.invalid', now()), (bob, 'bob@example.invalid', now()), (admin, 'admin@example.invalid', now()),
+    (carol, 'carol@example.invalid', now());
   insert into public.admins (user_id) values (admin);
   perform pg_temp.login(admin);
   before := public.admin_stats();
@@ -91,7 +97,7 @@ begin
   perform pg_temp.ok('anon reads only public tables', not exists (
     select 1 from information_schema.table_privileges
     where grantee = 'anon' and table_schema = 'public'
-      and table_name not in ('comments', 'photos')));
+      and table_name not in ('comments', 'photos', 'reviews')));
   perform pg_temp.ok('profiles: anon sees no private column', not exists (
     select 1 from information_schema.column_privileges
     where grantee in ('anon', 'authenticated') and table_schema = 'public' and table_name = 'profiles'
@@ -102,12 +108,17 @@ begin
   perform pg_temp.ok('anon cannot run any public function', not exists (
     select 1 from pg_proc p join pg_namespace s on s.oid = p.pronamespace
     left join pg_depend d on d.objid = p.oid and d.deptype = 'e'
-    where s.nspname = 'public' and d.objid is null and has_function_privilege('anon', p.oid, 'execute')));
+    where s.nspname = 'public' and d.objid is null and has_function_privilege('anon', p.oid, 'execute')
+      and p.proname <> 'airfield_summary'));
   perform pg_temp.ok('authenticated runs only the app functions', not exists (
     select 1 from pg_proc p join pg_namespace s on s.oid = p.pronamespace
     left join pg_depend d on d.objid = p.oid and d.deptype = 'e'
     where s.nspname = 'public' and d.objid is null and has_function_privilege('authenticated', p.oid, 'execute')
-      and p.proname not in ('is_admin', 'is_reported', 'admin_stats', 'admin_moderate', 'delete_my_account')));
+      and p.proname not in ('is_admin', 'is_reported', 'is_reported_review', 'admin_stats', 'admin_moderate',
+                            'delete_my_account', 'airfield_summary')));
+  perform pg_temp.ok('is_reported_review is not for guests', not has_function_privilege('anon', 'public.is_reported_review(uuid)', 'execute'));
+  perform pg_temp.ok('is_reported_review answers only yes or no',
+    (select prorettype = 'boolean'::regtype from pg_proc where oid = 'public.is_reported_review(uuid)'::regprocedure));
   create table public.rls_auto_probe (id int);
   perform pg_temp.ok('automatic RLS still switches on', (
     select relrowsecurity from pg_class where oid = 'public.rls_auto_probe'::regclass));
@@ -250,6 +261,130 @@ begin
   perform pg_temp.ok('older offline change ignored',
     (select landed_on from public.landings where airfield_code = 'LKBE') = '2026-10-01');
 
+  -- ---------- reviews (on a made-up code, so the run also fits a project with real reviews) ----------
+  insert into public.landings (airfield_code, landed_on) values ('ZZ-TEST', '2026-09-10');
+  -- the client never sends id, user_id, visited_on or moderation
+  insert into public.reviews (airfield_code, rating, facts, body) values ('ZZ-TEST', 5, '{wc,rest}', 'great') returning id into rev_a;
+  perform pg_temp.fails('the client cannot choose the review id', format(
+    $$insert into public.reviews (id, airfield_code, rating) values (%L, 'LKBE', 3)$$, gen_random_uuid()));
+  perform pg_temp.ok('the visit date comes from the landing', (select visited_on from public.reviews where id = rev_a) = '2026-09-10');
+  perform pg_temp.ok('the review owner comes from the login', (select user_id from public.reviews where id = rev_a) = alice);
+  perform pg_temp.fails('a second review of one airfield', $$insert into public.reviews (airfield_code, rating) values ('ZZ-TEST', 3)$$);
+  insert into public.reviews (airfield_code, rating, facts, body, client_updated_at)
+    values ('ZZ-TEST', 4, '{wc,rest,fee}', 'still good', now())
+    on conflict (user_id, airfield_code) do update set
+      rating = excluded.rating, facts = excluded.facts, body = excluded.body, client_updated_at = excluded.client_updated_at;
+  perform pg_temp.ok('an edit replaces the review, adds none', (select rating from public.reviews where id = rev_a) = 4
+    and (select count(*) from public.reviews where user_id = alice) = 1);
+  perform pg_temp.fails('0 stars', $$insert into public.reviews (airfield_code, rating) values ('LKBE', 0)$$);
+  perform pg_temp.fails('6 stars', $$insert into public.reviews (airfield_code, rating) values ('LKBE', 6)$$);
+  perform pg_temp.fails('an unknown facility', $$insert into public.reviews (airfield_code, rating, facts) values ('LKBE', 3, '{hangar}')$$);
+  perform pg_temp.fails('a facility twice', $$insert into public.reviews (airfield_code, rating, facts) values ('LKBE', 3, '{wc,wc}')$$);
+  perform pg_temp.fails('an oversized review', format(
+    $$insert into public.reviews (airfield_code, rating, body) values ('LKBE', 3, %L)$$, repeat('x', 2001)));
+  perform pg_temp.fails('a review without a landing', $$insert into public.reviews (airfield_code, rating) values ('LKHK', 3)$$);
+  perform pg_temp.fails('a custom strip cannot be reviewed', format(
+    $$insert into public.reviews (airfield_code, rating) values ('C%s', 3)$$, upper(left(replace(strip::text, '-', ''), 10))));
+  perform pg_temp.fails('forged review owner', format(
+    $$insert into public.reviews (user_id, airfield_code, rating) values (%L, 'LKBE', 3)$$, bob));
+  perform pg_temp.fails('forged moderation of a review', $$insert into public.reviews (airfield_code, rating, moderation)
+    values ('LKBE', 3, 'visible')$$);
+  perform pg_temp.fails('forged visit date', $$insert into public.reviews (airfield_code, rating, visited_on)
+    values ('LKBE', 3, '2020-01-01')$$);
+  perform pg_temp.fails('visit date not editable', format(
+    $$update public.reviews set visited_on = '2020-01-01' where id = %L$$, rev_a));
+  perform pg_temp.fails('review moderation not editable', format(
+    $$update public.reviews set moderation = 'visible' where id = %L$$, rev_a));
+  perform pg_temp.fails('the airfield of a review does not change', format(
+    $$update public.reviews set airfield_code = 'LKBE' where id = %L$$, rev_a));
+  -- sharing a photo needs a landing at that airfield (and a nickname, below with bob)
+  perform pg_temp.fails('a photo of an airfield without a landing is not shared',
+    $$insert into public.photos (airfield_code, is_public) values ('LKHK', true)$$);
+  insert into public.photos (id, airfield_code, is_public) values (ph_z, 'ZZ-TEST', true);
+  update public.photos set uploaded_at = now() where id = ph_z;
+
+  perform pg_temp.login(bob);
+  insert into public.landings (airfield_code, landed_on) values ('ZZ-TEST', '2026-08-01');
+  -- accepted terms, so only the missing nickname can stop him here
+  insert into public.user_settings (terms_version, terms_accepted_at) values ('test', now());
+  perform pg_temp.fails('a review without a nickname', $$insert into public.reviews (airfield_code, rating) values ('ZZ-TEST', 3)$$);
+  perform pg_temp.fails('a shared photo without a nickname', $$insert into public.photos (airfield_code, is_public) values ('ZZ-TEST', true)$$);
+  perform pg_temp.rows('bob cannot edit alice''s review',
+    format($$update public.reviews set rating = 1 where id = %L returning 1$$, rev_a), 0);
+  perform pg_temp.rows('bob cannot delete alice''s review',
+    format('delete from public.reviews where id = %L returning 1', rev_a), 0);
+  perform pg_temp.ok('bob sees alice''s visible review', exists (select 1 from public.reviews where id = rev_a));
+
+  -- carol: an old visit, outside the 24 months for facilities
+  perform pg_temp.login(carol);
+  insert into public.profiles (display_name) values ('Carol');
+  insert into public.user_settings (terms_version, terms_accepted_at) values ('test', now());
+  insert into public.landings (airfield_code, landed_on) values ('ZZ-TEST', '2023-01-01');
+  insert into public.reviews (airfield_code, rating, facts) values ('ZZ-TEST', 3, '{wc,night}') returning id into rev_c;
+
+  -- the summary: the same numbers for everyone, the own review included
+  perform pg_temp.guest();
+  summ := public.airfield_summary('ZZ-TEST');
+  perform pg_temp.ok('summary: count and average', (summ ->> 'n')::int = 2 and (summ ->> 'avg')::numeric = 3.5);
+  perform pg_temp.ok('summary: facilities of the last 24 months, by count',
+    summ -> 'facts' = '[{"key": "fee", "n": 1}, {"key": "rest", "n": 1}, {"key": "wc", "n": 1}]'::jsonb);
+  perform pg_temp.ok('summary: shared photos', (summ ->> 'photos_n')::int = 1
+    and jsonb_array_length(summ -> 'photos') = 1 and summ -> 'photos' -> 0 ->> 'id' = ph_z::text);
+  perform pg_temp.ok('summary of an airfield without reviews',
+    (public.airfield_summary('ZZ-NONE') ->> 'n')::int = 0 and public.airfield_summary('ZZ-NONE') -> 'facts' = '[]'::jsonb);
+  perform pg_temp.fails('guest: no review', $$insert into public.reviews (airfield_code, rating) values ('ZZ-TEST', 3)$$);
+  perform pg_temp.ok('guest reads only the columns the card needs', (
+    select array_agg(column_name::text order by column_name::text) from information_schema.column_privileges
+    where grantee = 'anon' and table_schema = 'public' and table_name = 'reviews' and privilege_type = 'SELECT')
+    = array['airfield_code', 'body', 'created_at', 'facts', 'id', 'moderation', 'rating', 'user_id', 'visited_on']);
+  perform pg_temp.fails('guest: no edit times of a review', 'select client_updated_at from public.reviews');
+  perform pg_temp.fails('guest: no whole review rows', 'select * from public.reviews');
+  perform pg_temp.ok('guest sees only visible reviews', not exists (
+    select 1 from public.reviews where airfield_code = 'ZZ-TEST' and moderation <> 'visible'));
+  perform pg_temp.ok('guest sees the visible reviews', (select count(*) from public.reviews where airfield_code = 'ZZ-TEST') = 2);
+  perform pg_temp.login(alice);
+  perform pg_temp.ok('the owner gets the same summary, own review counted', public.airfield_summary('ZZ-TEST') = summ);
+
+  -- reports of reviews; is_reported_review tells nothing to anyone but an admin
+  perform pg_temp.fails('nobody reports own review', format(
+    $$insert into public.reports (review_id, reason) values (%L, 'spam')$$, rev_a));
+  perform pg_temp.fails('nobody reports own shared photo', format(
+    $$insert into public.reports (photo_id, reason) values (%L, 'spam')$$, ph_z));
+  perform pg_temp.login(bob);
+  insert into public.reports (review_id, reason) values (rev_a, 'other');
+  perform pg_temp.fails('a review is reported once', format(
+    $$insert into public.reports (review_id, reason) values (%L, 'spam')$$, rev_a));
+  perform pg_temp.fails('a report has one target', format(
+    $$insert into public.reports (review_id, photo_id, reason) values (%L, %L, 'spam')$$, rev_c, ph_z));
+  perform pg_temp.ok('is_reported_review says no to a user, even for a reported review', not public.is_reported_review(rev_a));
+  perform pg_temp.sys();
+  update public.reviews set moderation = 'hidden' where id = rev_c; -- hidden without a report (a test shortcut)
+  perform pg_temp.login(bob);
+  perform pg_temp.ok('a user does not see another''s hidden review, the function opens nothing',
+    not exists (select 1 from public.reviews where id = rev_c)
+    and not exists (select 1 from public.reviews where public.is_reported_review(id) and user_id <> bob));
+  perform pg_temp.fails('a hidden review cannot be reported', format(
+    $$insert into public.reports (review_id, reason) values (%L, 'spam')$$, rev_c));
+  perform pg_temp.login(admin);
+  perform pg_temp.ok('admin sees the reported review', exists (select 1 from public.reviews where id = rev_a));
+  perform pg_temp.ok('admin does not see an unreported hidden review', not exists (select 1 from public.reviews where id = rev_c));
+  perform pg_temp.ok('the report keeps the review text', (select comment_body from public.reports where review_id = rev_a) = 'still good');
+  perform pg_temp.ok('stats count reviews', (public.admin_stats() ->> 'reviews')::int >= 2);
+  perform public.admin_moderate(null, null, 'hidden', 'resolved', rev_a);
+  perform pg_temp.guest();
+  perform pg_temp.ok('a hidden review is gone for guests', not exists (select 1 from public.reviews where id = rev_a)
+    and (public.airfield_summary('ZZ-TEST') ->> 'n')::int = 0);
+  perform pg_temp.login(alice);
+  perform pg_temp.ok('the author keeps the own hidden review', (select moderation from public.reviews where id = rev_a) = 'hidden');
+  perform pg_temp.ok('the author''s summary leaves the own hidden review out, like everyone''s',
+    (public.airfield_summary('ZZ-TEST') ->> 'n')::int = 0);
+  update public.reviews set body = 'edited', client_updated_at = now() + interval '3 hours' where id = rev_a;
+  perform pg_temp.ok('editing does not lift the hiding', (select moderation from public.reviews where id = rev_a) = 'hidden');
+  perform pg_temp.sys();
+  update public.reviews set moderation = 'visible' where id = rev_c;
+  perform pg_temp.login(alice);
+  delete from public.photos where id = ph_z; -- it has no files; the counts further down know only alice's photos
+
   -- ---------- guest ----------
   perform pg_temp.guest();
   perform pg_temp.ok('guest: public comment', (select count(*) from public.comments where user_id = alice) = 1);
@@ -307,7 +442,8 @@ begin
   perform pg_temp.fails('nickname taken, case ignored',
     $$insert into public.profiles (display_name) values ('ALICE')$$);
   stats := public.admin_stats();
-  perform pg_temp.ok('stats count', (stats ->> 'landings')::int = (before ->> 'landings')::int + 2
+  -- alice LKBE and her strip, then ZZ-TEST for alice, bob and carol in the review tests
+  perform pg_temp.ok('stats count', (stats ->> 'landings')::int = (before ->> 'landings')::int + 5
     and (stats ->> 'reports_open')::int = (before ->> 'reports_open')::int + 2
     and (stats ->> 'users')::int >= 3);
   perform pg_temp.ok('stats count the new test users', (stats ->> 'users_new_30d')::int >= 3);
@@ -316,7 +452,7 @@ begin
   perform pg_temp.ok('stats hold no e-mail', not (stats::text ~* 'email|@'));
   perform pg_temp.ok('report keeps the reported text', (select comment_body from public.reports
     where comment_id = pub_c and reporter_id = bob) = 'public note');
-  perform pg_temp.ok('admin sees reports', (select count(*) from public.reports where reporter_id = bob) = 2);
+  perform pg_temp.ok('admin sees reports', (select count(*) from public.reports where reporter_id = bob) = 3); -- comment, photo, review
   perform pg_temp.ok('admin sees feedback', (select count(*) from public.feedback where user_id = bob) = 1);
   perform pg_temp.ok('admin: no landings', (select count(*) from public.landings) = 0);
   perform pg_temp.ok('admin: no strips', (select count(*) from public.custom_airfields) = 0);
@@ -440,6 +576,7 @@ begin
     union all select 1 from public.comments where user_id = alice
     union all select 1 from public.photos where user_id = alice
     union all select 1 from public.custom_airfields where user_id = alice
+    union all select 1 from public.reviews where user_id = alice
     union all select 1 from public.profiles where id = alice));
 
   -- Deletion without a JWT (dashboard, SQL) must not depend on files: they are removed separately.
