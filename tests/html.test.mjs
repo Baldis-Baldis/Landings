@@ -832,7 +832,7 @@ test('my log: landing, note and photos under one heading, each photo with a shar
     "shareNoLanding:'Sdílet můžeš po zapsání přistání.'", "shareNoAccount:'Sdílet můžeš s účtem a přezdívkou.'",
     "shareCustom:'Fotky vlastních ploch zůstávají soukromé.'"]) assert.ok(html.includes(k), k);
   // sharing asks first, stopping does not; a blocked share tells why
-  assert.match(card, /const why=!p\.pub&&shareBlock\(a\); if\(why\)\{ status\(t\(why\)\); return; \}/);
+  assert.match(card, /const why=!p\.pub&&shareBlock\(a\); if\(why\)\{ chipTip\(b,t\(why\)\); return; \}/);
   assert.match(card, /if\(!p\.pub&&!confirm\(t\('shareConfirm'\)\)\) return;/);
   const block = html.slice(html.indexOf('function shareBlock(a){'), html.indexOf('async function setPhotoShared'));
   assert.ok(block.indexOf("'shareCustom'") < block.indexOf("'shareNoAccount'") && block.indexOf("'shareNoAccount'") < block.indexOf("'shareNoLanding'"));
@@ -865,6 +865,34 @@ test('a public review shows the month and year of the visit, 11/2026 in both lan
   const fmt = vm.runInNewContext(`(${html.match(/fmtMonth:(m=>\{[^}]*\})/)[1]})`);
   assert.equal(fmt('2026-11'), '11/2026');
   assert.equal(fmt('2026-03'), '3/2026');
+});
+
+test('a blocked or failed share is told in a bubble at the label, inside the card, read out politely', () => {
+  const card = html.slice(html.indexOf("d.querySelectorAll('.share')"), html.indexOf("d.querySelectorAll('.rmpic')"));
+  assert.match(card, /if\(why\)\{ chipTip\(b,t\(why\)\); return; \}/);
+  assert.match(card, /b\.disabled=false; chipTip\(b,t\(err&&err\.code==='P0001'\?'commLimit':'commFail'\)\); return;/);
+  assert.ok(!/status\(/.test(card), 'nothing about sharing goes to the status line');
+  const tip = html.slice(html.indexOf('function chipTip('), html.indexOf('function shareBlock('));
+  assert.match(tip, /tip\.setAttribute\('role','status'\); tip\.setAttribute\('aria-live','polite'\)/);
+  assert.match(tip, /btn\.closest\('\.diary'\)/, 'inside My log');
+  assert.match(tip, /Math\.min\(260,br\.width-8\)/, 'never wider than the card');
+  assert.match(tip, /Math\.max\(0,Math\.min\(br\.width-w,cx-w\/2\)\)/, 'never past its edges');
+  assert.match(tip, /timer=setTimeout\(off,4000\)/);
+  assert.match(tip, /addEventListener\('pointerdown',down,true\)/, 'a tap elsewhere closes it');
+  assert.match(tip, /msg\.textContent=text;/, 'text only');
+  assert.match(page, /\.pop \.diary\{[^}]*position:relative\}/);
+  assert.match(page, /\.pop \.chiptip\{position:absolute;/);
+});
+
+test('with a mouse the account button is as tall as the CZ/EN switch; touch keeps 44 px', () => {
+  const fine = page.slice(page.indexOf('@media (pointer:fine) and (min-width:761px){'));
+  assert.match(fine, /\.acctbtn\{position:relative;min-width:0;min-height:28px;height:28px;[^}]*border-radius:6px;font:600 12px Barlow/);
+  assert.match(page, /\.lang button\{font:600 12px Barlow,sans-serif;padding:6px 9px;/, 'the switch it follows');
+  assert.match(page, /\.lang\{display:flex;border:1px solid var\(--line\);border-radius:6px;/);
+  assert.match(fine, /\.acctbtn \.acctav\{width:20px;height:20px;/);
+  assert.match(fine, /header\{box-sizing:border-box;min-height:60px\}/, 'the logo keeps some air');
+  assert.match(page, /@media \(pointer:fine\) and \(min-width:761px\) and \(any-pointer:coarse\)\{\n  \.acctbtn::after\{content:'';position:absolute;left:0;right:0;top:-8px;bottom:-8px\}/, '28 + 2 × 8 = 44 px');
+  assert.match(page, /\.acctbtn\{[^}]*min-width:44px;min-height:44px;/, 'everywhere else 44 px');
 });
 
 test('deleting a photo asks first, a shared one says it leaves From pilots too', () => {

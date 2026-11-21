@@ -988,12 +988,12 @@ function popup(a){
   d.querySelectorAll('.share').forEach(b=>b.onclick=async e=>{
     e.stopPropagation();
     const p=getPics(a)[+b.dataset.i]; if(!p) return;
-    const why=!p.pub&&shareBlock(a); if(why){ status(t(why)); return; }
+    const why=!p.pub&&shareBlock(a); if(why){ chipTip(b,t(why)); return; }
     if(!p.id) return;
     if(!p.pub&&!confirm(t('shareConfirm'))) return;
     b.disabled=true;
     try{ await setPhotoShared(a,p.id,!p.pub); }
-    catch(err){ console.warn('share',err); status(t(err&&err.code==='P0001'?'commLimit':'commFail')); }
+    catch(err){ console.warn('share',err); b.disabled=false; chipTip(b,t(err&&err.code==='P0001'?'commLimit':'commFail')); return; }
     refreshCard(a);
   });
   // deleting asks first; a shared photo also leaves From pilots
@@ -1069,6 +1069,32 @@ function buildReviewForm(a){
     remove:()=>window.backend.deleteReview(mine.id),
     close:changed=>closeReviewForm(a,changed),
     onResize:()=>{ const m=markers[code]; if(m&&m.getPopup()) fitPopup(m.getPopup()); },
+  });
+}
+// A small bubble above a photo's sharing label, with an arrow, instead of the status line at the bottom that is easy
+// to miss. It stays inside My log (never wider than the card), is read out politely and goes after a few seconds or
+// with the next tap anywhere else.
+let chipTipOff=null;
+function chipTip(btn,text){
+  const box=btn.closest('.diary'); if(!box){ status(text); return; }
+  if(chipTipOff) chipTipOff();
+  const tip=document.createElement('div'), msg=document.createElement('span'), arrow=document.createElement('span');
+  tip.className='chiptip'; tip.setAttribute('role','status'); tip.setAttribute('aria-live','polite'); arrow.className='chiptiparrow';
+  tip.append(msg,arrow); box.appendChild(tip);
+  let timer=0;
+  const off=()=>{ clearTimeout(timer); document.removeEventListener('pointerdown',down,true); tip.remove(); if(chipTipOff===off) chipTipOff=null; };
+  const down=e=>{ if(!tip.contains(e.target)) off(); };
+  chipTipOff=off;
+  requestAnimationFrame(()=>{
+    msg.textContent=text; // set after the live region is in the page, so screen readers announce it
+    const br=box.getBoundingClientRect(), cr=(btn.querySelector('span')||btn).getBoundingClientRect();
+    tip.style.maxWidth=Math.max(120,Math.min(260,br.width-8))+'px';
+    const w=tip.offsetWidth, h=tip.offsetHeight, cx=cr.left+cr.width/2-br.left;
+    const left=Math.max(0,Math.min(br.width-w,cx-w/2));
+    tip.style.left=left+'px'; tip.style.top=(cr.top-br.top-h-8)+'px';
+    arrow.style.left=Math.max(8,Math.min(w-20,cx-left-6))+'px';
+    setTimeout(()=>document.addEventListener('pointerdown',down,true),0);
+    timer=setTimeout(off,4000);
   });
 }
 // Why a photo of this place cannot be shared now (a key of T), or '' when it can. The database checks the same:
@@ -1288,7 +1314,7 @@ document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.c
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&menu.classList.contains('on')){ e.preventDefault(); e.stopPropagation(); setMenu(false,true); } },true);
 document.getElementById('acctsyncnow').onclick=()=>document.getElementById('syncbtn').click();
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v56'; // matches the cache name in sw.js
+const APP_VERSION='landings-v57'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

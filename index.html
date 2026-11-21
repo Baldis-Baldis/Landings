@@ -136,7 +136,10 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .pop .gal button.share.off span{opacity:.8}
 .pop .gal button.share:focus-visible{outline:none}.pop .gal button.share:focus-visible span{outline:2px solid #fff;outline-offset:1px}
 .pop .gal div.shared{outline:2px solid var(--done);outline-offset:-2px}
-.pop .diary{border-top:2px solid var(--ink);padding-top:8px;margin-top:4px}
+.pop .diary{border-top:2px solid var(--ink);padding-top:8px;margin-top:4px;position:relative}
+/* the bubble above a sharing label (chipTip in app.js): inside My log, never wider than the card */
+.pop .chiptip{position:absolute;z-index:5;box-sizing:border-box;padding:7px 10px;border-radius:8px;background:var(--ink);color:#fff;font:500 12.5px/1.35 Barlow,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25);overflow-wrap:anywhere}
+.pop .chiptiparrow{position:absolute;bottom:-5px;width:12px;height:12px;background:var(--ink);transform:rotate(45deg);z-index:-1}
 .pop .diary h3,.pop .pilots h3{margin:0 0 8px;font:600 15px 'Barlow Condensed',Barlow,sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink)}
 .pop .gal .picstate{position:absolute;top:2px;left:2px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:rgba(0,0,0,.55);color:#fff;font:600 11px/22px Barlow,sans-serif;text-align:center}
 /* From pilots: header with average and facility icons, a strip that invites to rate, the opened section */
@@ -326,6 +329,20 @@ footer .legal a:hover{text-decoration:underline}
   .acctbtn.guest{width:48px;height:46px;border-radius:10px;flex-direction:column;gap:0;padding:2px 0}
   .acctbtn.guest .acctshort{display:block;font:600 10px/1.1 Barlow,sans-serif}
   .acctbtn:not(.guest) .acctav{width:36px;height:36px;font-size:13px}
+}
+/* With a mouse the account button is as tall as the CZ/EN switch (28 px, 6 px corners, 12 px text). A device that
+   also has a touch screen keeps a 44 px target through an invisible strip above and below. */
+@media (pointer:fine) and (min-width:761px){
+  .acctbtn{position:relative;min-width:0;min-height:28px;height:28px;padding:0 9px 0 4px;gap:5px;border-radius:6px;font:600 12px Barlow,sans-serif}
+  .acctbtn.guest{padding:0 9px 0 7px}
+  .acctbtn .acctic{width:14px;height:14px}
+  .acctbtn .acctav{width:20px;height:20px;font-size:9.5px}
+  .acctbtn[aria-expanded="true"]{box-shadow:0 0 0 2px var(--slz)}
+  /* the centred logo (48 px, absolute) no longer sets the height: keep it some air */
+  header{box-sizing:border-box;min-height:60px}
+}
+@media (pointer:fine) and (min-width:761px) and (any-pointer:coarse){
+  .acctbtn::after{content:'';position:absolute;left:0;right:0;top:-8px;bottom:-8px}
 }
 .accthead{display:flex;align-items:center;gap:10px;padding:8px 10px 10px}
 .acctwho{font:700 15px Barlow,sans-serif;color:var(--ink)}
