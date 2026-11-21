@@ -52,17 +52,23 @@ for (const rb of rollbacks) {
   const i = migrations.indexOf(target);
   if (i < 0) { console.log(`ROLLBACK ${rb}: no migration ${target}`); failed++; continue; }
   const before = await snapshot(migrations.slice(0, i));
-  const after = await snapshot(migrations.slice(0, i + 1), rb);
-  const diff = before.map((b, k) => (b === after[k] ? null : k)).filter(k => k !== null);
-  if (diff.length) {
-    failed++;
-    console.log(`ROLLBACK ${rb}: schema differs in part(s) ${diff.join(', ')}`);
-    for (const k of diff) {
-      const b = new Set(JSON.parse(before[k]).map(r => JSON.stringify(r))), a = new Set(JSON.parse(after[k]).map(r => JSON.stringify(r)));
-      for (const r of b) if (!a.has(r)) console.log('  missing after rollback:', r.slice(0, 300));
-      for (const r of a) if (!b.has(r)) console.log('  extra after rollback:  ', r.slice(0, 300));
-    }
-  } else console.log(`ROLLBACK ${rb}: schema back to the state before ${target}`);
+  // Later fix-up migrations without a rollback of their own (e.g. grants) must be undone by this one too.
+  let j = i + 1;
+  while (j < migrations.length && !rollbacks.includes(migrations[j].replace('.sql', '_down.sql'))) j++;
+  for (const end of j > i + 1 ? [i + 1, j] : [i + 1]) {
+    const after = await snapshot(migrations.slice(0, end), rb);
+    const what = end === i + 1 ? target : `${target} … ${migrations[end - 1]}`;
+    const diff = before.map((b, k) => (b === after[k] ? null : k)).filter(k => k !== null);
+    if (diff.length) {
+      failed++;
+      console.log(`ROLLBACK ${rb} after ${what}: schema differs in part(s) ${diff.join(', ')}`);
+      for (const k of diff) {
+        const b = new Set(JSON.parse(before[k]).map(r => JSON.stringify(r))), a = new Set(JSON.parse(after[k]).map(r => JSON.stringify(r)));
+        for (const r of b) if (!a.has(r)) console.log('  missing after rollback:', r.slice(0, 300));
+        for (const r of a) if (!b.has(r)) console.log('  extra after rollback:  ', r.slice(0, 300));
+      }
+    } else console.log(`ROLLBACK ${rb} after ${what}: schema back to the state before ${target}`);
+  }
 }
 console.log(failed ? 'ROLLBACK CHECK FAILED' : `ALL ROLLBACKS CHECKED (${rollbacks.length})`);
 process.exitCode = failed ? 1 : 0;

@@ -48,3 +48,10 @@ create function storage.foldername(name text) returns text[] language sql immuta
 $$;
 grant usage on schema storage to anon, authenticated;
 grant select, insert, update, delete on storage.objects to anon, authenticated;
+
+-- Supabase's default privileges in public: every new table, function and sequence starts open to the client roles.
+-- The project showed it on public.reviews (anon got REFERENCES, TRIGGER, TRUNCATE); here the widest variant, so a
+-- migration that does not start with "revoke all" fails the tests. Last, so the stubs above are not affected.
+alter default privileges in schema public grant all on tables to anon, authenticated;
+alter default privileges in schema public grant all on functions to anon, authenticated;
+alter default privileges in schema public grant all on sequences to anon, authenticated;

@@ -91,6 +91,25 @@ begin
   perform pg_temp.ok('anon may only read', not exists (
     select 1 from information_schema.role_table_grants
     where grantee = 'anon' and table_schema = 'public' and privilege_type <> 'SELECT'));
+  -- Supabase's default privileges give new tables more than the migrations grant; only these four ever count.
+  perform pg_temp.ok('clients get no TRUNCATE, TRIGGER, REFERENCES or MAINTAIN', not exists (
+    select 1 from information_schema.table_privileges
+    where grantee in ('anon', 'authenticated', 'PUBLIC') and table_schema = 'public'
+      and privilege_type not in ('SELECT', 'INSERT', 'UPDATE', 'DELETE')));
+  perform pg_temp.ok('reviews: anon has no table-wide grant', not exists (
+    select 1 from information_schema.table_privileges
+    where grantee in ('anon', 'PUBLIC') and table_schema = 'public' and table_name = 'reviews'));
+  perform pg_temp.ok('reviews: authenticated has only DELETE table-wide', (
+    select array_agg(privilege_type::text order by privilege_type::text) from information_schema.table_privileges
+    where grantee = 'authenticated' and table_schema = 'public' and table_name = 'reviews') = array['DELETE']);
+  perform pg_temp.ok('reviews: exact column grants of authenticated', (
+    select array_agg(privilege_type || ' ' || column_name order by privilege_type, column_name)
+    from information_schema.column_privileges
+    where grantee = 'authenticated' and table_schema = 'public' and table_name = 'reviews')
+    = array['INSERT airfield_code', 'INSERT body', 'INSERT client_updated_at', 'INSERT facts', 'INSERT rating',
+            'SELECT airfield_code', 'SELECT body', 'SELECT client_updated_at', 'SELECT created_at', 'SELECT facts', 'SELECT id',
+            'SELECT moderation', 'SELECT rating', 'SELECT user_id', 'SELECT visited_on',
+            'UPDATE body', 'UPDATE client_updated_at', 'UPDATE facts', 'UPDATE rating']);
   perform pg_temp.ok('anon has no column write', not exists (
     select 1 from information_schema.column_privileges
     where grantee = 'anon' and table_schema = 'public' and privilege_type <> 'SELECT'));

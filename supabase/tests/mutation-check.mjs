@@ -54,12 +54,16 @@ begin
   ['facility listed twice', `if cardinality(new.facts) <> (select count(distinct f) from unnest(new.facts) f) then`, 'if false then'],
   ['visit date from the client', 'grant insert (airfield_code, rating, facts, body, client_updated_at),', 'grant insert (airfield_code, rating, facts, body, visited_on, client_updated_at),'],
   ['review moderation writable', 'update (rating, facts, body, client_updated_at) on public.reviews to authenticated;', 'update (rating, facts, body, moderation, client_updated_at) on public.reviews to authenticated;'],
-  ['guest reads every review column', 'grant select (id, user_id, airfield_code, rating, facts, body, visited_on, moderation, created_at) on public.reviews to anon;', 'grant select on public.reviews to anon;'],
+  // the grants of reviews and its functions are set last by the fix-up migration 20261122110000
+  ['guest reads every review column', 'grant select (id, user_id, airfield_code, rating, facts, body, visited_on, moderation, created_at)\n  on public.reviews to anon, authenticated;', 'grant select on public.reviews to anon, authenticated;'],
   ['admin reads every review', `using ((select public.is_admin()) and public.is_reported_review(reviews.id));`, `using ((select public.is_admin()));`],
-  ['is_reported_review open to guests', 'revoke all on function public.is_reported_review(uuid) from public, anon;', 'grant execute on function public.is_reported_review(uuid) to anon;'],
+  ['is_reported_review open to guests', 'grant execute on function public.is_reported_review(uuid) to authenticated;\nrevoke all on function public.admin_moderate', 'grant execute on function public.is_reported_review(uuid) to anon, authenticated;\nrevoke all on function public.admin_moderate'],
   ['photo shared without a landing', `if new.airfield_code is null or not exists (\n    select 1 from public.landings l where l.user_id = new.user_id and l.airfield_code = new.airfield_code\n  ) then`, 'if false then'],
   ['summary counts hidden reviews', `'n', (select count(*) from public.reviews r where r.airfield_code = p_code and r.moderation = 'visible'),`, `'n', (select count(*) from public.reviews r where r.airfield_code = p_code),`],
   ['summary counts old facilities', `and coalesce(r.visited_on, r.created_at::date) >= (current_date - interval '24 months')::date`, ''],
+  // Supabase's default privileges (simulated in stubs.sql) must be taken away from every new object
+  ['reviews keep the default grants', 'revoke all on public.reviews from public, anon, authenticated;', 'null;'],
+  ['signed-in pilots read edit times', 'grant select (client_updated_at) on public.reviews to authenticated;', 'grant select (client_updated_at, updated_at) on public.reviews to authenticated;'],
   ['going public skips the limit','before insert or update of is_public on public.comments\n  for each row execute function private.limit_public_comments()', 'before insert on public.comments\n  for each row execute function private.limit_public_comments()'],
 ];
 
