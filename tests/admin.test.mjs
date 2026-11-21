@@ -77,6 +77,20 @@ test('reported content stays text and both decisions reach the database function
   ]);
 });
 
+test('a reported review shows its stars and texts and is moderated by its id', async () => {
+  const item = {
+    comment_id: null, photo_id: null, review_id: 'v2', airfield_code: 'LKBE', author: ATTACK, body: ATTACK, rating: 2,
+    url: null, thumb: null, is_public: true, moderation: 'visible',
+    reports: [{ reason: 'offensive', details: null, reported_body: 'before edit', reporter: 'Jan', created_at: '2026-11-22' }],
+  };
+  const { main, calls } = await load({ adminReports: async () => [item] });
+  assert.ok(main.all().some(n => /^Hodnocení · LKBE .*★★☆☆☆$/.test(n.textContent)));
+  assert.ok(main.all().some(n => n.textContent === ATTACK));
+  assert.ok(main.all().some(n => n.textContent === 'before edit'));
+  await main.all().find(n => n.textContent === 'Skrýt').onclick();
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [['moderate', { review_id: 'v2' }, 'hidden', 'resolved']]);
+});
+
 test('feedback can be marked read and closed', async () => {
   const { main, calls } = await load({ adminFeedback: async () => [{ id: 'f1', message: ATTACK, status: 'new', author: null, created_at: '' }] });
   assert.ok(main.all().some(n => n.textContent === ATTACK));

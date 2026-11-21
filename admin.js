@@ -31,6 +31,7 @@
     ['users_active_7d', 'aktivních za 7 dní'], ['users_active_30d', 'aktivních za 30 dní'], ['profiles', 's přezdívkou'],
     ['landings', 'přistání'], ['custom_airfields', 'vlastních ploch'], ['comments', 'komentářů'],
     ['comments_public', 'veřejných komentářů'], ['photos', 'fotek'], ['photos_public', 'veřejných fotek'],
+    ['reviews', 'hodnocení'], ['reviews_hidden', 'skrytých hodnocení'],
     ['reports_open', 'otevřených hlášení'], ['feedback_new', 'nových vzkazů'],
   ];
 
@@ -62,11 +63,13 @@
 
   function report(item) {
     const row = el('div', 'item');
-    const what = item.comment_id ? 'Komentář' : 'Fotka';
+    const what = item.comment_id ? 'Komentář' : item.review_id ? 'Hodnocení' : 'Fotka';
+    const stars = item.review_id && item.rating ? ` · ${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)}` : '';
     row.append(el('div', 'meta', `${what} · ${item.airfield_code || '?'} · autor ${item.author || 'bez přezdívky'}`
-      + ` · ${item.is_public ? 'veřejné' : 'soukromé'} · ${item.moderation === 'hidden' ? 'skryté' : 'viditelné'}`));
-    if (item.body !== null) row.append(el('div', 'body', item.body));
-    else if (item.comment_id) row.append(el('div', 'meta', 'Obsah už neexistuje nebo ho nelze číst.'));
+      + ` · ${item.is_public ? 'veřejné' : 'soukromé'} · ${item.moderation === 'hidden' ? 'skryté' : 'viditelné'}${stars}`));
+    if (item.body) row.append(el('div', 'body', item.body));
+    else if (item.review_id && item.moderation) row.append(el('div', 'meta', 'Hodnocení bez textu.'));
+    else if (item.comment_id || item.review_id) row.append(el('div', 'meta', 'Obsah už neexistuje nebo ho nelze číst.'));
     if (/^https:/.test(item.thumb || '')) {
       const img = el('img');
       img.src = item.thumb;
@@ -75,12 +78,13 @@
       row.append(img);
     }
     for (const r of item.reports) {
-      const changed = item.comment_id && r.reported_body !== null && r.reported_body !== item.body;
+      // the text at report time (comments and reviews): the author may have edited it since
+      const changed = (item.comment_id || item.review_id) && r.reported_body != null && r.reported_body !== item.body;
       row.append(el('div', 'meta', `${day(r.created_at)} · ${REASONS[r.reason] || r.reason} · nahlásil ${r.reporter || 'bez přezdívky'}`));
       if (r.details) row.append(el('div', 'body', r.details));
       if (changed) row.append(el('div', 'meta', 'Text při nahlášení:'), el('div', 'body', r.reported_body));
     }
-    const target = { comment_id: item.comment_id, photo_id: item.photo_id };
+    const target = item.review_id ? { review_id: item.review_id } : { comment_id: item.comment_id, photo_id: item.photo_id };
     row.append(
       button('Skrýt', () => window.backend.adminModerate(target, 'hidden', 'resolved'), 'danger'),
       button('Ponechat', () => window.backend.adminModerate(target, 'visible', 'dismissed')),
