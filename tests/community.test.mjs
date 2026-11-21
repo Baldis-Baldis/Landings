@@ -32,7 +32,7 @@ const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 const SUMMARY = { n: 2, avg: 4.5, facts: [{ key: 'wc', n: 2 }, { key: 'fee', n: 1 }], photos_n: 1 };
 const ATTACK = '<img src=x onerror=alert(1)>';
 const review = (id, extra = {}) => ({ id, own: false, author: 'Eva', rating: 4, facts: [], body: `text ${id}`,
-  visited_on: '2026-09-01', created_at: '2026-10-01', moderation: 'visible', photos: [], ...extra });
+  visited_month: '2026-09', created_at: '2026-10-01', moderation: 'visible', photos: [], ...extra });
 
 function load({ signedIn = false, landed = null, mine = null, data = { reviews: [], photos: [] }, summary = SUMMARY,
   confirmed = true, backend = {}, code = `LK${Math.random().toString(36).slice(2, 6).toUpperCase()}` } = {}) {
@@ -55,7 +55,7 @@ function load({ signedIn = false, landed = null, mine = null, data = { reviews: 
   vm.runInContext(readFileSync(join(root, 'community.js'), 'utf8'), ctx);
   const opts = {
     t: k => (/^(nRatings|starsOf|rateLanded|landedOn|moreReviews)$/.test(k) ? v => `${k}(${v})` : k),
-    lang: () => 'cs', fmtDate: d => `D${d}`, signedIn: () => signedIn, nickname: () => (signedIn ? 'Me' : null),
+    lang: () => 'cs', fmtDate: d => `D${d}`, fmtMonth: m => `M${m}`, signedIn: () => signedIn, nickname: () => (signedIn ? 'Me' : null),
     landedOn: () => landed, myReview: () => mine, onResize() {}, openPhoto: (...a) => calls.push(['photo', ...a]),
     onRate: r => calls.push(['rate', r && r.id]), onChanged: () => calls.push(['changed']),
   };
@@ -123,7 +123,8 @@ test('foreign text stays text, the own review comes first, reviews without text 
   assert.ok(box.text().includes(ATTACK), 'shown as text');
   assert.equal(items[0].find(n => n.className === 'nick').textContent, 'commYou');
   assert.equal(items[1].find(n => n.className === 'nick').textContent, ATTACK);
-  assert.match(items[1].text(), /landedOn\(D2026-09-01\)/);
+  assert.match(items[1].text(), /landedOn\(M2026-09\)/, 'month and year only');
+  assert.doesNotMatch(byClass(box, 'rvlist').text(), /2026-09-01|D2026/, 'no exact day in public reviews');
 });
 
 test('report only for signed-in users and never on the own review', async () => {

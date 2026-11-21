@@ -316,6 +316,8 @@ test('the opened section lists reviews with nicknames and the authors\' shared p
   assert.deepEqual(plain(got.reviews[1].facts), ['wc'], 'unknown facilities are dropped');
   assert.deepEqual(plain(got.reviews[1].photos.map(p => p.id)), ['p2']);
   assert.equal(got.reviews[0].moderation, 'hidden');
+  assert.deepEqual(plain(got.reviews.map(r => r.visited_month)), ['2026-08', '2026-09'], 'month and year only');
+  assert.equal(got.reviews.some(r => 'visited_on' in r), false, 'the day never reaches the card');
   assert.deepEqual(plain(got.photos.map(p => [p.id, p.own])), [['p2', false], ['p1', true]]);
   assert.equal('user_id' in got.photos[0], false);
   const reviews = calls.find(c => c.url.pathname.endsWith('/reviews'));

@@ -843,6 +843,12 @@ test('my log: landing, note and photos under one heading, each photo with a shar
   assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
 });
 
+test('a public review shows the month and year of the visit, 11/2026 in both languages', () => {
+  const fmt = vm.runInNewContext(`(${html.match(/fmtMonth:(m=>\{[^}]*\})/)[1]})`);
+  assert.equal(fmt('2026-11'), '11/2026');
+  assert.equal(fmt('2026-03'), '3/2026');
+});
+
 test('deleting a photo asks first, a shared one says it leaves From pilots too', () => {
   const rm = html.slice(html.indexOf("d.querySelectorAll('.rmpic')"));
   assert.match(rm, /if\(!confirm\(t\(gone\.pub\?'photoDelShared':'photoDelConfirm'\)\)\) return;\n\s*setPics/);

@@ -931,7 +931,7 @@ function popup(a){
   d.innerHTML=html;
   const fit=watchCardSize(d,a);
   if(!isCustom){
-    const sec=window.community.section(a.code,{t,lang:()=>lang,fmtDate:fmtDay,
+    const sec=window.community.section(a.code,{t,lang:()=>lang,fmtDate:fmtDay,fmtMonth:m=>{ const [y,mo]=String(m).split('-'); return Number(mo)+'/'+y; },
       signedIn:()=>!!account, nickname:()=>window.authNickname?window.authNickname():null,
       landedOn:()=>visited[a.code]?(visited[a.code].date||''):null, myReview:()=>myReviews[a.code]||null,
       onResize:fit, openPhoto:openLightbox,

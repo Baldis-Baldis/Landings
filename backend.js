@@ -227,7 +227,8 @@
       const list = reviews.map(r => ({
         id: r.id, own: !!user && r.user_id === user.id, author: names[r.user_id] || null,
         rating: r.rating, facts: (r.facts || []).filter(f => REVIEW_FACTS.includes(f)), body: r.body || '',
-        visited_on: r.visited_on, created_at: r.created_at, moderation: r.moderation,
+        // only the month and year of the visit leave this module for public reviews: the card never shows the day
+        visited_month: r.visited_on ? String(r.visited_on).slice(0, 7) : null, created_at: r.created_at, moderation: r.moderation,
         photos: pics.filter(p => p.user_id === r.user_id).map(({ user_id, ...p }) => p),
       }));
       // the own review first, the rest newest first

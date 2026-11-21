@@ -64,7 +64,7 @@
   function forget(code) { summaries.delete(code); }
 
   /*
-   * opts: t (texts), lang() 'cs'/'en', fmtDate(iso), signedIn(), landedOn() (the date of the own landing, '' when
+   * opts: t (texts), lang() 'cs'/'en', fmtDate(iso), fmtMonth('YYYY-MM') e.g. 11/2026, signedIn(), landedOn() (the date of the own landing, '' when
    * landed without a date, null when not landed), myReview() (own review or null), onResize(), openPhoto(urls, i),
    * onRate(review or null) opens the form, onChanged() after the own review was deleted.
    */
@@ -182,7 +182,8 @@
       const top = el('div', 'rvh');
       const who = el('div', 'who');
       who.append(el('span', 'nick', name), ' ', stars(r.rating, t));
-      const meta = el('div', 'meta', [r.visited_on ? t('landedOn')(opts.fmtDate(r.visited_on)) : '',
+      // a public review shows only the month and year of the visit, never the day (the exact date stays in My log)
+      const meta = el('div', 'meta', [r.visited_month ? t('landedOn')(opts.fmtMonth(r.visited_month)) : '',
         r.moderation === 'hidden' ? t('commHidden') : ''].filter(Boolean).join(' · '));
       const text = el('div');
       text.append(who, meta);
