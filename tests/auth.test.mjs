@@ -141,12 +141,14 @@ test('email sign-in with a wrong and a right code, then the nickname', async () 
   await emit(USER);
   assert.equal($('authnickform').hidden, false);
   assert.equal($('authdlg').open, true);
-  assert.equal($('auth').textContent, `Účet: ${USER.email}`);
+  assert.equal($('auth').textContent, 'Nastavení účtu (přezdívka, smazání)');
+  assert.equal($('acctbtn').ariaLabel, `Můj účet: ${USER.email}`, 'signed in before a nickname exists');
 
   $('authnick').value = ' Pilot ';
   await $('authnickform').submit();
   assert.equal($('authdlg').open, false);
-  assert.equal($('auth').textContent, 'Účet: Pilot');
+  assert.equal($('auth').textContent, 'Nastavení účtu (přezdívka, smazání)');
+  assert.equal($('acctname').textContent, 'Pilot', 'still signed in');
 });
 
 test('a taken nickname keeps the dialog open', async () => {
@@ -162,7 +164,8 @@ test('an existing nickname does not open the dialog', async () => {
   const { $, emit } = load({ getNickname: async () => 'Pilot' });
   await emit(USER);
   assert.equal($('authdlg').open, false);
-  assert.equal($('auth').textContent, 'Účet: Pilot');
+  assert.equal($('auth').textContent, 'Nastavení účtu (přezdívka, smazání)');
+  assert.equal($('acctname').textContent, 'Pilot', 'still signed in');
 });
 
 test('a failed nickname read does not nag and a token refresh does not repeat the question', async () => {
@@ -180,7 +183,8 @@ test('a failed sign-out stays signed in and says so', async () => {
   $('auth').onclick();
   await $('authout').onclick();
   assert.equal($('authdlg').open, true);
-  assert.equal($('auth').textContent, 'Účet: Pilot');
+  assert.equal($('auth').textContent, 'Nastavení účtu (přezdívka, smazání)');
+  assert.equal($('acctname').textContent, 'Pilot', 'still signed in');
   assert.ok($('authmsg').textContent);
 });
 
@@ -200,4 +204,57 @@ test('without the beacon a sign-in does not reload', async () => {
   const { emit } = load({ getTermsVersion: async () => '2026-11-02' }, { location: { reload() { reloads += 1; } } });
   await emit(USER);
   assert.equal(reloads, 0);
+});
+
+// --- the account button in the header and the head of the "My account" panel ---
+test('a guest sees "Sign in" on the button, the panel offers sign-in and hides account items', () => {
+  const { $ } = load();
+  assert.equal($('acctname').textContent, 'Přihlásit se');
+  assert.equal($('acctshort').textContent, 'Přihlásit');
+  assert.equal($('acctbtn').ariaLabel, 'Přihlásit se');
+  assert.equal($('acctav').textContent, '');
+  assert.equal($('acctwho').textContent, 'Nepřihlášený');
+  assert.equal($('acctguest').hidden, false);
+  assert.equal($('auth').textContent, 'Přihlásit se');
+  assert.equal($('acctexport').hidden, true);
+  assert.equal($('acctout').hidden, true);
+  $('auth').onclick();
+  assert.equal($('authdlg').open, true, 'the sign-in dialog opens from the panel');
+});
+
+test('a signed-in pilot sees initials and nickname; the panel has their data, settings and sign-out', async () => {
+  const { $, emit, calls } = load({ getTermsVersion: async () => '2026-11-02', getNickname: async () => 'Roman Balda' });
+  await emit(USER);
+  assert.equal($('acctav').textContent, 'RB');
+  assert.equal($('acctav2').textContent, 'RB');
+  assert.equal($('acctname').textContent, 'Roman Balda');
+  assert.equal($('acctbtn').ariaLabel, 'Můj účet: Roman Balda');
+  assert.equal($('acctwho').textContent, 'Roman Balda');
+  assert.equal($('acctmail').textContent, USER.email);
+  assert.equal($('acctguest').hidden, true);
+  assert.equal($('auth').textContent, 'Nastavení účtu (přezdívka, smazání)');
+  assert.equal($('acctexport').hidden, false);
+  assert.equal($('acctexport').textContent, 'Stáhnout moje data');
+  assert.equal($('acctout').hidden, false);
+  await $('acctout').onclick();
+  assert.deepEqual(calls.filter(c => c[0] === 'out'), [['out']], 'sign-out from the panel');
+});
+
+test('initials from a nickname: two words, one word, an e-mail; markup stays text', async () => {
+  for (const [nick, want] of [['Pilot', 'PI'], ['petr_k', 'PK'], ['Žaneta Nová', 'ŽN'], ['<script>alert(1)</script>', '<S']]) {
+    const { $, emit } = load({ getTermsVersion: async () => '2026-11-02', getNickname: async () => nick });
+    await emit(USER);
+    assert.equal($('acctav').textContent, want, nick);
+    assert.equal($('acctname').textContent, nick, 'the nickname goes in as text');
+  }
+  const { $, emit } = load({ getTermsVersion: async () => '2026-11-02', getNickname: async () => null });
+  await emit(USER);
+  assert.equal($('acctav').textContent, 'PI', 'from the e-mail before a nickname exists');
+  assert.equal($('acctwho').textContent, 'Bez přezdívky');
+});
+
+test('auth.js writes the account button only through textContent', () => {
+  const part = source.slice(source.indexOf('function renderButton()'), source.indexOf('function renderAuth()'));
+  assert.ok(part.length > 200);
+  assert.ok(!/innerHTML|insertAdjacentHTML|outerHTML/.test(part));
 });

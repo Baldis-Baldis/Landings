@@ -21,6 +21,8 @@
       deleteConfirm: 'Smazat účet? Smažou se přistání, poznámky, vlastní plochy, komentáře i fotky. Nejde to vrátit.',
       deleteConfirm2: 'Opravdu smazat? Data v tomto zařízení se také odstraní.',
       deleted: 'Účet je smazaný. Ze záloh zmizí nejpozději do 30 dnů.',
+      signInShort: 'Přihlásit', myAccount: 'Můj účet', settings: 'Nastavení účtu (přezdívka, smazání)',
+      guestTitle: 'Nepřihlášený', noNick: 'Bez přezdívky',
     },
     en: {
       signIn: 'Sign in', account: 'Account', signOut: 'Sign out', close: 'Close',
@@ -40,6 +42,8 @@
       deleteConfirm: 'Delete the account? Landings, notes, custom airstrips, comments and photos will be deleted. This cannot be undone.',
       deleteConfirm2: 'Really delete? The data on this device will be removed too.',
       deleted: 'The account is deleted. It leaves the backups within 30 days.',
+      signInShort: 'Sign in', myAccount: 'My account', settings: 'Account settings (nickname, deletion)',
+      guestTitle: 'Not signed in', noNick: 'No nickname',
     },
   };
   const s = k => S[lang][k];
@@ -59,9 +63,34 @@
     if (step === 'terms') return s('termsTitle');
     return nickname ? s('account') : s('nickTitle');
   }
+  // two letters for the round badge: the first letters of two words of the nickname, else its first two letters
+  function initials(name) {
+    const words = String(name || '').replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean);
+    const first = w => Array.from(w)[0] || '';
+    return (words.length > 1 ? first(words[0]) + first(words[1]) : Array.from(words[0] || '?').slice(0, 2).join('')).toUpperCase();
+  }
+  // the account button in the header and the head of the "My account" panel; every text goes in as text
+  function renderButton() {
+    const btn = $('acctbtn'), name = user ? nickname || user.email : '';
+    btn.classList.toggle('guest', !user);
+    $('acctname').textContent = user ? nickname || s('myAccount') : s('signIn');
+    $('acctshort').textContent = s('signInShort');
+    $('acctav').textContent = $('acctav2').textContent = user ? initials(name) : '';
+    btn.ariaLabel = btn.title = user ? `${s('myAccount')}: ${name}` : s('signIn');
+    $('acctav2').hidden = !user;
+    $('acctwho').textContent = user ? nickname || s('noNick') : s('guestTitle');
+    $('acctmail').textContent = user ? user.email : '';
+    $('acctguest').hidden = !!user;
+    menuItem.classList.toggle('primary', !user);
+    $('acctexport').textContent = s('exportData');
+    $('acctexport').hidden = !(user && termsOk);
+    $('acctout').textContent = s('signOut');
+    $('acctout').hidden = !user;
+  }
   function renderAuth() {
     menuItem.hidden = false;
-    menuItem.textContent = user ? `${s('account')}: ${nickname || user.email}` : s('signIn');
+    menuItem.textContent = user ? s('settings') : s('signIn');
+    renderButton();
     dlg.querySelectorAll('[data-a]').forEach(e => { e.textContent = s(e.dataset.a); });
     $('authtitle').textContent = title();
     $('authwho').textContent = user && step === 'nick' ? user.email : '';
@@ -164,7 +193,8 @@
       } catch (err) { message(errorText(err), true); }
     });
   });
-  $('authexport').onclick = async () => {
+  // "Download my data", from the dialog and from the "My account" panel
+  async function exportData(onError) {
     try {
       const data = await window.backend.exportAccount();
       const link = document.createElement('a');
@@ -172,8 +202,10 @@
       link.download = `mylandings-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 60000);
-    } catch (e) { message(errorText(e), true); }
-  };
+    } catch (e) { onError(errorText(e)); }
+  }
+  $('authexport').onclick = () => exportData(text => message(text, true));
+  $('acctexport').onclick = () => exportData(text => status(text));
   $('authdelete').onclick = async () => {
     if (!confirm(s('deleteConfirm')) || !confirm(s('deleteConfirm2'))) return;
     const prefix = `u:${user.id}:`;
@@ -223,13 +255,17 @@
       } catch (err) { message(errorText(err), true); }
     });
   });
-  $('authout').onclick = async () => {
+  // Sign-out, from the dialog and from the "My account" panel. Resolves false when the user changed their mind.
+  async function leave() {
     const signOut = () => window.backend.signOut();
-    try {
-      // Before the terms the account was never used here, so there is nothing of it on this device.
-      const leave = termsOk && window.leaveAccount ? window.leaveAccount(signOut) : signOut();
-      if (await leave !== false) dlg.close();
-    } catch (e) { message(errorText(e), true); }
+    // Before the terms the account was never used here, so there is nothing of it on this device.
+    return termsOk && window.leaveAccount ? window.leaveAccount(signOut) : signOut();
+  }
+  $('authout').onclick = async () => {
+    try { if (await leave() !== false) dlg.close(); } catch (e) { message(errorText(e), true); }
+  };
+  $('acctout').onclick = async () => {
+    try { await leave(); } catch (e) { status(errorText(e)); }
   };
 
   renderAuth();

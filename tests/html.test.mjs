@@ -114,10 +114,10 @@ test('the about page has no code, both languages and the mail link', () => {
   assert.match(doc, /href="privacy\.html"/);
   assert.match(doc, /href="terms\.html"/);
   assert.match(doc.match(/<title>([^<]*)<\/title>/)[1], /MyLandings/);
-  // linked from the menu and from the footer next to privacy and terms
-  const footer = page.match(/<footer>([\s\S]*?)<div id="menu"/)[1];
+  // linked from the "My account" panel and from the footer next to privacy and terms
+  const footer = page.match(/<footer>([\s\S]*?)<\/footer>/)[1];
   assert.match(footer, /<a href="about\.html"[^>]*>O aplikaci<\/a> · <a href="privacy\.html"/);
-  assert.match(page.match(/<div id="menu"[\s\S]*?<\/footer>/)[0], /<a href="about\.html"/);
+  assert.match(page.match(/<div id="menu"[\s\S]*?<\/header>/)[0], /<a href="about\.html"/);
   assert.match(readFileSync(join(root, 'sw.js'), 'utf8'), /'\.\/about\.html'/);
 });
 
@@ -186,7 +186,7 @@ test('the analytics beacon loads on mylandings.net only and never on the admin p
 
 test('the brand and the legal links are in the plain HTML, for Google OAuth review', () => {
   assert.match(page.match(/<title>([^<]*)<\/title>/)[1], /MyLandings/);
-  const footer = page.match(/<footer>([\s\S]*?)<div id="menu"/)[1];
+  const footer = page.match(/<footer>([\s\S]*?)<\/footer>/)[1];
   assert.match(footer, /<a href="privacy\.html"[^>]*>[^<]+<\/a>/, 'privacy link outside the menu, with text');
   assert.match(footer, /<a href="terms\.html"[^>]*>[^<]+<\/a>/, 'terms link outside the menu, with text');
   assert.match(page, /© 2026 MyLandings/);
@@ -623,6 +623,35 @@ test('"Show all airfields" in the card adds the country; an airfield of a shown 
   // its marker changes with landed, favourite and want to visit like any other, and its country is in Mine & selected
   assert.match(html, /if\(peek&&peek\.m===old\)\{ peek\.m=m; peek\.swap=true;/);
   assert.match(html, /return CCS\.filter\(c=>c===home\|\|selCC\.includes\(c\)\|\|mine\[c\]\|\|fl\.has\(c\)\);/);
+});
+
+// --- the account button and the "My account" panel ---
+test('the account button sits in the header for everyone, the old "⋯" menu is gone', () => {
+  const header = page.match(/<header>([\s\S]*?)<\/header>/)[1];
+  assert.match(header, /<button id="acctbtn" class="acctbtn guest" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu">/);
+  assert.match(header, /<div id="menu" role="dialog" aria-labelledby="acctwho">/, 'the panel lives in the header');
+  for (const id of ['auth', 'acctsync', 'acctexport', 'exp', 'imp', 'fb', 'adminbtn', 'appver', 'acctout']) assert.match(header, new RegExp(`id="${id}"`), id);
+  assert.ok(!/morebtn/.test(page + html), 'one place for the account, no second menu');
+  const footer = page.match(/<footer>([\s\S]*?)<\/footer>/)[1];
+  assert.ok(!/id="menu"/.test(footer));
+  // always on top: above the panels and the country backdrop, below the photo viewer; panels stop under it
+  const z = sel => Number(page.match(new RegExp(`${sel}\\{[^}]*z-index:(\\d+)`))[1]);
+  assert.ok(z('header') > z('\\.sheet') && z('header') > z('\\.ccback') && z('header') < z('#lightbox'));
+  assert.match(page, /\.sheet\{--cstop:var\(--hh,56px\);/);
+  // a finger-sized target, a label for screen readers
+  assert.match(page, /\.acctbtn\{[^}]*min-width:44px;min-height:44px;/);
+  assert.match(page, /\.acctbtn\.guest\{width:48px;height:46px;/);
+});
+
+test('the panel opens and closes like a dialog: tap outside, Esc first, focus back on the button', () => {
+  assert.match(html, /function setMenu\(on,back\)\{\n  menu\.classList\.toggle\('on',on\); acctBtn\.setAttribute\('aria-expanded',String\(on\)\);/);
+  assert.match(html, /const first=menu\.querySelector\('button:not\(\[hidden\]\),a'\); if\(first\) first\.focus\(\);/);
+  assert.match(html, /\} else if\(back\) acctBtn\.focus\(\);/);
+  assert.match(html, /document\.addEventListener\('keydown',e=>\{ if\(e\.key==='Escape'&&menu\.classList\.contains\('on'\)\)\{ e\.preventDefault\(\); e\.stopPropagation\(\); setMenu\(false,true\); \} \},true\);/);
+  assert.match(html, /if\(menu\.classList\.contains\('on'\)&&!menu\.contains\(e\.target\)&&!acctBtn\.contains\(e\.target\)\) setMenu\(false\);/);
+  assert.match(html, /acctGuest:'Your data are on this device only\./);
+  assert.match(html, /export:'Back up to a file \(export\)'/);
+  assert.match(html, /import:'Restore from a file \(import\)'/);
 });
 
 // --- closed airfields and ICAO codes from the registry ---

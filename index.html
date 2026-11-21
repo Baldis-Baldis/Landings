@@ -21,7 +21,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:Barlow,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 #app{display:flex;flex-direction:column;height:100dvh}
-header{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 14px 10px;background:var(--paper);position:relative;z-index:1001;border-bottom:1px solid var(--line)}
+header{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 14px 10px;background:var(--paper);position:relative;z-index:1700;border-bottom:1px solid var(--line)}
 header h1{font:700 21px/1 "Barlow Condensed",sans-serif;margin:0;flex:1}
 header .brand{position:absolute;left:50%;top:calc(50% + env(safe-area-inset-top)/2);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;user-select:none}
 header .brand .word{font:700 26px/1 "Barlow Condensed",sans-serif;letter-spacing:.5px;color:var(--ink)}
@@ -76,7 +76,7 @@ header .count small{font:500 12px/1 Barlow,sans-serif;color:var(--ink2);margin-l
 .pop .flag.want.on{background:#E8EFFB;border-color:var(--want);color:#213F8F}
 .wantic{display:inline-block;width:10px;height:14px;vertical-align:-2px}
 /* airfield card as a sheet from below on narrow screens (same breakpoint as the stacked layout) */
-.sheet{--cstop:max(8px,env(safe-area-inset-top));position:fixed;left:0;right:0;bottom:0;z-index:1500;height:0;display:flex;flex-direction:column;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.22);transition:height .22s ease-out;overflow:hidden}
+.sheet{--cstop:var(--hh,56px);position:fixed;left:0;right:0;bottom:0;z-index:1500;height:0;display:flex;flex-direction:column;background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.22);transition:height .22s ease-out;overflow:hidden}
 .sheet[hidden]{display:none}
 .sheet.drag{transition:none}
 .csgrip{flex:0 0 auto;display:flex;justify-content:center;padding:8px 0 4px;touch-action:none;cursor:grab}
@@ -231,9 +231,37 @@ footer .legal{white-space:nowrap;font-size:11px;color:var(--ink2)}
 footer .legal a{color:inherit;text-decoration:none}
 footer .legal a:hover{text-decoration:underline}
 #menu .src.copy{border-top:0;margin-top:0;padding-top:0}
-#morebtn{flex:0 0 auto;width:38px;height:30px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:700 16px/1 Barlow,sans-serif;cursor:pointer;padding:0}
-#morebtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-#menu{display:none;position:absolute;right:8px;bottom:calc(100% + 6px);width:min(300px,calc(100vw - 16px));flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(27,39,64,.18);padding:6px;z-index:1200}
+/* account button in the header: always visible; a guest sees "Sign in", a signed-in pilot initials and nickname */
+.acctbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;min-width:44px;min-height:44px;padding:0 12px 0 8px;border:1px solid var(--line);border-radius:22px;background:#fff;color:var(--ink);font:600 13.5px Barlow,sans-serif;cursor:pointer;box-sizing:border-box}
+.acctbtn:focus-visible{outline:2px solid var(--slz);outline-offset:2px}
+.acctbtn .acctic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.acctbtn.guest{background:var(--ink);border-color:var(--ink);color:#fff;padding:0 14px 0 10px}
+.acctbtn:not(.guest) .acctic,.acctbtn.guest .acctav{display:none}
+.acctbtn[aria-expanded="true"]{box-shadow:0 0 0 2px var(--slz)}
+.acctav{width:30px;height:30px;border-radius:50%;background:#DCE6F7;color:#1F4E9C;display:inline-flex;align-items:center;justify-content:center;font:700 12.5px Barlow,sans-serif;flex:0 0 auto}
+.acctav.big{width:40px;height:40px;font-size:15px}
+.acctname{max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acctshort{display:none}
+@media (max-width:760px){
+  .acctbtn{padding:0;width:44px;justify-content:center;border-radius:50%}
+  .acctbtn .acctname{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .acctbtn.guest{width:48px;height:46px;border-radius:10px;flex-direction:column;gap:0;padding:2px 0}
+  .acctbtn.guest .acctshort{display:block;font:600 10px/1.1 Barlow,sans-serif}
+  .acctbtn:not(.guest) .acctav{width:36px;height:36px;font-size:13px}
+}
+.accthead{display:flex;align-items:center;gap:10px;padding:8px 10px 10px}
+.acctwho{font:700 15px Barlow,sans-serif;color:var(--ink)}
+.acctmail{font-size:12px;color:var(--ink2);overflow-wrap:anywhere}
+.acctguest{margin:0 10px 8px;font-size:13px;line-height:1.4;color:var(--ink2)}
+#menu #auth.primary{background:var(--ink);color:#fff;text-align:center;margin:0 6px 6px}
+#menu #auth.primary:hover{background:#2A3550}
+.acctsync{display:flex;align-items:center;gap:8px;padding:2px 6px 2px 12px;font-size:13px;color:var(--ink2)}
+.acctsync[hidden]{display:none}
+.acctsync span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#menu .acctsync button{padding:6px 10px;border:1px solid var(--line);font-size:12.5px}
+#menu .acctout{color:#A3311F;border-top:1px solid var(--line);border-radius:0 0 6px 6px;margin-top:4px}
+#menu{display:none;position:absolute;right:8px;top:calc(100% + 6px);width:min(320px,calc(100vw - 16px));max-height:calc(100dvh - var(--hh,56px) - 16px);overflow:auto;overscroll-behavior:contain;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(27,39,64,.18);padding:6px;z-index:1200;box-sizing:border-box}
+#menu [hidden]{display:none}
 #menu.on{display:flex}
 #menu button{text-align:left;border:0;background:none;padding:10px 12px;border-radius:6px;font:600 14px Barlow,sans-serif;color:var(--ink);cursor:pointer}
 #menu button:hover{background:var(--paper)}
@@ -282,7 +310,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <body>
 <div id="app">
 <header><h1 data-i data-t="title"></h1><div class="brand" aria-label="MyLandings"><span class="word">My<span>Landings</span></span><svg width="150" height="20" viewBox="0 -3 150 20" aria-hidden="true"><defs><symbol id="lplane" viewBox="0 0 24 24"><path d="M12 1.5c.9 0 1.4.9 1.4 2.2V9l8.1 2.6c.3.1.5.4.5.7v1.1c0 .3-.3.5-.6.4L13.4 12v5.3l2.6 1.7c.2.1.3.3.3.5v.8c0 .3-.3.5-.6.4L12 19.9l-3.7.8c-.3.1-.6-.1-.6-.4v-.8c0-.2.1-.4.3-.5l2.6-1.7V12l-8 1.8c-.3.1-.6-.1-.6-.4v-1.1c0-.3.2-.6.5-.7L10.6 9V3.7c0-1.3.5-2.2 1.4-2.2z"/></symbol></defs><rect x="0" y="3" width="150" height="8" rx="1.5" fill="var(--ink)"/><g fill="#fff"><rect x="4" y="5" width="1.6" height="4"/><rect x="7" y="5" width="1.6" height="4"/><rect x="10" y="5" width="1.6" height="4"/><rect x="138.4" y="5" width="1.6" height="4"/><rect x="141.4" y="5" width="1.6" height="4"/><rect x="144.4" y="5" width="1.6" height="4"/></g><line x1="20" y1="7" x2="130" y2="7" stroke="#fff" stroke-width="1" stroke-dasharray="7 5"/><use href="#lplane" x="53" y="-4" width="22" height="22" fill="var(--done)" stroke="var(--paper)" stroke-width="1.2" transform="rotate(90 64 7)"/></svg></div><div class="count"><span id="cnt">0</span><small><span data-i data-t="of"></span> <span id="tot">0</span></small></div>
-<div class="lang"><button data-l="cs">CZ</button><button data-l="en">EN</button></div></header>
+<div class="lang"><button data-l="cs">CZ</button><button data-l="en">EN</button></div><button id="acctbtn" class="acctbtn guest" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu"><svg class="acctic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span id="acctav" class="acctav" aria-hidden="true"></span><span id="acctname" class="acctname"></span><span id="acctshort" class="acctshort" aria-hidden="true"></span></button><div id="menu" role="dialog" aria-labelledby="acctwho"><div class="accthead"><span id="acctav2" class="acctav big" aria-hidden="true"></span><div class="accttext"><div id="acctwho" class="acctwho"></div><div id="acctmail" class="acctmail"></div></div></div><p id="acctguest" class="acctguest" data-i data-t="acctGuest"></p><button id="auth" type="button" hidden></button><div id="acctsync" class="acctsync" hidden><span id="acctsyncst"></span><button id="acctsyncnow" type="button" data-i data-t="syncNow"></button></div><button id="acctexport" type="button" hidden></button><button id="exp" type="button" data-i data-t="export"></button><button id="imp" type="button" data-i data-t="import"></button><button id="fb" type="button" data-i data-t="feedback" hidden></button><button id="adminbtn" type="button" data-i data-t="admin" hidden></button><a href="about.html" data-i data-t="aboutMenu">O aplikaci</a><a href="terms.html" data-i data-t="termsMenu">Podmínky použití</a><a href="privacy.html" data-i data-t="privacyMenu">Ochrana osobních údajů</a><div class="src" data-i data-t="src"></div><div class="src" id="appver"></div><div class="src copy">© 2026 MyLandings</div><button id="acctout" class="acctout" type="button" hidden></button></div></header>
 <div id="map"><div class="ccbar" id="ccbar"><button id="ccbtn" class="ccbtn" type="button"></button><span id="ccchips"></span></div><div id="homehint" class="homehint" hidden><span data-i data-t="homeHint"></span><button type="button" class="hhpick" data-i data-t="homePick"></button><button type="button" class="hhx" aria-label="×">×</button></div></div>
 <div class="side">
 <div class="tools">
@@ -293,7 +321,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <div class="legend"><span><i style="background:var(--icao)"></i><span data-i data-t="icao"></span></span><span><i style="background:var(--slz)"></i><span data-i data-t="slz"></span></span><span><i style="background:var(--custom)"></i><span data-i data-t="custom"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinG)" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg><span data-i data-t="landed"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinWant)" stroke="#fff" stroke-width="1.4"/><circle cx="12" cy="11" r="7.2" fill="#fff"/><circle cx="12" cy="11" r="5.28" fill="#213F8F"/><circle cx="12" cy="11" r="3.52" fill="#fff"/><circle cx="12" cy="11" r="1.76" fill="#213F8F"/></svg><span data-i data-t="want"></span></span><span><svg class="lpin" viewBox="0 0 24 34"><path transform="translate(1,0)" d="M11 1C5.5 1 1 5.4 1 10.9 1 18.2 11 29 11 29s10-10.8 10-18.1C21 5.4 16.5 1 11 1z" fill="url(#pinGold)" stroke="#fff" stroke-width="1.4"/><path transform="translate(12 11) rotate(-45) scale(.42)" d="M0-12c1.3 0 2 1.2 2 2.6V-4l9 5.4v2.4L2 1.2V6l2.8 2.2V10L0 8.6-4.8 10V8.2L-2 6V1.2l-9 2.6V1.4l9-5.4v-5.4C-2-10.8-1.3-12 0-12z" fill="#fff"/></svg><span data-i data-t="fav"></span></span></div>
 <p id="addhint" style="display:none;margin:0;padding:6px 14px;font-size:12.5px;background:#FFF3E0;color:var(--ink)" data-i data-t="addHint"></p>
 <div id="list"></div>
-<footer><button id="syncbtn" class="sync">⟳ <span id="syncst"></span></button><span class="status" id="st"></span><span class="legal"><a href="about.html" data-i data-t="aboutShort">O aplikaci</a> · <a href="privacy.html" data-i data-t="privacyShort">Soukromí</a> · <a href="terms.html" data-i data-t="termsShort">Podmínky</a></span><button id="morebtn" type="button" aria-haspopup="true">⋯</button><div id="menu" role="menu"><button id="auth" type="button" hidden></button><button id="fb" type="button" data-i data-t="feedback" hidden></button><button id="adminbtn" type="button" data-i data-t="admin" hidden></button><button id="exp" type="button" data-i data-t="export"></button><button id="imp" type="button" data-i data-t="import"></button><a href="about.html" data-i data-t="aboutMenu">O aplikaci</a><a href="terms.html" data-i data-t="termsMenu">Podmínky použití</a><a href="privacy.html" data-i data-t="privacyMenu">Ochrana osobních údajů</a><div class="src" data-i data-t="src"></div><div class="src" id="appver"></div><div class="src copy">© 2026 MyLandings</div></div><input id="file" type="file" accept=".json" hidden></footer>
+<footer><button id="syncbtn" class="sync">⟳ <span id="syncst"></span></button><span class="status" id="st"></span><span class="legal"><a href="about.html" data-i data-t="aboutShort">O aplikaci</a> · <a href="privacy.html" data-i data-t="privacyShort">Soukromí</a> · <a href="terms.html" data-i data-t="termsShort">Podmínky</a></span><input id="file" type="file" accept=".json" hidden></footer>
 </div>
 </div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="pinG" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#5fd39a"/><stop offset=".45" stop-color="#22955c"/><stop offset="1" stop-color="#0d4f2f"/></radialGradient><radialGradient id="pinGold" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".5" stop-color="#d9a514"/><stop offset="1" stop-color="#7a5600"/></radialGradient><radialGradient id="pinWant" cx="35%" cy="28%" r="75%"><stop offset="0" stop-color="#A9C1F5"/><stop offset=".22" stop-color="#3A62C4"/><stop offset=".55" stop-color="#213F8F"/><stop offset="1" stop-color="#142A5C"/></radialGradient></defs></svg>
