@@ -598,7 +598,7 @@ test('an airfield from another country shows as one temporary marker with its ca
   assert.deepEqual(Object.keys(ctx.markers), []);
   // the new search calls clearPeek, opening another card and removing the country's markers do too
   assert.match(html, /function openCard\(a,opener\)\{\n  if\(peek&&peek\.a\.code!==a\.code\) clearPeek\(\);/);
-  assert.match(html, /onHidden:\(\)=>\{ if\(!cardSheet\.isOpen\(\)\)\{ sheetBody\.textContent=''; sheetA=null; clearPeek\(\); \} \}/);
+  assert.match(html, /onHidden:\(\)=>\{ if\(!cardSheet\.isOpen\(\)\)\{ sheetBody\.textContent=''; sheetA=null; reviewFormFor=null; clearPeek\(\); \} \}/);
   assert.match(html, /function dropMarker\(code\)\{\n  if\(peek&&peek\.a\.code===code\)\{ clearPeek\(\); return; \}/);
 });
 

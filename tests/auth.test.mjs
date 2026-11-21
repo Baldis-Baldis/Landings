@@ -177,6 +177,18 @@ test('a failed nickname read does not nag and a token refresh does not repeat th
   assert.equal($('authdlg').open, false);
 });
 
+test('deleting the account removes its keys from the device, unsent rating drafts included', async () => {
+  const store = new Map([['u:u1:review-draft:LKBE', '{"rating":4}'], ['u:u1:visited-cz-airfields', '{}'], ['u:u2:review-draft:LKBE', '{}'], ['lang', 'cs']]);
+  const localStorage = new Proxy({ removeItem: k => store.delete(k) },
+    { ownKeys: () => [...store.keys(), 'removeItem'], getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
+  const { $, calls, emit } = load({ getNickname: async () => 'Pilot', deleteAccount: async () => { calls.push(['delete']); } },
+    { localStorage, confirm: () => true });
+  await emit(USER);
+  await $('authdelete').onclick();
+  assert.deepEqual(calls.filter(c => c[0] === 'delete'), [['delete']]);
+  assert.deepEqual([...store.keys()].sort(), ['lang', 'u:u2:review-draft:LKBE'], 'only this account goes');
+});
+
 test('a failed sign-out stays signed in and says so', async () => {
   const { $, emit } = load({ getNickname: async () => 'Pilot', signOut: async () => { throw new Error('offline'); } });
   await emit(USER);

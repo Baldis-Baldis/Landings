@@ -192,6 +192,35 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .pop .showmore{display:block;width:100%;margin-top:6px;font:600 13px Barlow,sans-serif;padding:7px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer}
 .pop .pilfoot{font-size:11px;color:var(--ink2);padding:8px 10px;margin:8px -10px -4px;background:var(--paper)}
 .pop .commhint{padding:4px 0}
+/* the rating form, in place of the card */
+.pop .reviewform h3{margin:0;font:600 17px 'Barlow Condensed',Barlow,sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink)}
+.pop .reviewform .m{margin:2px 0 10px}
+.pop .reviewform .q{font-weight:600;font-size:14px;margin:12px 0 4px;color:var(--ink)}
+.pop .rvfnick{margin:8px 0;padding:8px 10px;border-radius:6px;background:var(--paper)}
+.pop .rvfnick p{margin:0 0 6px;font-size:13px}
+.pop .rvfnick[hidden]{display:none}
+.pop .bigstars{display:flex;gap:2px}
+.pop .bigstars .star{width:48px;height:48px;border:0;background:none;padding:0;font-size:34px;line-height:1;color:var(--line);cursor:pointer}
+.pop .bigstars .star.on{color:var(--fav)}
+.pop .bigstars .star:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;border-radius:6px}
+.pop .reviewform .word{font-size:13px;font-weight:600;color:var(--ink2);min-height:18px}
+.pop .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pop .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px;min-height:64px;border:1px solid var(--line);border-radius:8px;background:#fff;font:500 11px/1.15 Barlow,sans-serif;color:var(--ink);text-align:center;cursor:pointer}
+.pop .tile svg{width:22px;height:22px}
+.pop .tile.on{border-color:var(--done);background:var(--done-bg);color:var(--done);font-weight:600}
+.pop .reviewform .small{font-size:12px;color:var(--ink2);margin:4px 0}
+.pop .reviewform textarea{min-height:70px}
+.pop .reviewform .cnt{text-align:right;font-size:11px;color:var(--ink2)}
+.pop .fp{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.pop .fp .fpitem{display:flex;flex-direction:column;align-items:center;gap:2px;width:72px;margin:0;font-size:11px;font-weight:500}
+.pop .fp .fpitem img{width:72px;height:72px;object-fit:cover;border-radius:6px;display:block}
+.pop .fp .fpitem.shared img{outline:2px solid var(--done);outline-offset:-2px}
+.pop .fp .fpitem input{width:auto;display:inline;margin:0}
+.pop .fp .addphoto{align-self:center}
+.pop .reviewform .warn{margin:12px 0;padding:8px 10px;border-radius:6px;background:#FFF6DD;border:1px solid #EAD38A;font-size:12.5px}
+.pop .reviewform .err{margin:8px 0;padding:8px 10px;border-radius:6px;background:#FCE8E8;border:1px solid #E5A3A3;font-size:12.5px;color:#7A1C1F}
+.pop .reviewform .err[hidden]{display:none}
+.pop .acts2{display:flex;gap:8px;flex-wrap:wrap}
 .pop .commbtn{font:inherit;margin:2px 4px 2px 0;cursor:pointer}
 .pop .rmphoto{background:none;border:0;color:var(--ink2);font:600 11px Barlow,sans-serif;cursor:pointer;padding:0;margin:0 0 8px;display:block}
 .leaflet-popup-content{margin:12px 14px}
@@ -395,6 +424,7 @@ html,body,header,.side,#list,footer,.sheet,.csbody,button,a,label,summary,input,
 <script src="sync.js"></script>
 <script src="backend.js"></script>
 <script src="community.js"></script>
+<script src="review.js"></script>
 <script src="auth.js"></script>
 <script src="analytics.js"></script>
 </body>

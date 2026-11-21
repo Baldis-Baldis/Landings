@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SCRIPTS = ['app.js', 'sheet.js', 'viewer.js', 'auth.js', 'community.js', 'backend.js', 'sync.js', 'admin.js', 'countries.js', 'analytics.js', 'config.js', 'sw.js'];
+const SCRIPTS = ['app.js', 'sheet.js', 'viewer.js', 'auth.js', 'community.js', 'review.js', 'backend.js', 'sync.js', 'admin.js', 'countries.js', 'analytics.js', 'config.js', 'sw.js'];
 
 // A small JavaScript scanner: strings, templates with nested expressions, comments and regex literals.
 export function placeholdersInPlainStrings(src) {

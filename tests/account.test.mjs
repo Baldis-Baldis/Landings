@@ -334,6 +334,7 @@ test('signing out removes only that account from the device', async () => {
   await a.signIn(ALICE);
   a.land('LKBE', '2026-10-01');
   await a.sync();
+  a.store.set('u:alice:review-draft:LKBE', JSON.stringify({ rating: 4, body: 'not sent' })); // a shared device
   let signedOut = false;
   assert.equal(await a.ctx.window.leaveAccount(async () => { signedOut = true; }), true);
   assert.equal(signedOut, true);

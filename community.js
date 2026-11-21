@@ -315,5 +315,5 @@
     return box;
   }
 
-  window.community = Object.freeze({ section, forget, FACTS });
+  window.community = Object.freeze({ section, forget, icon, FACTS });
 })();
