@@ -856,6 +856,11 @@ test('the privacy notice and the about page describe airfield ratings in both la
   assert.ok(!/Komentáře, veřejné nebo soukromé|Comments, public or private/.test(about), 'public comments are gone');
 });
 
+test('From pilots: hidden buttons stay hidden, the report flag sits on the right', () => {
+  assert.ok(page.includes('.pop .showmore[hidden]{display:none}'), 'display:block would show "Show 0 more"');
+  assert.ok(page.includes('.pop .rvh>div:not(.commreport){flex:1;min-width:0}'));
+});
+
 test('a public review shows the month and year of the visit, 11/2026 in both languages', () => {
   const fmt = vm.runInNewContext(`(${html.match(/fmtMonth:(m=>\{[^}]*\})/)[1]})`);
   assert.equal(fmt('2026-11'), '11/2026');
