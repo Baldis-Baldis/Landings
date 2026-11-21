@@ -76,9 +76,6 @@
   }
 
   const SHOWN = 30; // what one airfield card shows, newest first
-  const shared = (table, columns, code) => client.from(table).select(columns)
-    .eq('airfield_code', code).eq('is_public', true).eq('moderation', 'visible')
-    .order('created_at', { ascending: false }).limit(SHOWN);
 
   // the facilities the database accepts, in the order the card shows them
   const REVIEW_FACTS = ['rest', 'wc', 'fuel', 'bus', 'bike', 'stay', 'night', 'fee'];
@@ -200,29 +197,6 @@
       await removeById('custom_airfields', strips.remove);
     },
 
-    // What others shared at an airfield, readable by guests too, and the user's own comments there.
-    // Only the nickname identifies the author, the e-mail is not in any table the client reads.
-    async placeContent(code) {
-      const user = await currentUser();
-      const [publicComments, publicPhotos, own] = [
-        unwrap(await shared('comments', 'id,user_id,body,created_at', code)),
-        unwrap(await shared('photos', 'id,user_id,storage_path,thumb_path', code).not('uploaded_at', 'is', null)),
-        user ? unwrap(await client.from('comments').select('id,body,is_public,moderation,created_at')
-          .eq('user_id', user.id).eq('airfield_code', code).eq('is_note', false)
-          .order('created_at', { ascending: false }).limit(SHOWN)) : [],
-      ];
-      const others = rows => rows.filter(r => r.user_id !== user?.id);
-      const comments = others(publicComments);
-      const photos = others(publicPhotos);
-      const names = await nicknames([...comments, ...photos].map(r => r.user_id));
-      const links = await signedPhotos(photos);
-      return {
-        own,
-        comments: comments.map(r => ({ id: r.id, author: names[r.user_id] || null, body: r.body, created_at: r.created_at })),
-        photos: photos.map(r => ({ id: r.id, author: names[r.user_id] || null, url: links[r.storage_path], thumb: links[r.thumb_path] })),
-      };
-    },
-
     // ---------- reviews ----------
     // The small public summary the card asks for when it opens: count, average, facilities, shared photos (raw rows,
     // signed only when the section opens). Guests too. The database counts visible reviews only.
@@ -299,14 +273,6 @@
       if (!rows.length) throw new Error('not changed');
     },
 
-    async addComment({ airfield_code, body, is_public }) {
-      const user = await currentUser();
-      if (!user) throw new Error('not signed in');
-      unwrap(await client.from('comments').insert({ airfield_code, body: body.trim().slice(0, 2000), is_public: !!is_public }));
-    },
-
-    removeComment(id) { return removeById('comments', [{ id }]); },
-    setCommentPublic(id, isPublic) { return setShared('comments', id, !!isPublic); },
     setPhotoPublic(id, isPublic) { return setShared('photos', id, !!isPublic); },
 
     // Returns 'ok' or 'already' (each user reports a thing once); other failures throw.

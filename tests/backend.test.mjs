@@ -256,53 +256,6 @@ test('signing out clears the session on this device only', async () => {
   assert.equal(store.has(STORAGE_KEY), false);
 });
 
-const sharedServer = ({ me = false } = {}) => (url, init) => {
-  const table = url.pathname.split('/').pop();
-  if (url.pathname.includes('/object/sign/')) {
-    return [200, JSON.parse(init.body).paths.map(path => ({ path, signedURL: `/object/sign/photos/${path}?token=t` }))];
-  }
-  if (table === 'profiles') return [200, [{ id: 'u2', display_name: 'Eva' }]];
-  if (table === 'photos') return [200, [{ id: 'p2', user_id: 'u2', storage_path: 'u2/p2.jpg', thumb_path: 'u2/p2_thumb.jpg' }]];
-  if (url.searchParams.get('is_note')) return [200, [{ id: 'c1', body: 'mine', is_public: false, moderation: 'visible', created_at: '2026-11-01' }]];
-  return [200, [
-    { id: 'c2', user_id: 'u2', body: '<b>hi</b>', created_at: '2026-11-01' },
-    ...(me ? [{ id: 'c1', user_id: USER_ID, body: 'mine', created_at: '2026-11-01' }] : []),
-  ]];
-};
-
-test('a guest reads shared content of an airfield without a session', async () => {
-  const { backend, calls } = load({ respond: sharedServer() });
-  const got = await backend.placeContent('LKBE');
-  assert.deepEqual(JSON.parse(JSON.stringify(got.comments)), [{ id: 'c2', author: 'Eva', body: '<b>hi</b>', created_at: '2026-11-01' }]);
-  assert.equal(got.photos[0].author, 'Eva');
-  assert.match(got.photos[0].thumb, /u2\/p2_thumb\.jpg/);
-  assert.equal(got.own.length, 0);
-  const reads = calls.filter(c => /comments|photos$/.test(c.url.pathname) && !c.url.pathname.includes('sign'));
-  assert.equal(reads.length, 2, 'no query for own comments');
-  for (const c of reads) {
-    assert.equal(c.url.searchParams.get('is_public'), 'eq.true');
-    assert.equal(c.url.searchParams.get('moderation'), 'eq.visible');
-    assert.equal(c.url.searchParams.get('airfield_code'), 'eq.LKBE');
-  }
-  assert.equal(calls.some(c => c.url.searchParams.get('select')?.includes('email')), false);
-});
-
-test('own comments come separately, without the landing note', async () => {
-  const { backend, calls } = load({ signedIn: true, respond: sharedServer({ me: true }) });
-  const got = await backend.placeContent('LKBE');
-  assert.equal(got.comments.length, 1, 'own public comment is not listed twice');
-  assert.equal(got.own[0].id, 'c1');
-  const own = calls.find(c => c.url.searchParams.get('is_note'));
-  assert.equal(own.url.searchParams.get('is_note'), 'eq.false');
-  assert.equal(own.url.searchParams.get('user_id'), `eq.${USER_ID}`);
-});
-
-test('a new comment is private unless asked and the client sets no owner', async () => {
-  const { backend, calls } = load({ signedIn: true, respond: () => [201, []] });
-  await backend.addComment({ airfield_code: 'LKBE', body: '  hello  ' });
-  assert.deepEqual(calls[0].body, { airfield_code: 'LKBE', body: 'hello', is_public: false });
-});
-
 test('sharing fails loudly when the database dropped the change', async () => {
   const { backend, calls } = load({ signedIn: true, respond: () => [200, []] });
   await assert.rejects(backend.setPhotoPublic('p1', true), /not changed/);

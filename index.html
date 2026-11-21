@@ -139,19 +139,59 @@ body.cardopen .ccbar,body.cardopen .homehint,body.cardopen .leaflet-control-attr
 .pop .diary{border-top:2px solid var(--ink);padding-top:8px;margin-top:4px}
 .pop .diary h3,.pop .pilots h3{margin:0 0 8px;font:600 15px 'Barlow Condensed',Barlow,sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink)}
 .pop .gal .picstate{position:absolute;top:2px;left:2px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:rgba(0,0,0,.55);color:#fff;font:600 11px/22px Barlow,sans-serif;text-align:center}
-.pop .comm{margin-top:8px;font-size:12px;color:var(--ink2)}
-.pop .comm summary{cursor:pointer;font-weight:600}
-.pop .commbody{max-height:220px;overflow-y:auto;margin-top:4px}
-.pop .commgal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
-.pop .commgal figure{margin:0;min-width:0}
-.pop .commgal img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border-radius:4px;cursor:zoom-in}
-.pop .commgal figcaption{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pop .commitem{padding:4px 0;border-top:1px solid var(--paper)}
-.pop .commmeta{font-size:11px;opacity:.75}
-.pop .commtext{white-space:pre-wrap;overflow-wrap:anywhere}
+/* From pilots: header with average and facility icons, a strip that invites to rate, the opened section */
+.pop .pilots{margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px;color:var(--ink)}
+.pop .pilhead{cursor:pointer;list-style:none;padding:9px 10px 7px;display:block}
+.pop .pilhead::-webkit-details-marker{display:none}
+.pop .pilrow{display:flex;align-items:center;gap:8px}
+.pop .piltitle{font:600 15px 'Barlow Condensed',Barlow,sans-serif;text-transform:uppercase;letter-spacing:.5px}
+.pop .pilavg{font-weight:600}.pop .pilavg small{color:var(--ink2);font-weight:500}.pop .pilstar{color:var(--fav)}
+.pop .pilrow::after{content:'▾';margin-left:auto;color:var(--ink2)}
+.pop .pilbox[open] .pilrow::after{content:'▴'}
+.pop .minifx{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;color:var(--ink2)}
+.pop .minifx svg{width:18px;height:18px;display:block}
+.pop .pilbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--done-bg)}
+.pop .pilbar.grey{background:var(--paper);color:var(--ink2)}
+.pop .pilbar p{margin:0;flex:1}
+.pop .btn{font:600 13px Barlow,sans-serif;padding:7px 12px;min-height:36px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;white-space:nowrap}
+.pop .btn.sec{background:#fff;color:var(--ink)}
+.pop .btn.danger{background:#fff;color:#A3262A;border-color:#A3262A}
+.pop .btn:disabled{opacity:.45;cursor:default}
+.pop .stars{display:inline-block;letter-spacing:1px;background:linear-gradient(90deg,var(--fav) var(--fill,0%),var(--line) var(--fill,0%));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pop .stars.big{font-size:18px}
+.pop .pilbody{padding:0 10px 4px}
+.pop .sum{display:flex;align-items:center;gap:12px;padding:4px 0 10px;border-bottom:1px solid var(--paper)}
+.pop .bigavg{font:600 34px/1 'Barlow Condensed',Barlow,sans-serif}
+.pop .sum small{display:block;color:var(--ink2);font-size:12px}
+.pop .h4{margin:10px 0 6px;font:600 11px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.4px;color:var(--ink2)}
+.pop .fxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 6px}
+.pop .fxgrid div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;text-align:center}
+.pop .fxgrid .ring{width:36px;height:36px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center}
+.pop .fxgrid svg{width:20px;height:20px}
+.pop .fxgrid b{color:var(--done)}
+.pop .pilgal{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.pop .pilgal figure{margin:0;min-width:0;position:relative}
+.pop .pilgal img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border-radius:4px;cursor:zoom-in}
+.pop .pilgal figcaption{font-size:10px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop .pilgal .more{position:absolute;left:0;top:0;width:100%;aspect-ratio:1;border:0;border-radius:4px;background:rgba(10,14,24,.55);color:#fff;font:600 16px Barlow,sans-serif;cursor:pointer}
+.pop .pilgal .commreport{position:absolute;top:0;right:0;margin:0}
+.pop .flagbtn{border:0;background:none;color:var(--ink2);font-size:14px;min-width:44px;min-height:36px;cursor:pointer;padding:0}
+.pop .pilgal .flagbtn{min-width:32px;min-height:32px;color:#fff;text-shadow:0 0 3px #000}
+.pop .rv{padding:8px 0;border-top:1px solid var(--paper)}
+.pop .rv.own{background:#F2F6FC;margin:0 -10px;padding:8px 10px}
+.pop .rvh{display:flex;align-items:flex-start;gap:8px}
+.pop .rvh>div{flex:1;min-width:0}
+.pop .rvh .commreport{margin:0}
+.pop .ini{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font:600 11px/28px Barlow,sans-serif;text-align:center;flex:none}
+.pop .rvh .nick{font-weight:600;overflow-wrap:anywhere}
+.pop .rvh .meta{font-size:11px;color:var(--ink2)}
+.pop .rvtext{margin:4px 0 0 36px;white-space:pre-wrap;overflow-wrap:anywhere}
+.pop .rvthumbs{display:flex;gap:4px;margin:6px 0 0 36px}
+.pop .rvthumbs img{width:44px;height:44px;object-fit:cover;border-radius:4px;cursor:zoom-in}
+.pop .rvacts{margin:6px 0 0 36px;display:flex;gap:6px}
+.pop .showmore{display:block;width:100%;margin-top:6px;font:600 13px Barlow,sans-serif;padding:7px;min-height:36px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);cursor:pointer}
+.pop .pilfoot{font-size:11px;color:var(--ink2);padding:8px 10px;margin:8px -10px -4px;background:var(--paper)}
 .pop .commhint{padding:4px 0}
-.pop .commnew{width:100%;min-height:48px;box-sizing:border-box}
-.pop .commshare{display:block;margin:2px 0}
 .pop .commbtn{font:inherit;margin:2px 4px 2px 0;cursor:pointer}
 .pop .rmphoto{background:none;border:0;color:var(--ink2);font:600 11px Barlow,sans-serif;cursor:pointer;padding:0;margin:0 0 8px;display:block}
 .leaflet-popup-content{margin:12px 14px}

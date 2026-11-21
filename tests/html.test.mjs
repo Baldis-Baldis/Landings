@@ -88,7 +88,7 @@ test('a token left by the old GitHub sync is removed on start', () => {
 // Checked in headless Edge: without this, Leaflet takes a click on a swapped button for a map click
 // and closes the card, so the report form never shows.
 test('clicks in the shared section never reach the map', () => {
-  assert.match(html, /const sec=window\.community\.section\([\s\S]{0,400}?sec\.addEventListener\('click',e=>e\.stopPropagation\(\)\)/);
+  assert.match(html, /const sec=window\.community\.section\([\s\S]{0,900}?sec\.addEventListener\('click',e=>e\.stopPropagation\(\)\)/);
 });
 
 test('every form field has a name', () => {

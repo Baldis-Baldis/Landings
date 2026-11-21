@@ -68,6 +68,7 @@ class Server {
         const list = t => JSON.parse(JSON.stringify([...data[t].values()]));
         return { strips: list('strips'), landings: list('landings'), flags: list('flags'), photos: list('photos'), notes: list('notes').sort((a, b) => (a.client_updated_at < b.client_updated_at ? -1 : 1)) };
       },
+      myReviews: async () => [],
       uploadPhoto: async ({ id: photoId, airfield_code, custom_airfield_id, full, thumb }) => {
         if (this.offline || this.failUpload) throw new TypeError('offline');
         assert.deepEqual([full, thumb], ['full:' + full.slice(5), 'thumb:' + thumb.slice(6)]);
