@@ -98,6 +98,11 @@
     $('authexport').hidden = $('authdelete').hidden = !(user && termsOk && step === 'nick');
   }
   window.renderAuth = renderAuth;
+  // The nickname of a signed-in user who accepted the terms, else null: the card decides with it whether a photo
+  // can be shared or an airfield rated (the database checks it again). askNickname opens the nickname step.
+  window.authNickname = () => (user && termsOk ? nickname : null);
+  window.askNickname = () => { if (user && termsOk) show('nick'); };
+  const nicknameChanged = () => { if (window.onNicknameChange) window.onNicknameChange(); };
 
   function show(next) {
     step = next;
@@ -176,7 +181,7 @@
   async function startAccount() {
     if (window.useAccount) window.useAccount(user);
     try { nickname = await window.backend.getNickname(); } catch (e) { return; } // offline: ask next time
-    renderAuth();
+    renderAuth(); nicknameChanged();
     if (!nickname && !askedNick) { askedNick = true; show('nick'); }
   }
 
@@ -251,7 +256,7 @@
         if (result === 'taken') { message(s('nickTaken'), true); return; }
         if (result === 'invalid') { message(s('nickInvalid'), true); return; }
         nickname = $('authnick').value.trim();
-        dlg.close(); renderAuth(); status(s('nickSaved'));
+        dlg.close(); renderAuth(); status(s('nickSaved')); nicknameChanged();
       } catch (err) { message(errorText(err), true); }
     });
   });

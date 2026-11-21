@@ -810,14 +810,44 @@ test('every photo shows its state, the card is redrawn after an upload, new phot
   assert.match(html, /accountBase=s\.base; accountPhotos=s\.photoIds; saveBase\(\);\n\s*refreshOpenCard\(\);/);
   assert.match(html, /if\(account&&!p\.id\) return `<span class="picstate up" role="status">/, 'uploading state');
   assert.match(html, /aria-label="\$\{esc\(lbl\)\}"/, 'the button says what a tap does');
-  assert.match(html, /picPrivateTap:'Soukromá fotka – klepnutím ji zveřejníte pro všechny'/);
-  assert.match(html, /picPublicTap:'Veřejná fotka – klepnutím ji skryjete'/);
   assert.match(html, /picUploading:'nahrávám…'/);
   // a new photo is a plain {url}: private until published, and the upload never sends is_public
   assert.match(html, /const pic=\{url:durl\};/);
   const backend = readFileSync(join(root, 'backend.js'), 'utf8');
   assert.match(backend, /from\('photos'\)\.upsert\(\{ id, airfield_code, custom_airfield_id \}/);
   assert.ok(!/upsert\(\{[^}]*is_public/.test(backend), 'no is_public on upload');
+});
+
+test('my log: landing, note and photos under one heading, each photo with a sharing label', () => {
+  const card = html.slice(html.indexOf('function popup(a){'), html.indexOf('function openLightbox('));
+  assert.ok(card.indexOf('<section class="diary">') < card.indexOf('landed-cb') && card.indexOf('landed-cb') < card.indexOf('class="gal"'),
+    'heading, then the landing, then the photos');
+  assert.match(html, /diary:'Můj deník'/); assert.match(html, /diary:'My log'/);
+  // the label is a real button: pressed state, a label that says what a tap does, the disabled reason
+  assert.match(card, /<button type="button" class="share\$\{on\?' on':''\}\$\{off\?' off':''\}" data-i="\$\{i\}" aria-pressed="\$\{on\}"\$\{off\?' aria-disabled="true"':''\}/);
+  assert.match(card, /const on=!!p\.pub, off=!on&&!!why/, 'a shared photo always says so and can always stop');
+  for (const k of ["shareOn:'Sdíleno'", "shareOff:'Jen já'", "shareDo:'Sdílet fotku s piloty'", "shareUndo:'Zrušit sdílení fotky'",
+    "shareOn:'Shared'", "shareOff:'Only me'", "shareDo:'Share photo with pilots'", "shareUndo:'Stop sharing photo'",
+    "shareConfirm:'Fotku uvidí všichni, i nepřihlášení, s tvou přezdívkou.'",
+    "shareNoLanding:'Sdílet můžeš po zapsání přistání.'", "shareNoAccount:'Sdílet můžeš s účtem a přezdívkou.'",
+    "shareCustom:'Fotky vlastních ploch zůstávají soukromé.'"]) assert.ok(html.includes(k), k);
+  // sharing asks first, stopping does not; a blocked share tells why
+  assert.match(card, /const why=!p\.pub&&shareBlock\(a\); if\(why\)\{ status\(t\(why\)\); return; \}/);
+  assert.match(card, /if\(!p\.pub&&!confirm\(t\('shareConfirm'\)\)\) return;/);
+  const block = html.slice(html.indexOf('function shareBlock(a){'), html.indexOf('async function setPhotoShared'));
+  assert.ok(block.indexOf("'shareCustom'") < block.indexOf("'shareNoAccount'") && block.indexOf("'shareNoAccount'") < block.indexOf("'shareNoLanding'"));
+  assert.match(block, /window\.authNickname&&window\.authNickname\(\)/, 'a nickname is needed');
+  // 44 px target, small visible label, a 2 px frame in the app's green on a shared photo
+  assert.match(page, /\.pop \.gal button\.share\{[^}]*min-width:44px;min-height:44px/);
+  assert.match(page, /\.pop \.gal button\.share span\{[^}]*font:600 11px/);
+  assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
+});
+
+test('deleting a photo asks first, a shared one says it leaves From pilots too', () => {
+  const rm = html.slice(html.indexOf("d.querySelectorAll('.rmpic')"));
+  assert.match(rm, /if\(!confirm\(t\(gone\.pub\?'photoDelShared':'photoDelConfirm'\)\)\) return;\n\s*setPics/);
+  assert.match(html, /photoDelConfirm:'Smazat fotku z deníku\?'/);
+  assert.match(html, /photoDelConfirm:'Delete the photo from your log\?'/);
 });
 
 test('the date field is as wide as the note field everywhere', () => {
