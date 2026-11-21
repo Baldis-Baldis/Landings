@@ -80,6 +80,12 @@
     .eq('airfield_code', code).eq('is_public', true).eq('moderation', 'visible')
     .order('created_at', { ascending: false }).limit(SHOWN);
 
+  // the facilities the database accepts, in the order the card shows them
+  const REVIEW_FACTS = ['rest', 'wc', 'fuel', 'bus', 'bike', 'stay', 'night', 'fee'];
+  // what a guest may read of a review; never the edit times (a column grant, the database refuses more)
+  const REVIEW_PUBLIC = 'id,user_id,rating,facts,body,visited_on,moderation,created_at';
+  const REVIEWS_SHOWN = 200;
+
   async function nicknames(ids) {
     if (!ids.length) return {};
     const rows = unwrap(await client.from('profiles').select('id,display_name').in('id', [...new Set(ids)]));
@@ -217,6 +223,82 @@
       };
     },
 
+    // ---------- reviews ----------
+    // The small public summary the card asks for when it opens: count, average, facilities, shared photos (raw rows,
+    // signed only when the section opens). Guests too. The database counts visible reviews only.
+    async airfieldSummary(code) {
+      const s = unwrap(await client.rpc('airfield_summary', { p_code: code })) || {};
+      return {
+        n: Number(s.n) || 0,
+        avg: s.avg == null ? null : Number(s.avg),
+        facts: Array.isArray(s.facts) ? s.facts.filter(f => REVIEW_FACTS.includes(f.key)).map(f => ({ key: f.key, n: Number(f.n) || 0 })) : [],
+        photos_n: Number(s.photos_n) || 0,
+      };
+    },
+
+    // The opened section: visible reviews of the airfield (the own one even when hidden, RLS lets the owner see it)
+    // and all shared photos there, the own ones included. Nicknames only, never an e-mail.
+    async airfieldReviews(code) {
+      const user = await currentUser();
+      const reviews = unwrap(await client.from('reviews').select(REVIEW_PUBLIC).eq('airfield_code', code)
+        .order('created_at', { ascending: false }).limit(REVIEWS_SHOWN));
+      const photos = unwrap(await client.from('photos').select('id,user_id,storage_path,thumb_path')
+        .eq('airfield_code', code).eq('is_public', true).eq('moderation', 'visible').not('uploaded_at', 'is', null)
+        .order('uploaded_at', { ascending: false }).limit(SHOWN));
+      const names = await nicknames([...reviews, ...photos].map(r => r.user_id));
+      const links = await signedPhotos(photos);
+      const pics = photos.map(p => ({ id: p.id, user_id: p.user_id, own: !!user && p.user_id === user.id,
+        author: names[p.user_id] || null, url: links[p.storage_path], thumb: links[p.thumb_path] }))
+        .filter(p => /^https:/.test(p.url || ''));
+      const list = reviews.map(r => ({
+        id: r.id, own: !!user && r.user_id === user.id, author: names[r.user_id] || null,
+        rating: r.rating, facts: (r.facts || []).filter(f => REVIEW_FACTS.includes(f)), body: r.body || '',
+        visited_on: r.visited_on, created_at: r.created_at, moderation: r.moderation,
+        photos: pics.filter(p => p.user_id === r.user_id).map(({ user_id, ...p }) => p),
+      }));
+      // the own review first, the rest newest first
+      list.sort((a, b) => (b.own - a.own));
+      return { reviews: list, photos: pics.map(({ user_id, ...p }) => p) };
+    },
+
+    // The user's own reviews, for the card strip ("your rating") without asking per card.
+    async myReviews() {
+      const user = await currentUser();
+      if (!user) return [];
+      return readAll(() => client.from('reviews').select('id,airfield_code,rating,facts,body,visited_on,moderation')
+        .eq('user_id', user.id).order('id'));
+    },
+
+    // One review per pilot and airfield (unique in the database), so a repeated send after a failure never adds a
+    // second one: insert, and when it exists already, update it. Not an upsert: that would also set airfield_code,
+    // which the client may not update. The database adds the owner and the visit date and refuses a review without
+    // a landing, nickname or accepted terms.
+    async saveReview({ airfield_code, rating, facts, body }) {
+      const user = await currentUser();
+      if (!user) throw new Error('not signed in');
+      const fields = {
+        rating: Math.round(Number(rating)),
+        facts: REVIEW_FACTS.filter(f => (facts || []).includes(f)),
+        body: String(body || '').trim().slice(0, 2000) || null,
+        client_updated_at: new Date().toISOString(),
+      };
+      if (!(fields.rating >= 1 && fields.rating <= 5)) throw new Error('rating');
+      const { data, error } = await client.from('reviews').insert({ airfield_code, ...fields }).select('id');
+      if (!error) return data[0].id;
+      if (error.code !== '23505') throw error;
+      const rows = unwrap(await client.from('reviews').update(fields)
+        .eq('user_id', user.id).eq('airfield_code', airfield_code).select('id'));
+      if (!rows.length) throw new Error('not changed'); // a device with a late clock, see keep_newest
+      return rows[0].id;
+    },
+
+    async deleteReview(id) {
+      const user = await currentUser();
+      if (!user) throw new Error('not signed in');
+      const rows = unwrap(await client.from('reviews').delete().eq('id', id).select('id'));
+      if (!rows.length) throw new Error('not changed');
+    },
+
     async addComment({ airfield_code, body, is_public }) {
       const user = await currentUser();
       if (!user) throw new Error('not signed in');
@@ -228,11 +310,11 @@
     setPhotoPublic(id, isPublic) { return setShared('photos', id, !!isPublic); },
 
     // Returns 'ok' or 'already' (each user reports a thing once); other failures throw.
-    async report({ comment_id = null, photo_id = null, reason, details = '' }) {
+    async report({ comment_id = null, photo_id = null, review_id = null, reason, details = '' }) {
       const user = await currentUser();
       if (!user) throw new Error('not signed in');
       const { error } = await client.from('reports')
-        .insert({ comment_id, photo_id, reason, details: details.trim().slice(0, 1000) || null });
+        .insert({ comment_id, photo_id, review_id, reason, details: details.trim().slice(0, 1000) || null });
       if (!error) return 'ok';
       if (error.code === '23505') return 'already';
       throw error;
@@ -255,27 +337,31 @@
     // Open reports grouped by what they point at, with the content as the database lets the admin see it.
     async adminReports() {
       const reports = unwrap(await client.from('reports')
-        .select('id,reporter_id,comment_id,photo_id,reason,details,comment_body,created_at')
+        .select('id,reporter_id,comment_id,photo_id,review_id,reason,details,comment_body,created_at')
         .eq('status', 'open').order('created_at').limit(200));
       const ids = key => [...new Set(reports.map(r => r[key]).filter(Boolean))];
       const comments = ids('comment_id').length ? unwrap(await client.from('comments')
         .select('id,user_id,airfield_code,body,is_public,moderation').in('id', ids('comment_id'))) : [];
       const photos = ids('photo_id').length ? unwrap(await client.from('photos')
         .select('id,user_id,airfield_code,storage_path,thumb_path,is_public,moderation').in('id', ids('photo_id'))) : [];
-      const names = await nicknames([...reports.map(r => r.reporter_id), ...comments.map(r => r.user_id), ...photos.map(r => r.user_id)]);
+      // the admin reads other people's reviews only while they are reported (RLS)
+      const reviews = ids('review_id').length ? unwrap(await client.from('reviews')
+        .select('id,user_id,airfield_code,rating,body,moderation').in('id', ids('review_id'))) : [];
+      const names = await nicknames([...reports.map(r => r.reporter_id), ...[...comments, ...photos, ...reviews].map(r => r.user_id)]);
       const links = await signedPhotos(photos);
       const items = new Map();
       for (const r of reports) {
-        const key = r.comment_id ? `c:${r.comment_id}` : `p:${r.photo_id}`;
+        const key = r.comment_id ? `c:${r.comment_id}` : r.photo_id ? `p:${r.photo_id}` : `r:${r.review_id}`;
         if (!items.has(key)) {
           const c = r.comment_id && comments.find(x => x.id === r.comment_id);
           const p = r.photo_id && photos.find(x => x.id === r.photo_id);
-          const row = c || p || {};
+          const v = r.review_id && reviews.find(x => x.id === r.review_id);
+          const row = c || p || v || {};
           items.set(key, {
-            comment_id: r.comment_id, photo_id: r.photo_id, airfield_code: row.airfield_code || null,
-            author: names[row.user_id] || null, body: c ? c.body : null,
+            comment_id: r.comment_id, photo_id: r.photo_id, review_id: r.review_id || null, airfield_code: row.airfield_code || null,
+            author: names[row.user_id] || null, body: c ? c.body : v ? v.body : null, rating: v ? v.rating : null,
             url: p ? links[p.storage_path] : null, thumb: p ? links[p.thumb_path] : null,
-            is_public: !!row.is_public, moderation: row.moderation || null, reports: [],
+            is_public: v ? true : !!row.is_public, moderation: row.moderation || null, reports: [],
           });
         }
         items.get(key).reports.push({
@@ -287,9 +373,10 @@
     },
 
     // moderation 'hidden' or 'visible', status 'resolved' or 'dismissed'; closes every open report of the item.
-    async adminModerate({ comment_id = null, photo_id = null }, moderation, status) {
-      unwrap(await client.rpc('admin_moderate',
-        { p_comment_id: comment_id, p_photo_id: photo_id, p_moderation: moderation, p_status: status }));
+    async adminModerate({ comment_id = null, photo_id = null, review_id = null }, moderation, status) {
+      unwrap(await client.rpc('admin_moderate', {
+        p_comment_id: comment_id, p_photo_id: photo_id, p_moderation: moderation, p_status: status, p_review_id: review_id,
+      }));
     },
 
     async adminFeedback() {
@@ -337,6 +424,8 @@
         landings: await mine('landings', '*'),
         airfield_flags: await mine('airfield_flags', '*'),
         comments: await mine('comments', '*'),
+        // explicit columns: a signed-in user may not read updated_at of reviews (column grant)
+        reviews: await mine('reviews', 'id,airfield_code,rating,facts,body,visited_on,moderation,client_updated_at,created_at'),
         photos: photos.map(p => ({ ...p, url: links[p.storage_path] || null, thumb_url: links[p.thumb_path] || null })),
       };
     },

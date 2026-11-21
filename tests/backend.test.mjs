@@ -314,8 +314,171 @@ test('a report sends no owner and a repeat is not an error', async () => {
   let n = 0;
   const { backend, calls } = load({ signedIn: true, respond: () => (n++ ? [409, { code: '23505', message: 'dup' }] : [201, []]) });
   assert.equal(await backend.report({ comment_id: 'c2', reason: 'spam', details: '  why  ' }), 'ok');
-  assert.deepEqual(calls[0].body, { comment_id: 'c2', photo_id: null, reason: 'spam', details: 'why' });
+  assert.deepEqual(calls[0].body, { comment_id: 'c2', photo_id: null, review_id: null, reason: 'spam', details: 'why' });
   assert.equal(await backend.report({ comment_id: 'c2', reason: 'spam' }), 'already');
+});
+
+test('a review can be reported', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: () => [201, []] });
+  assert.equal(await backend.report({ review_id: 'v2', reason: 'offensive' }), 'ok');
+  assert.deepEqual(calls[0].body, { comment_id: null, photo_id: null, review_id: 'v2', reason: 'offensive', details: null });
+});
+
+// ---------- reviews ----------
+const plain = x => JSON.parse(JSON.stringify(x)); // values from the vm realm
+test('the card summary is one database call, guests too, unknown facilities dropped', async () => {
+  const { backend, calls } = load({ respond: () => [200, { n: 3, avg: 4.33, facts: [{ key: 'wc', n: 2 }, { key: 'hangar', n: 9 }], photos_n: 1, photos: [] }] });
+  const s = await backend.airfieldSummary('LKBE');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.pathname, '/rest/v1/rpc/airfield_summary');
+  assert.deepEqual(calls[0].body, { p_code: 'LKBE' });
+  assert.deepEqual(JSON.parse(JSON.stringify(s)), { n: 3, avg: 4.33, facts: [{ key: 'wc', n: 2 }], photos_n: 1 });
+});
+
+test('an airfield without reviews has no average', async () => {
+  const { backend } = load({ respond: () => [200, { n: 0, avg: null, facts: [], photos_n: 0, photos: [] }] });
+  assert.equal((await backend.airfieldSummary('ZZ-NONE')).avg, null);
+});
+
+const reviewServer = (url, init) => {
+  const table = url.pathname.split('/').pop();
+  if (url.pathname.includes('/object/sign/')) {
+    return [200, JSON.parse(init.body).paths.map(path => ({ path, signedURL: `/object/sign/photos/${path}?token=t` }))];
+  }
+  if (table === 'profiles') return [200, [{ id: 'u2', display_name: '<script>x</script>' }, { id: USER_ID, display_name: 'Me' }]];
+  if (table === 'photos') return [200, [
+    { id: 'p2', user_id: 'u2', storage_path: 'u2/p2.jpg', thumb_path: 'u2/p2_thumb.jpg' },
+    { id: 'p1', user_id: USER_ID, storage_path: `${USER_ID}/p1.jpg`, thumb_path: `${USER_ID}/p1_thumb.jpg` },
+  ]];
+  return [200, [
+    { id: 'v2', user_id: 'u2', rating: 5, facts: ['wc', 'hangar'], body: 'nice', visited_on: '2026-09-01', moderation: 'visible', created_at: '2026-10-02' },
+    { id: 'v1', user_id: USER_ID, rating: 3, facts: [], body: null, visited_on: '2026-08-01', moderation: 'hidden', created_at: '2026-10-01' },
+  ]];
+};
+
+test('the opened section lists reviews with nicknames and the authors\' shared photos, the own review first', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: reviewServer });
+  const got = await backend.airfieldReviews('LKBE');
+  assert.deepEqual(plain(got.reviews.map(r => [r.id, r.own, r.author])), [['v1', true, 'Me'], ['v2', false, '<script>x</script>']]);
+  assert.deepEqual(plain(got.reviews[1].facts), ['wc'], 'unknown facilities are dropped');
+  assert.deepEqual(plain(got.reviews[1].photos.map(p => p.id)), ['p2']);
+  assert.equal(got.reviews[0].moderation, 'hidden');
+  assert.deepEqual(plain(got.photos.map(p => [p.id, p.own])), [['p2', false], ['p1', true]]);
+  assert.equal('user_id' in got.photos[0], false);
+  const reviews = calls.find(c => c.url.pathname.endsWith('/reviews'));
+  assert.equal(reviews.url.searchParams.get('airfield_code'), 'eq.LKBE');
+  assert.doesNotMatch(reviews.url.searchParams.get('select'), /updated_at|\*/);
+  const photos = calls.find(c => c.url.pathname.endsWith('/photos'));
+  assert.equal(photos.url.searchParams.get('is_public'), 'eq.true');
+  assert.equal(photos.url.searchParams.get('moderation'), 'eq.visible');
+  assert.equal(calls.some(c => c.url.searchParams.get('select')?.includes('email')), false);
+});
+
+test('a guest sees the reviews too, none of them own', async () => {
+  const { backend } = load({ respond: reviewServer });
+  const got = await backend.airfieldReviews('LKBE');
+  assert.equal(got.reviews.some(r => r.own) || got.photos.some(p => p.own), false);
+});
+
+test('a new review is inserted with the allowed columns, cleaned, never owner or visit date', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: () => [201, [{ id: 'v1' }]] });
+  assert.equal(await backend.saveReview({ airfield_code: 'LKBE', rating: 4, facts: ['fee', 'wc', 'wc', 'hangar'], body: '  ok  ', visited_on: '2020-01-01' }), 'v1');
+  assert.equal(calls.length, 1);
+  const c = calls[0];
+  assert.equal(c.method, 'POST');
+  assert.equal(c.url.pathname, '/rest/v1/reviews');
+  assert.equal(c.url.searchParams.get('on_conflict'), null, 'not an upsert: it would set airfield_code');
+  assert.deepEqual(Object.keys(c.body).sort(), ['airfield_code', 'body', 'client_updated_at', 'facts', 'rating']);
+  assert.deepEqual(plain(c.body.facts), ['wc', 'fee']);
+  assert.equal(c.body.body, 'ok');
+});
+
+const existing = (then = [200, [{ id: 'v1' }]]) => (url, init) =>
+  (init.method === 'POST' ? [409, { code: '23505', message: 'duplicate key' }] : then);
+
+test('an existing review is updated in place, without its airfield', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: existing() });
+  assert.equal(await backend.saveReview({ airfield_code: 'LKBE', rating: 2, facts: ['wc'], body: 'x' }), 'v1');
+  const u = calls[1];
+  assert.equal(u.method, 'PATCH');
+  assert.equal(u.url.searchParams.get('airfield_code'), 'eq.LKBE');
+  assert.equal(u.url.searchParams.get('user_id'), `eq.${USER_ID}`);
+  assert.deepEqual(Object.keys(u.body).sort(), ['body', 'client_updated_at', 'facts', 'rating']);
+});
+
+test('repeating a save after a failure never adds a second review', async () => {
+  let n = 0;
+  const server = existing();
+  const { backend, calls } = load({ signedIn: true, respond: (url, init) => (n++ ? server(url, init) : [503, { message: 'down' }]) });
+  const review = { airfield_code: 'LKBE', rating: 5, facts: [], body: '' };
+  await assert.rejects(backend.saveReview(review));
+  assert.equal(await backend.saveReview(review), 'v1');
+  assert.equal(calls.filter(c => c.method === 'PATCH').length, 1);
+  assert.equal(calls.at(-1).body.body, null);
+});
+
+test('other insert failures are not taken for an existing review', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: () => [400, { code: 'P0001', message: 'only a pilot who landed there can review it' }] });
+  await assert.rejects(backend.saveReview({ airfield_code: 'LKBE', rating: 3 }), e => e.code === 'P0001');
+  assert.equal(calls.length, 1);
+});
+
+test('a review without stars is refused before any request', async () => {
+  const { backend, calls } = load({ signedIn: true });
+  await assert.rejects(backend.saveReview({ airfield_code: 'LKBE', rating: 0 }), /rating/);
+  assert.equal(calls.length, 0);
+});
+
+test('an update the database dropped (late clock) fails loudly', async () => {
+  const { backend } = load({ signedIn: true, respond: existing([200, []]) });
+  await assert.rejects(backend.saveReview({ airfield_code: 'LKBE', rating: 3 }), /not changed/);
+});
+
+test('deleting a review deletes by id and fails when nothing was deleted', async () => {
+  let n = 0;
+  const { backend, calls } = load({ signedIn: true, respond: () => (n++ ? [200, []] : [200, [{ id: 'v1' }]]) });
+  await backend.deleteReview('v1');
+  assert.equal(calls[0].method, 'DELETE');
+  assert.equal(calls[0].url.searchParams.get('id'), 'eq.v1');
+  await assert.rejects(backend.deleteReview('v1'), /not changed/);
+});
+
+test('own reviews are read for the signed-in user only, a guest asks nothing', async () => {
+  const guest = load();
+  assert.deepEqual(plain(await guest.backend.myReviews()), []);
+  assert.equal(guest.calls.length, 0);
+  const { backend, calls } = load({ signedIn: true, respond: () => [200, [{ id: 'v1', airfield_code: 'LKBE', rating: 4 }]] });
+  assert.equal((await backend.myReviews())[0].airfield_code, 'LKBE');
+  assert.equal(calls[0].url.searchParams.get('user_id'), `eq.${USER_ID}`);
+});
+
+test('the export carries the reviews with explicit columns', async () => {
+  const { backend, calls } = load({ signedIn: true, respond: url => [200, url.pathname.endsWith('/user_settings') ? null : []] });
+  const data = await backend.exportAccount();
+  assert.deepEqual(plain(data.reviews), []);
+  const r = calls.find(c => c.url.pathname.endsWith('/reviews'));
+  assert.equal(r.url.searchParams.get('user_id'), `eq.${USER_ID}`);
+  const cols = r.url.searchParams.get('select').split(',');
+  assert.equal(cols.includes('updated_at') || cols.includes('*'), false);
+  assert.ok(cols.includes('rating') && cols.includes('visited_on'));
+});
+
+test('a reported review reaches the admin with its stars and text, and is moderated by its id', async () => {
+  const respond = url => {
+    const table = url.pathname.split('/').pop();
+    if (table === 'reports') return [200, [
+      { id: 'r1', reporter_id: 'u3', comment_id: null, photo_id: null, review_id: 'v2', reason: 'spam', details: null, comment_body: 'old', created_at: '1' },
+    ]];
+    if (table === 'reviews') return [200, [{ id: 'v2', user_id: 'u2', airfield_code: 'LKBE', rating: 1, body: 'new', moderation: 'visible' }]];
+    if (table === 'profiles') return [200, [{ id: 'u2', display_name: 'Eva' }]];
+    if (table === 'admin_moderate') return [204, null];
+    return [200, []];
+  };
+  const { backend, calls } = load({ signedIn: true, respond });
+  const [item] = await backend.adminReports();
+  assert.deepEqual(plain([item.review_id, item.rating, item.body, item.author, item.reports[0].reported_body]), ['v2', 1, 'new', 'Eva', 'old']);
+  await backend.adminModerate({ review_id: 'v2' }, 'hidden', 'resolved');
+  assert.equal(calls.at(-1).body.p_review_id, 'v2');
 });
 
 test('a guest is no admin without asking the server', async () => {
@@ -349,7 +512,7 @@ test('moderation goes through the database function', async () => {
   const { backend, calls } = load({ signedIn: true, respond: () => [204, null] });
   await backend.adminModerate({ photo_id: 'p2' }, 'hidden', 'resolved');
   assert.equal(calls[0].url.pathname, '/rest/v1/rpc/admin_moderate');
-  assert.deepEqual(calls[0].body, { p_comment_id: null, p_photo_id: 'p2', p_moderation: 'hidden', p_status: 'resolved' });
+  assert.deepEqual(calls[0].body, { p_comment_id: null, p_photo_id: 'p2', p_moderation: 'hidden', p_status: 'resolved', p_review_id: null });
 });
 
 test('accepting the terms sends only version and time', async () => {
