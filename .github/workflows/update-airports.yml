@@ -1,7 +1,8 @@
 # Monthly refresh of foreign airfields, runways and frequencies from OurAirports.
 # Runs on the 2nd of every month and can be started by hand (Actions -> Update airfield data -> Run workflow).
-# The script checks the data before writing (failed download, empty files, a country losing more than 20 %)
-# and then fails without writing, so nothing is committed.
+# The script checks the data before writing (failed download, empty files, a country losing more than 20 %,
+# a code leaving data/registry.json or changing its OurAirports row) and then fails without writing, so nothing
+# is committed. The registry keeps every airfield code for good.
 name: Update airfield data
 
 on:
@@ -25,7 +26,7 @@ jobs:
 
       # Node comes with the runner image; the script has no dependencies
       - name: Test the update script
-        run: node --version && node --test tests/update-airports.test.mjs
+        run: node --version && node --test tests/update-airports.test.mjs tests/registry.test.mjs
 
       - name: Download and rebuild data
         run: node tools/update-airports.mjs
@@ -34,7 +35,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/countries/
+          git add data/countries/ data/registry.json
           if git diff --cached --quiet; then
             echo "No changes in OurAirports data."
             exit 0

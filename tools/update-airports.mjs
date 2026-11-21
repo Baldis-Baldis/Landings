@@ -4,10 +4,13 @@
 // data/countries/CZ.json follows the VFR manual and is kept by hand: the script never rewrites it, it only
 // refreshes the runways and frequencies of those airfields.
 //
+// Every published code is a permanent ID kept in data/registry.json (see build): it never changes or disappears.
+//
 // Safety: everything is downloaded and checked before anything is written. The run fails and writes nothing
-// when a download fails, a file looks empty, or a country loses more than 20 % of its airfields or info.
+// when a download fails, a file looks empty, a country loses more than 20 % of its airfields (they would go
+// missing at once) or info, a code would leave the registry or point at another OurAirports row.
 // A file is rewritten only when its content changed, so the monthly Action commits only real changes.
-// Usage: node tools/update-airports.mjs
+// Usage: node tools/update-airports.mjs [--dry-run]
 import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -79,36 +82,114 @@ export function ftToM(v) {
 const round5 = x => Number(Number(x).toFixed(5));
 const lt = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
-// builds the per-country data from the three OurAirports tables
-export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, czAirports) {
+// --- the registry (data/registry.json): every published code is a permanent ID ---
+// A code is never changed, never removed and never given to another airfield, so the users' landings, photos,
+// comments and reviews (all keyed by airfield_code) never lose their airfield. OurAirports rows are found
+// through the registry: first by their stable numeric id (oa_id), in Czechia by the VFR code. A new ICAO code
+// or ident is only recorded. An airfield gone from the source stays with its last known data, gets missing_since
+// and after CLOSE_AFTER_MONTHS the status closed; when it comes back it is active again.
+export const CLOSE_AFTER_MONTHS = 3;
+export const EMPTY_REGISTRY = { v: 1, generated: '', airfields: {} };
+const addMonths = (day, n) => { const [y, m, d] = day.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + n, d)).toISOString().slice(0, 10); };
+
+// one airfield per line, so a monthly change shows as a few changed lines in git
+export function stringifyRegistry(reg) {
+  const lines = Object.entries(reg.airfields).map(([code, r]) => `${JSON.stringify(code)}:${JSON.stringify(r)}`);
+  return `{"v":${reg.v},"generated":${JSON.stringify(reg.generated)},"airfields":{\n${lines.join(',\n')}\n}}\n`;
+}
+
+// builds the per-country data from the three OurAirports tables, through the registry
+export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, czAirports,
+  { registry = EMPTY_REGISTRY, prevFiles = {}, today = new Date().toISOString().slice(0, 10) } = {}) {
   const live = Object.keys(COUNTRIES).filter(c => COUNTRIES[c].live && c !== 'CZ');
   const out = { CZ: { airports: czAirports, info: {} } };
   const czCodes = czAirports.map(a => a.code);
   live.forEach(c => { out[c] = { airports: [], info: {} }; });
+  const reg = structuredClone(registry.airfields || {});
+  const report = { added: [], collisions: [], changed: [], missing: [], closed: [], back: [], held: [] };
+  const byOa = new Map(), byId = new Map(airports.map(r => [Number(r.id), r]));
+  for (const [code, r] of Object.entries(reg)) if (r.oa_id !== null) byOa.set(r.oa_id, code);
   const seen = new Set(), identToCode = new Map(), codeCc = new Map(), exceptions = {};
-  for (const r of airports) {
-    const cc = r.iso_country;
-    if (!out[cc] || cc === 'CZ' || !TYPES.has(r.type)) continue;
-    const [code, icao] = appCode(r, COUNTRIES[cc].icao);
-    if (seen.has(code)) continue;
-    seen.add(code); identToCode.set(r.ident, code); codeCc.set(code, cc);
-    out[cc].airports.push({
+  const entry = (r, code, cc) => {
+    const icao = r.icao_code || '';
+    return {
       code, name: r.name.replace(/\s+/g, ' ').trim(),
       lat: round5(r.latitude_deg), lon: round5(r.longitude_deg),
       elev: r.elevation_ft || '', town: r.municipality || '',
-      slz: !icao && r.type === 'small_airport', cc,
-    });
-    if (countryOfCode(code, null) !== cc) exceptions[code] = cc;
+      slz: !appCode(r, COUNTRIES[cc].icao)[1] && r.type === 'small_airport', cc,
+      ...(icao && icao !== code ? { icao } : {}),
+    };
+  };
+  const present = (code, rec, r, cc) => {
+    if (rec.missing_since || rec.status !== 'active') { report.back.push(code); rec.missing_since = null; rec.status = 'active'; }
+    const was = `${rec.oa_ident}|${rec.icao}|${rec.cc}`;
+    rec.oa_ident = r.ident; rec.icao = r.icao_code || ''; rec.cc = cc;
+    if (`${rec.oa_ident}|${rec.icao}|${rec.cc}` !== was) report.changed.push(`${code}: ${was} -> ${rec.oa_ident}|${rec.icao}|${rec.cc}`);
+    seen.add(code); identToCode.set(r.ident, code); codeCc.set(code, cc);
+    out[cc].airports.push(entry(r, code, cc));
+  };
+  // 1. rows the registry knows by oa_id keep their code, whatever their ICAO code or ident is now
+  const pending = [];
+  for (const r of airports) {
+    const cc = r.iso_country;
+    if (!out[cc] || cc === 'CZ' || !TYPES.has(r.type)) continue;
+    const code = byOa.get(Number(r.id));
+    if (code && reg[code].cc !== 'CZ') present(code, reg[code], r, cc); else pending.push(r);
+  }
+  // 2. rows the registry does not know
+  for (const r of pending) {
+    const cc = r.iso_country, icao = r.icao_code || '';
+    const sameAs = ([c, x]) => x.cc === cc && !seen.has(c) && ((icao && (c === icao || x.icao === icao)) || c === r.ident || x.oa_ident === r.ident);
+    // an airfield of ours not in this run (its row gone or no longer an airfield) with the same ICAO code or ident:
+    // pairing it would change its oa_id, which only a person may decide, so the row waits and ours keeps its data
+    const gone = Object.entries(reg).find(e => e[1].oa_id !== null && sameAs(e));
+    if (gone) { report.held.push(`${cc} oa ${r.id} ${r.ident} "${r.name}" looks like ${gone[0]} (its OurAirports row ${gone[1].oa_id} is gone)`); continue; }
+    // an airfield of ours that never had an OurAirports row: the ICAO code or ident links it for good
+    const unlinked = Object.entries(reg).find(e => e[1].oa_id === null && e[1].cc !== 'CZ' && sameAs(e));
+    if (unlinked) { unlinked[1].oa_id = Number(r.id); byOa.set(Number(r.id), unlinked[0]); present(unlinked[0], unlinked[1], r, cc); continue; }
+    // a new airfield: the code of today's rule, unless the registry has it already
+    let [code] = appCode(r, COUNTRIES[cc].icao);
+    if (reg[code] || seen.has(code)) {
+      const taken = code; code = `${cc}-X${r.id}`;
+      report.collisions.push(`${taken} is taken, oa ${r.id} "${r.name}" (${cc}) gets ${code}`);
+      if (reg[code]) { report.held.push(`${code} exists already, oa ${r.id} left out`); continue; }
+    }
+    reg[code] = { cc, status: 'active', added: today, oa_id: Number(r.id), oa_ident: r.ident, icao, vfr: '', missing_since: null };
+    byOa.set(Number(r.id), code); report.added.push(code);
+    present(code, reg[code], r, cc);
+  }
+  // 3. Czech airfields follow the VFR manual (CZ.json): their state never depends on OurAirports
+  const cz = new Set(czCodes);
+  const czRows = airports.filter(r => r.iso_country === 'CZ');
+  for (const a of czAirports) {
+    const r = reg[a.code];
+    const row = r && r.oa_id !== null ? byId.get(r.oa_id)
+      : czRows.find(x => TYPES.has(x.type) && [x.ident, x.gps_code, x.icao_code, x.local_code].includes(a.code));
+    if (!r) { reg[a.code] = { cc: 'CZ', status: 'active', added: today, oa_id: row ? Number(row.id) : null, oa_ident: row ? row.ident : '', icao: row ? row.icao_code || '' : '', vfr: a.code, missing_since: null }; report.added.push(a.code); }
+    const rec = reg[a.code];
+    const status = a.closed ? 'closed' : 'active';
+    if (rec.status !== status || rec.missing_since) { (status === 'active' ? report.back : report.closed).push(a.code); rec.status = status; rec.missing_since = null; }
+    if (row) { rec.oa_ident = row.ident; rec.icao = row.icao_code || ''; identToCode.set(row.ident, a.code); }
+    seen.add(a.code); codeCc.set(a.code, 'CZ');
+  }
+  for (const r of czRows) for (const alias of [r.ident, r.gps_code, r.icao_code, r.local_code])
+    if (cz.has(alias) && !identToCode.has(r.ident)) { identToCode.set(r.ident, alias); break; }
+  // 4. airfields gone from the source keep their last known data, runways and frequencies included
+  const keptInfo = {};
+  for (const [code, rec] of Object.entries(reg)) {
+    if (seen.has(code)) continue;
+    if (rec.cc === 'CZ') throw new Error(`data/countries/CZ.json lost ${code}: keep every VFR code, mark a strip closed instead of deleting it`);
+    const prev = prevFiles[rec.cc] && prevFiles[rec.cc].airports.find(a => a.code === code);
+    if (!prev || !out[rec.cc]) throw new Error(`${code} is in the registry but neither in OurAirports nor in data/countries/${rec.cc}.json`);
+    if (!rec.missing_since) { rec.missing_since = today; report.missing.push(code); }
+    if (rec.status === 'active' && addMonths(rec.missing_since, CLOSE_AFTER_MONTHS) <= today) { rec.status = 'closed'; report.closed.push(code); }
+    const { closed, ...kept } = prev;
+    out[rec.cc].airports.push(rec.status === 'closed' ? { ...kept, closed: 1 } : kept);
+    if (prevFiles[rec.cc].info && prevFiles[rec.cc].info[code]) keptInfo[code] = prevFiles[rec.cc].info[code];
+    seen.add(code); codeCc.set(code, rec.cc);
   }
   live.forEach(c => out[c].airports.sort((a, b) => lt(a.name, b.name)));
-  for (const code of czCodes) if (countryOfCode(code, null) !== 'CZ') exceptions[code] = 'CZ';
-  // Czech airfields: match the VFR-manual codes to OurAirports records
-  const cz = new Set(czCodes);
-  for (const r of airports) {
-    if (r.iso_country !== 'CZ') continue;
-    for (const alias of [r.ident, r.gps_code, r.icao_code, r.local_code])
-      if (cz.has(alias)) { identToCode.set(r.ident, alias); codeCc.set(alias, 'CZ'); break; }
-  }
+  for (const c of Object.keys(out)) for (const a of out[c].airports) if (countryOfCode(a.code, null) !== c) exceptions[a.code] = c;
   const info = {};
   for (const r of runways) {
     const code = identToCode.get(r.airport_ident);
@@ -124,18 +205,49 @@ export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz
     const list = ((info[code] ??= {}).f ??= []);
     if (!list.some(x => x[0] === item[0] && x[1] === item[1] && x[2] === item[2])) list.push(item);
   }
+  for (const [code, v] of Object.entries(keptInfo)) if (!info[code]) info[code] = v;
   for (const code of Object.keys(info).sort(lt)) {
     const v = info[code]; if (v.r) v.r.sort((a, b) => (b[1] || 0) - (a[1] || 0));
-    out[codeCc.get(code)].info[code] = v;
+    if (codeCc.has(code)) out[codeCc.get(code)].info[code] = v;
   }
-  return { countries: out, exceptions: Object.fromEntries(Object.entries(exceptions).sort((a, b) => lt(a[0], b[0]))) };
+  const airfields = Object.fromEntries(Object.entries(reg).sort((a, b) => lt(a[0], b[0])));
+  const same = JSON.stringify(airfields) === JSON.stringify(registry.airfields || {});
+  return {
+    countries: out, exceptions: Object.fromEntries(Object.entries(exceptions).sort((a, b) => lt(a[0], b[0]))),
+    registry: { v: 1, generated: same && registry.generated ? registry.generated : today, airfields }, report,
+  };
 }
 
-// the search index over every country: code, name and town only (no positions, no custom strips), by country.
+// Throws when the registry would break its promise: a code that disappears or points at another OurAirports row,
+// or a country where more than MAX_DROP of its airfields went missing at once (a broken download looks like that,
+// now that missing airfields stay in the files).
+export function checkRegistry(before, after, report, prevFiles) {
+  const problems = [];
+  for (const [code, r] of Object.entries(before.airfields || {})) {
+    const now = after.airfields[code];
+    if (!now) problems.push(`${code} would leave the registry`);
+    else if (r.oa_id !== null && now.oa_id !== r.oa_id) problems.push(`${code}: oa_id ${r.oa_id} -> ${now.oa_id}`);
+  }
+  const lost = {};
+  for (const code of report.missing) { const cc = after.airfields[code].cc; lost[cc] = (lost[cc] || 0) + 1; }
+  for (const [cc, n] of Object.entries(lost)) {
+    const base = ((prevFiles[cc] && prevFiles[cc].airports) || []).filter(a => !(before.airfields[a.code] || {}).missing_since).length;
+    if (base && n > base * MAX_DROP) problems.push(`${cc}: airfields ${base} -> ${base - n}`);
+  }
+  if (problems.length) throw new Error('registry check failed, nothing written: ' + problems.join('; '));
+}
+
+// the search index over every country: code, name and town (no positions, no custom strips), by country, plus the
+// ICAO code when it differs from ours and a mark for a closed airfield.
 // The app downloads it on the first search and finds airfields of countries that are not shown.
 export function searchIndex(countries) {
   const c = {};
-  for (const cc of Object.keys(countries).sort(lt)) c[cc] = countries[cc].airports.map(a => [a.code, a.name, a.town || '']);
+  for (const cc of Object.keys(countries).sort(lt)) c[cc] = countries[cc].airports.map(a => {
+    const row = [a.code, a.name, a.town || ''];
+    if (a.icao || a.closed) row.push(a.icao || '');
+    if (a.closed) row.push(1);
+    return row;
+  });
   return { v: 1, c };
 }
 
@@ -180,13 +292,43 @@ export async function fetchCsv(name, minRows = 1000) {
 
 const stable = (o) => JSON.stringify(o);
 
-// downloads, checks and only then writes; returns a short report
-export async function run({ root, getCsv = fetchCsv, today = new Date().toISOString().slice(0, 10), log = console.log } = {}) {
+// the registry must exist: without it every code could be handed out again
+export function readRegistry(root) {
+  let reg = null;
+  try { reg = JSON.parse(readFileSync(join(root, 'data', 'registry.json'), 'utf8')); } catch {}
+  if (!reg || reg.v !== 1 || !reg.airfields || typeof reg.airfields !== 'object') throw new Error('data/registry.json is missing or broken');
+  return reg;
+}
+
+function readPrevFiles(root, COUNTRIES) {
+  const files = {};
+  for (const c of Object.keys(COUNTRIES)) {
+    try { files[c] = JSON.parse(readFileSync(join(root, 'data', 'countries', c + '.json'), 'utf8')); } catch {}
+  }
+  return files;
+}
+
+// a short monthly overview for the log (and the summary of the GitHub run)
+export function summary(report) {
+  const part = (title, list) => list.length ? [`${title}: ${list.length}`, ...list.slice(0, 50).map(x => '  ' + x), ...(list.length > 50 ? [`  … ${list.length - 50} more`] : [])] : [];
+  const lines = [
+    `registry: ${report.added.length} new, ${report.changed.length} changed, ${report.missing.length} newly missing, ${report.closed.length} closed, ${report.back.length} back, ${report.collisions.length} collisions, ${report.held.length} waiting for a decision`,
+    ...part('new', report.added), ...part('collisions', report.collisions), ...part('changed (ident|ICAO|country)', report.changed),
+    ...part('newly missing', report.missing), ...part('closed', report.closed), ...part('back', report.back), ...part('waiting for a decision', report.held),
+  ];
+  return lines.join('\n');
+}
+
+// downloads, checks and only then writes; returns a short report. dryRun checks everything and writes nothing.
+export async function run({ root, getCsv = fetchCsv, today = new Date().toISOString().slice(0, 10), log = console.log, dryRun = false } = {}) {
   const { COUNTRIES, countryOfCode } = loadCountries(root);
   const cz = czechList(root);
+  const before = readRegistry(root);
+  const prevFiles = readPrevFiles(root, COUNTRIES);
   const [airports, runways, freqs] = await Promise.all(['airports.csv', 'runways.csv', 'airport-frequencies.csv'].map(n => getCsv(n)));
-  const { countries, exceptions } = build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz.airports);
+  const { countries, exceptions, registry, report } = build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz.airports, { registry: before, prevFiles, today });
   checkCounts(previousCounts(root), countries);
+  checkRegistry(before, registry, report, prevFiles);
 
   const dir = join(root, 'data', 'countries');
   mkdirSync(dir, { recursive: true });
@@ -209,14 +351,20 @@ export async function run({ root, getCsv = fetchCsv, today = new Date().toISOStr
   const spath = join(dir, 'search.json'), search = JSON.stringify(searchIndex(countries));
   let oldSearch = null; try { oldSearch = readFileSync(spath, 'utf8'); } catch {}
   if (oldSearch !== search) files[spath] = search;
+  const rpath = join(root, 'data', 'registry.json'), regText = stringifyRegistry(registry);
+  if (registry.generated !== before.generated || JSON.stringify(registry.airfields) !== JSON.stringify(before.airfields)) files[rpath] = regText;
   // write through temporary files so a crash never leaves half a file behind
-  for (const [p, text] of Object.entries(files)) if (text !== null) { writeFileSync(p + '.tmp', text); renameSync(p + '.tmp', p); }
+  if (!dryRun) for (const [p, text] of Object.entries(files)) if (text !== null) { writeFileSync(p + '.tmp', text); renameSync(p + '.tmp', p); }
   for (const [c, v] of Object.entries(index.countries)) log(`${c}: ${v.n} airfields, info ${v.info}, ${v.bytes} B${files[join(dir, c + '.json')] ? ' (updated)' : ''}`);
   log(`exceptions: ${Object.keys(exceptions).length}${idxSame ? '' : ' (index updated)'}`);
   log(`search: ${Buffer.byteLength(search)} B${files[spath] ? ' (updated)' : ''}`);
-  return { index, written: Object.keys(files).filter(p => files[p] !== null) };
+  const overview = summary(report);
+  log(overview);
+  if (!dryRun && process.env.GITHUB_STEP_SUMMARY) { try { writeFileSync(process.env.GITHUB_STEP_SUMMARY, '```\n' + overview + '\n```\n', { flag: 'a' }); } catch {} }
+  if (dryRun) log('dry run: nothing written');
+  return { index, report, registry, countries, written: dryRun ? [] : Object.keys(files).filter(p => files[p] !== null), wouldWrite: Object.keys(files).filter(p => files[p] !== null) };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  run({ root: join(dirname(fileURLToPath(import.meta.url)), '..') }).catch(e => { console.error(e.message); process.exit(1); });
+  run({ root: join(dirname(fileURLToPath(import.meta.url)), '..'), dryRun: process.argv.includes('--dry-run') }).catch(e => { console.error(e.message); process.exit(1); });
 }

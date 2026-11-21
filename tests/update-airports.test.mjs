@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseCsv, build, run, loadCountries, fetchCsv, checkCounts, ftToM, appCode, searchIndex } from '../tools/update-airports.mjs';
+import { parseCsv, build, run, loadCountries, fetchCsv, checkCounts, ftToM, appCode, searchIndex, checkRegistry, EMPTY_REGISTRY } from '../tools/update-airports.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const { COUNTRIES, countryOfCode } = loadCountries(ROOT);
@@ -32,8 +32,10 @@ function tempRoot() {
   copyFileSync(join(ROOT, 'countries.js'), join(dir, 'countries.js'));
   mkdirSync(join(dir, 'data', 'countries'), { recursive: true });
   writeFileSync(join(dir, 'data', 'countries', 'CZ.json'), JSON.stringify({ source: 'VFR manual', cc: 'CZ', airports: CZ_LIST, info: {} }));
+  writeFileSync(join(dir, 'data', 'registry.json'), JSON.stringify(EMPTY_REGISTRY));
   return dir;
 }
+const registryOf = dir => JSON.parse(readFileSync(join(dir, 'data', 'registry.json'), 'utf8'));
 // only SK, AT and CZ are live in the temporary root, whatever countries.js says later
 function onlyLive(dir) {
   const src = readFileSync(join(dir, 'countries.js'), 'utf8').replace(/,live:1/g, '')
@@ -42,7 +44,12 @@ function onlyLive(dir) {
 }
 const csvFrom = (w) => async (name) => w[{ 'airports.csv': 'airports', 'runways.csv': 'runways', 'airport-frequencies.csv': 'freqs' }[name]];
 const quiet = () => {};
-const snapshot = (dir) => { const d = join(dir, 'data', 'countries'); return existsSync(d) ? Object.fromEntries(readdirSync(d).map(f => [f, readFileSync(join(d, f), 'utf8')])) : {}; };
+// everything the update may write: the country files, the index, the search index and the registry
+const snapshot = (dir) => {
+  const d = join(dir, 'data', 'countries'), out = existsSync(d) ? Object.fromEntries(readdirSync(d).map(f => [f, readFileSync(join(d, f), 'utf8')])) : {};
+  const r = join(dir, 'data', 'registry.json'); if (existsSync(r)) out['registry.json'] = readFileSync(r, 'utf8');
+  return out;
+};
 
 test('CSV fields may hold commas, quotes and line breaks', () => {
   const rows = parseCsv('a,b,c\r\n1,"x, ""y""","line\nbreak"\n2,,\n');
@@ -71,7 +78,7 @@ test('data are split per country, Czech info is matched to the VFR codes, odd co
 test('a run writes per-country files and an index, a second run changes nothing', async () => {
   const dir = tempRoot(); onlyLive(dir);
   const first = await run({ root: dir, getCsv: csvFrom(world()), today: '2026-11-07', log: quiet });
-  assert.equal(first.written.length, 5, 'three countries, the index and the search index');
+  assert.equal(first.written.length, 6, 'three countries, the index, the search index and the registry');
   const idx = JSON.parse(readFileSync(join(dir, 'data', 'countries', 'index.json'), 'utf8'));
   assert.deepEqual(Object.keys(idx.countries), ['AT', 'CZ', 'SK']);
   assert.equal(idx.countries.CZ.n, 1);
@@ -114,6 +121,121 @@ test('the published search index agrees with the country files exactly', () => {
   }
 });
 
+// --- the registry: codes are permanent IDs ---
+const rec = (o) => ({ cc: 'SK', status: 'active', added: '2026-11-21', oa_id: null, oa_ident: '', icao: '', vfr: '', missing_since: null, ...o });
+const reg = airfields => ({ v: 1, generated: '2026-11-21', airfields });
+const tables = airports => ({ airports, runways: [], freqs: [] });
+
+test('a code never changes: a new ICAO code or ident is only recorded, the card gets the ICAO code', () => {
+  const r = build(tables([airport({ id: '101', ident: 'LZAA', icao_code: 'LZAA' })]), live, countryOfCode, CZ_LIST,
+    { registry: reg({ 'SK-0001': rec({ oa_id: 101, oa_ident: 'SK-0001' }) }), today: '2026-12-02' });
+  const a = r.countries.SK.airports.find(x => x.code === 'SK-0001');
+  assert.ok(a, 'the code stays');
+  assert.equal(a.icao, 'LZAA');
+  assert.ok(!r.countries.SK.airports.some(x => x.code === 'LZAA'), 'no second airfield under the new code');
+  assert.equal(r.registry.airfields['SK-0001'].icao, 'LZAA');
+  assert.equal(r.registry.airfields['SK-0001'].oa_ident, 'LZAA');
+  assert.deepEqual(r.report.changed, ['SK-0001: SK-0001||SK -> LZAA|LZAA|SK']);
+  assert.deepEqual(searchIndex(r.countries).c.SK.find(x => x[0] === 'SK-0001'), ['SK-0001', 'X', '', 'LZAA']);
+});
+
+test('a new airfield gets the code of the rule; a taken code becomes CC-X<oa_id>, nothing is dropped any more', () => {
+  const rows = [
+    airport({ id: '10', ident: 'LZIB', icao_code: 'LZIB', name: 'Bratislava' }),
+    airport({ id: '77', ident: 'SK-0777', icao_code: 'LZIB', name: 'Holds the ICAO code now' }),
+    airport({ id: '80', ident: 'SK-0080', gps_code: 'LZQQ', name: 'First' }),
+    airport({ id: '81', ident: 'SK-0081', gps_code: 'LZQQ', name: 'Second' }),
+  ];
+  const r = build(tables(rows), live, countryOfCode, CZ_LIST, { registry: reg({ LZIB: rec({ oa_id: 10, oa_ident: 'LZIB', icao: 'LZIB' }) }), today: '2026-12-02' });
+  const codes = r.countries.SK.airports.map(a => a.code).sort();
+  assert.deepEqual(codes, ['LZIB', 'LZQQ', 'SK-X77', 'SK-X81']);
+  assert.equal(r.registry.airfields['SK-X77'].oa_id, 77);
+  assert.equal(r.registry.airfields['SK-X77'].added, '2026-12-02');
+  assert.equal(r.countries.SK.airports.find(a => a.code === 'SK-X77').icao, 'LZIB', 'the card shows its real ICAO code');
+  assert.deepEqual(r.report.collisions, [
+    'LZIB is taken, oa 77 "Holds the ICAO code now" (SK) gets SK-X77',
+    'LZQQ is taken, oa 81 "Second" (SK) gets SK-X81',
+  ]);
+  assert.equal(countryOfCode('SK-X77', r.exceptions), 'SK', 'the country is in the code');
+});
+
+test('an airfield gone from the source keeps its data, closes after 3 months and comes back active', () => {
+  const kept = { code: 'SK-0005', name: 'Gone strip', lat: 48, lon: 17, elev: '', town: 'T', slz: true, cc: 'SK' };
+  const prevFiles = { SK: { airports: [kept], info: { 'SK-0005': { r: [['09/27', 500, 20, 'grs', 0]] } } } };
+  let r = build(tables([]), live, countryOfCode, CZ_LIST, { registry: reg({ 'SK-0005': rec({ oa_id: 105 }) }), prevFiles, today: '2026-12-02' });
+  assert.deepEqual(r.countries.SK.airports, [kept], 'last known data stay');
+  assert.deepEqual(r.countries.SK.info['SK-0005'].r[0], ['09/27', 500, 20, 'grs', 0], 'runways too');
+  assert.equal(r.registry.airfields['SK-0005'].missing_since, '2026-12-02');
+  assert.deepEqual(r.report.missing, ['SK-0005']);
+  r = build(tables([]), live, countryOfCode, CZ_LIST, { registry: r.registry, prevFiles: { SK: r.countries.SK }, today: '2027-03-01' });
+  assert.equal(r.registry.airfields['SK-0005'].status, 'active', 'not yet three months');
+  assert.deepEqual(r.report.missing, [], 'reported once');
+  r = build(tables([]), live, countryOfCode, CZ_LIST, { registry: r.registry, prevFiles: { SK: r.countries.SK }, today: '2027-03-02' });
+  assert.equal(r.registry.airfields['SK-0005'].status, 'closed');
+  assert.equal(r.countries.SK.airports[0].closed, 1);
+  assert.deepEqual(searchIndex(r.countries).c.SK[0], ['SK-0005', 'Gone strip', 'T', '', 1]);
+  r = build(tables([airport({ id: '105', ident: 'SK-0005', name: 'Gone strip' })]), live, countryOfCode, CZ_LIST, { registry: r.registry, prevFiles: { SK: r.countries.SK }, today: '2027-04-02' });
+  assert.equal(r.registry.airfields['SK-0005'].status, 'active');
+  assert.equal(r.registry.airfields['SK-0005'].missing_since, null);
+  assert.equal(r.countries.SK.airports[0].closed, undefined);
+  assert.deepEqual(r.report.back, ['SK-0005']);
+});
+
+test('a VFR-manual strip without OurAirports never goes missing; CZ.json decides alone, a closed strip stays', () => {
+  const list = [...CZ_LIST, { code: 'LKNONE', name: 'Only in the manual', lat: 49, lon: 14, elev: '', town: '', slz: true, cc: 'CZ' }];
+  let r = build(tables([]), live, countryOfCode, list, { registry: EMPTY_REGISTRY, today: '2026-12-02' });
+  assert.deepEqual(r.registry.airfields.LKNONE, rec({ cc: 'CZ', added: '2026-12-02', vfr: 'LKNONE' }));
+  for (const today of ['2027-03-02', '2027-06-02']) {
+    r = build(tables([]), live, countryOfCode, list, { registry: r.registry, today });
+    assert.equal(r.registry.airfields.LKNONE.missing_since, null, today);
+    assert.equal(r.registry.airfields.LKNONE.status, 'active', today);
+  }
+  // the manual drops a strip: CZ.json marks it closed, it is never deleted
+  r = build(tables([]), live, countryOfCode, [CZ_LIST[0], { ...list[1], closed: 1 }], { registry: r.registry, today: '2027-07-02' });
+  assert.equal(r.registry.airfields.LKNONE.status, 'closed');
+  assert.throws(() => build(tables([]), live, countryOfCode, CZ_LIST, { registry: r.registry, today: '2027-07-02' }), /CZ\.json lost LKNONE/);
+});
+
+test('a new row with the ICAO code of an airfield whose OurAirports row is gone waits for a person', () => {
+  const kept = { code: 'SK-0009', name: 'Old', lat: 48, lon: 17, elev: '', town: '', slz: false, cc: 'SK', icao: 'LZZZ' };
+  const r = build(tables([airport({ id: '200', ident: 'SK-0200', icao_code: 'LZZZ', name: 'Re-created' })]), live, countryOfCode, CZ_LIST,
+    { registry: reg({ 'SK-0009': rec({ oa_id: 109, icao: 'LZZZ' }) }), prevFiles: { SK: { airports: [kept], info: {} } }, today: '2026-12-02' });
+  assert.deepEqual(r.countries.SK.airports.map(a => a.code), ['SK-0009'], 'no second airfield');
+  assert.equal(r.registry.airfields['SK-0009'].oa_id, 109, 'its oa_id never changes by itself');
+  assert.match(r.report.held[0], /oa 200 SK-0200 "Re-created" looks like SK-0009/);
+});
+
+test('the registry check stops a code that leaves or changes its OurAirports row, and a mass disappearance', () => {
+  const before = reg({ AAAA: rec({ oa_id: 1 }), BBBB: rec({ oa_id: 2 }), CCCC: rec({ cc: 'CZ' }) });
+  const none = { missing: [] };
+  assert.throws(() => checkRegistry(before, reg({ AAAA: rec({ oa_id: 1 }), CCCC: rec({ cc: 'CZ' }) }), none, {}), /BBBB would leave the registry/);
+  assert.throws(() => checkRegistry(before, reg({ AAAA: rec({ oa_id: 9 }), BBBB: rec({ oa_id: 2 }), CCCC: rec({ cc: 'CZ' }) }), none, {}), /AAAA: oa_id 1 -> 9/);
+  assert.doesNotThrow(() => checkRegistry(before, reg({ ...before.airfields, CCCC: rec({ cc: 'CZ', oa_id: 5 }) }), none, {}), 'a VFR strip may get its OurAirports row');
+  const prevFiles = { SK: { airports: [{ code: 'AAAA' }, { code: 'BBBB' }] } };
+  assert.throws(() => checkRegistry(before, before, { missing: ['AAAA'] }, prevFiles), /SK: airfields 2 -> 1/);
+});
+
+test('a code in the registry that has no data left stops the run, nothing is written', async () => {
+  const dir = tempRoot(); onlyLive(dir);
+  await run({ root: dir, getCsv: csvFrom(world()), log: quiet, today: '2026-12-02' });
+  const r = registryOf(dir);
+  r.airfields['SK-0999'] = rec({ oa_id: 999 });
+  writeFileSync(join(dir, 'data', 'registry.json'), JSON.stringify(r));
+  const before = snapshot(dir);
+  await assert.rejects(run({ root: dir, getCsv: csvFrom(world()), log: quiet }), /SK-0999 is in the registry but neither in OurAirports nor in data\/countries\/SK\.json/);
+  assert.deepEqual(snapshot(dir), before);
+});
+
+test('a dry run checks everything and writes nothing', async () => {
+  const dir = tempRoot(); onlyLive(dir);
+  const before = snapshot(dir);
+  const res = await run({ root: dir, getCsv: csvFrom(world()), log: quiet, dryRun: true });
+  assert.deepEqual(snapshot(dir), before);
+  assert.deepEqual(res.written, []);
+  assert.ok(res.wouldWrite.length >= 5);
+  assert.equal(res.report.added.length, 23, 'the whole small world is new to an empty registry');
+});
+
 test('a failed download writes nothing', async () => {
   const dir = tempRoot(); onlyLive(dir);
   await run({ root: dir, getCsv: csvFrom(world()), log: quiet });
@@ -136,9 +258,12 @@ test('a country that loses all its airfields or more than 20 % writes nothing', 
   await assert.rejects(run({ root: dir, getCsv: csvFrom(world({ sk: 18, at: 0 })), log: quiet }), /AT: airfields 10 -> 0/);
   await assert.rejects(run({ root: dir, getCsv: csvFrom(world({ sk: 13, at: 10 })), log: quiet }), /SK: airfields 20 -> 15/);
   assert.deepEqual(snapshot(dir), before);
-  // exactly 20 % less is still accepted
-  await run({ root: dir, getCsv: csvFrom(world({ sk: 14, at: 10 })), log: quiet });
-  assert.equal(JSON.parse(readFileSync(join(dir, 'data', 'countries', 'SK.json'), 'utf8')).airports.length, 16);
+  // exactly 20 % less is still accepted; the missing airfields stay in the file with their last data
+  await run({ root: dir, getCsv: csvFrom(world({ sk: 14, at: 10 })), log: quiet, today: '2026-12-02' });
+  assert.equal(JSON.parse(readFileSync(join(dir, 'data', 'countries', 'SK.json'), 'utf8')).airports.length, 20);
+  const reg = registryOf(dir).airfields;
+  for (const c of ['SK-0014', 'SK-0015', 'SK-0016', 'SK-0017']) assert.equal(reg[c].missing_since, '2026-12-02', c);
+  assert.equal(reg['SK-0013'].missing_since, null);
 });
 
 test('losing more than 20 % of runway and frequency info is refused too', () => {
@@ -174,7 +299,7 @@ test('without the Czech list the run stops and writes nothing', async () => {
   const dir = tempRoot(); onlyLive(dir);
   rmSync(join(dir, 'data', 'countries', 'CZ.json'));
   await assert.rejects(run({ root: dir, getCsv: csvFrom(world()), log: quiet }), /no Czech airfield list/);
-  assert.deepEqual(snapshot(dir), {});
+  assert.deepEqual(snapshot(dir), { 'registry.json': JSON.stringify(EMPTY_REGISTRY) }, 'only the untouched registry');
   writeFileSync(join(dir, 'data', 'countries', 'CZ.json'), JSON.stringify({ airports: [] }));
   await assert.rejects(run({ root: dir, getCsv: csvFrom(world()), log: quiet }), /no Czech airfield list/);
 });

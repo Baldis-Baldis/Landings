@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync, writeFileSync, renameSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fetchCsv, loadCountries, appCode } from './update-airports.mjs';
+import { fetchCsv, loadCountries, appCode, stringifyRegistry } from './update-airports.mjs';
 
 const TYPES = new Set(['small_airport', 'medium_airport', 'large_airport']);
 
@@ -63,11 +63,8 @@ export function buildRegistry({ pairs, today }) {
   return { v: 1, generated: today, airfields };
 }
 
-// one airfield per line, so a monthly change shows as a few changed lines in git
-export function stringifyRegistry(reg) {
-  const lines = Object.entries(reg.airfields).map(([code, r]) => `${JSON.stringify(code)}:${JSON.stringify(r)}`);
-  return `{"v":${reg.v},"generated":${JSON.stringify(reg.generated)},"airfields":{\n${lines.join(',\n')}\n}}\n`;
-}
+// one airfield per line (shared with the monthly update)
+export { stringifyRegistry };
 
 // what must hold before the file is written
 export function checkRegistry(reg, files) {
