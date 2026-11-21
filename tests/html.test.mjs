@@ -567,6 +567,10 @@ function peekWorld(selected = ['CZ']) {
   ctx.openCard = a => { ctx.opened = a.code; };
   ctx.showOnMap = a => { ctx.shown = a.code; };
   ctx.applyCountries = async () => { ctx.applied = [...ctx.selCC]; };
+  ctx.own = {};
+  ctx.hasOwnData = a => !!ctx.own[a.code];
+  ctx.addMarker = a => { ctx.markers[a.code] = marker(a); ctx.added = a.code; };
+  ctx.marker = marker;
   vm.runInContext('let peek=null;\n' + peekCode, ctx);
   return { ctx, A, B };
 }
@@ -608,9 +612,10 @@ test('"Show all airfields" in the card adds the country; an airfield of a shown 
   assert.deepEqual(Object.keys(ctx.markers), [], 'the temporary marker gives way to the country\'s own');
   assert.equal(ctx.shown, 'LFPG', 'and the card opens on it');
   const shown = peekWorld(['CZ', 'FR']);
+  shown.ctx.markers.LFOE = shown.ctx.marker(shown.B);
   await vm.runInContext("openElsewhere('FR','LFOE')", shown.ctx);
-  assert.equal(shown.ctx.shown, 'LFOE');
-  assert.deepEqual(Object.keys(shown.ctx.markers), []);
+  assert.equal(shown.ctx.shown, 'LFOE', 'a shown airfield with its marker opens as usual');
+  assert.deepEqual(Object.keys(shown.ctx.markers), ['LFOE'], 'no temporary marker');
   // the link: only for a country that is not shown, text only, the click stays in the card
   assert.match(html, /if\(!isCustom&&CCS\.includes\(a\.cc\)&&!selCC\.includes\(a\.cc\)\)\{\n    const all=document\.createElement\('button'\); all\.type='button'; all\.className='showall'; all\.textContent=t\('showAll'\)\(ccName\(a\.cc\)\);\n    all\.onclick=e=>\{ e\.stopPropagation\(\); showAllOf\(a\); \};/);
   assert.match(html, /showAll:c=>'Zobrazit všechna letiště: '\+c/);
@@ -618,6 +623,58 @@ test('"Show all airfields" in the card adds the country; an airfield of a shown 
   // its marker changes with landed, favourite and want to visit like any other, and its country is in Mine & selected
   assert.match(html, /if\(peek&&peek\.m===old\)\{ peek\.m=m; peek\.swap=true;/);
   assert.match(html, /return CCS\.filter\(c=>c===home\|\|selCC\.includes\(c\)\|\|mine\[c\]\|\|fl\.has\(c\)\);/);
+});
+
+// --- closed airfields and ICAO codes from the registry ---
+test('a closed airfield is shown only to whoever has own data on it; the card says since when', () => {
+  const code = html.slice(html.indexOf('function hasOwnData(a)'), html.indexOf('function refreshTotal()'));
+  const ctx = vm.createContext({ visited: {}, flags: {}, photos: {}, custom: {}, selCC: ['SK'],
+    ccData: { SK: [{ code: 'SK-0001' }, { code: 'SK-0002', closed: '2027-03-02' }, { code: 'SK-0003', closed: '2027-03-02' }, { code: 'SK-0004', closed: true }] },
+    t: k => ({ closedNote: d => 'Zrušeno, už není ve zdroji' + (d ? ' (od ' + d + ')' : '') }[k]) });
+  vm.runInContext(code, ctx);
+  const shown = () => JSON.parse(JSON.stringify(vm.runInContext('allData().map(a=>a.code)', ctx)));
+  assert.deepEqual(shown(), ['SK-0001'], 'closed without own data stay out of the map and the list');
+  ctx.visited['SK-0002'] = { date: '2026-05-01' };
+  ctx.flags['SK-0003'] = { want: true };
+  ctx.photos['SK-0004'] = { pics: [{ url: 'x' }] };
+  assert.deepEqual(shown(), ['SK-0001', 'SK-0002', 'SK-0003', 'SK-0004'], 'a landing, a flag or a photo keeps them');
+  assert.equal(vm.runInContext("closedNote({closed:'2027-03-02'})", ctx), 'Zrušeno, už není ve zdroji (od 3/2027)');
+  assert.equal(vm.runInContext('closedNote({closed:true})', ctx), 'Zrušeno, už není ve zdroji', 'closed by hand in CZ.json');
+  assert.match(html, /closedNote:d=>'Closed, no longer in the source'\+\(d\?' \(since '\+d\+'\)':''\)/);
+  assert.match(html, /if\(!isCustom&&a\.closed\) html\+=`<div class="closednote">\$\{esc\(closedNote\(a\)\)\}<\/div>`;/);
+  // the markers follow the same rule, the temporary one is left alone
+  assert.match(html, /const want=sel&&\(!a\.closed\|\|hasOwnData\(a\)\), has=!!markers\[a\.code\];/);
+  assert.match(html, /if\(peek&&peek\.a\.code===a\.code\) return;/);
+});
+
+test('the card shows the ICAO code when it differs from ours, and the search finds it', () => {
+  assert.match(html, /<div class="m">\$\{esc\(a\.code\)\}\$\{a\.icao\?' · ICAO: '\+esc\(a\.icao\):''\}/);
+  assert.match(html, /return \[a\.code,a\.icao\?'ICAO: '\+a\.icao:'',a\.town/);
+  const w = searchWorld(async () => ({ ok: true, json: async () => ({ v: 1, c: { FR: [['FR-X4026', 'Los Pozuelos', 'Ciudad Real', 'LEXX'], ['FR-0001', 'Gone', 'Town', '', 1]] } }) }));
+  vm.runInContext('loadSearch()', w);
+  return ticks().then(ticks).then(() => {
+    const hits = JSON.parse(JSON.stringify(vm.runInContext("elsewhere('lexx','all')", w))).hits;
+    assert.deepEqual(hits.map(h => h.code), ['FR-X4026'], 'by the ICAO code from the registry');
+    assert.equal(vm.runInContext("searchText({name:'A',code:'SK-0001',town:'',icao:'LZAB'})", w).includes('lzab'), true);
+    const gone = JSON.parse(JSON.stringify(vm.runInContext("elsewhere('gone','all')", w))).hits[0];
+    assert.equal(gone.closed, true, 'a closed one is found too');
+  });
+});
+
+test('a search finds closed airfields of the shown countries with a label, and opens them on a temporary marker', async () => {
+  assert.match(searchCode, /function closedHits\(s,mode\)\{/);
+  assert.match(searchCode, /filter\(a=>a\.closed&&!hasOwnData\(a\)&&searchText\(a\)\.includes\(s\)\)/);
+  assert.match(searchCode, /if\(r\.closed\) meta\.append\(' ',el\('span','closedtag',t\('closedTag'\)\)\);/);
+  assert.match(html, /\$\{a\.closed\?' <span class="closedtag">'\+esc\(t\('closedTag'\)\)\+'<\/span>':''\}/, 'and in the list for whoever has data');
+  // a closed airfield of a shown country has no marker: it opens like one from another country
+  const { ctx } = peekWorld(['CZ', 'FR']);
+  await vm.runInContext("openElsewhere('FR','LFPG')", ctx);
+  assert.ok(ctx.markers.LFPG && ctx.markers.LFPG._map === ctx.map, 'a temporary marker');
+  assert.equal(ctx.opened, 'LFPG');
+  // a landing on it meanwhile: when the card closes, the real marker takes over
+  ctx.own.LFPG = true;
+  ctx.markers.LFPG.fire('popupclose');
+  assert.equal(ctx.added, 'LFPG');
 });
 
 test('grouping can be switched off in the country panel and is remembered', () => {

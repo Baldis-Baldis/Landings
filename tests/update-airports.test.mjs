@@ -172,7 +172,7 @@ test('an airfield gone from the source keeps its data, closes after 3 months and
   assert.deepEqual(r.report.missing, [], 'reported once');
   r = build(tables([]), live, countryOfCode, CZ_LIST, { registry: r.registry, prevFiles: { SK: r.countries.SK }, today: '2027-03-02' });
   assert.equal(r.registry.airfields['SK-0005'].status, 'closed');
-  assert.equal(r.countries.SK.airports[0].closed, 1);
+  assert.equal(r.countries.SK.airports[0].closed, '2026-12-02', 'the day it went missing, for "since M/YYYY"');
   assert.deepEqual(searchIndex(r.countries).c.SK[0], ['SK-0005', 'Gone strip', 'T', '', 1]);
   r = build(tables([airport({ id: '105', ident: 'SK-0005', name: 'Gone strip' })]), live, countryOfCode, CZ_LIST, { registry: r.registry, prevFiles: { SK: r.countries.SK }, today: '2027-04-02' });
   assert.equal(r.registry.airfields['SK-0005'].status, 'active');

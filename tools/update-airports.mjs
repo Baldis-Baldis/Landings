@@ -183,8 +183,9 @@ export function build({ airports, runways, freqs }, COUNTRIES, countryOfCode, cz
     if (!prev || !out[rec.cc]) throw new Error(`${code} is in the registry but neither in OurAirports nor in data/countries/${rec.cc}.json`);
     if (!rec.missing_since) { rec.missing_since = today; report.missing.push(code); }
     if (rec.status === 'active' && addMonths(rec.missing_since, CLOSE_AFTER_MONTHS) <= today) { rec.status = 'closed'; report.closed.push(code); }
+    // a closed airfield carries the day it went missing, the card says "closed, gone from the source since M/YYYY"
     const { closed, ...kept } = prev;
-    out[rec.cc].airports.push(rec.status === 'closed' ? { ...kept, closed: 1 } : kept);
+    out[rec.cc].airports.push(rec.status === 'closed' ? { ...kept, closed: rec.missing_since } : kept);
     if (prevFiles[rec.cc].info && prevFiles[rec.cc].info[code]) keptInfo[code] = prevFiles[rec.cc].info[code];
     seen.add(code); codeCc.set(code, rec.cc);
   }
