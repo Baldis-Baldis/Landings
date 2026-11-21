@@ -1288,7 +1288,7 @@ document.addEventListener('click',e=>{ if(menu.classList.contains('on')&&!menu.c
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&menu.classList.contains('on')){ e.preventDefault(); e.stopPropagation(); setMenu(false,true); } },true);
 document.getElementById('acctsyncnow').onclick=()=>document.getElementById('syncbtn').click();
 // Account items of the menu. The admin item only leads to the page, the database decides what it shows.
-const APP_VERSION='landings-v55'; // matches the cache name in sw.js
+const APP_VERSION='landings-v56'; // matches the cache name in sw.js
 function showAccountMenu(){
   document.getElementById('fb').hidden=!account;
   const adminBtn=document.getElementById('adminbtn'); adminBtn.hidden=true;

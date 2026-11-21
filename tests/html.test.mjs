@@ -843,6 +843,19 @@ test('my log: landing, note and photos under one heading, each photo with a shar
   assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
 });
 
+test('the privacy notice and the about page describe airfield ratings in both languages', () => {
+  const privacy = readFileSync(join(root, 'privacy.html'), 'utf8').replace(/\s+/g, ' ');
+  const about = readFileSync(join(root, 'about.html'), 'utf8').replace(/\s+/g, ' ');
+  for (const s of ['měsíc a rok vašeho posledního přistání', 'the month and year of your last landing',
+    'Rozepsané hodnocení zůstane v prohlížeči', 'A rating you have started stays in your browser',
+    'znění nahlášeného komentáře nebo hodnocení', 'Účet, záznamy a hodnocení:', 'Account, records and ratings:',
+    '(hodnocení letišť)', '(airfield ratings)']) assert.ok(privacy.includes(s), s);
+  assert.ok(!privacy.includes('datum vašeho posledního přistání'), 'never the exact day');
+  for (const s of ['Hodnocení letišť – hvězdičky', 'Airfield ratings – stars', 'Můj deník –', 'My log –',
+    'vybavením letiště, sdílenými fotkami', 'kromě sdílení a hodnocení', 'except sharing and rating']) assert.ok(about.includes(s), s);
+  assert.ok(!/Komentáře, veřejné nebo soukromé|Comments, public or private/.test(about), 'public comments are gone');
+});
+
 test('a public review shows the month and year of the visit, 11/2026 in both languages', () => {
   const fmt = vm.runInNewContext(`(${html.match(/fmtMonth:(m=>\{[^}]*\})/)[1]})`);
   assert.equal(fmt('2026-11'), '11/2026');
