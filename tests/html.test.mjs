@@ -468,6 +468,39 @@ test('the list draws in chunks of 200 and keeps its length after a change', () =
   assert.match(html, /document\.getElementById\('cnt'\)\.textContent=data\.filter\(a=>visited\[a\.code\]\)\.length;/);
 });
 
+test('the header count says what it counts: "15 z 166 na mapě", "15 / 166" on phones, "+N jinde" only when there are some', () => {
+  assert.match(page, /<span id="cntsum" role="img"><span id="cnt">0<\/span><small><span class="ofw" data-i data-t="of"><\/span><span class="ofs">\/<\/span> <span id="tot">0<\/span><span class="onmap"> <span data-i data-t="onMap"><\/span><\/span><\/small><\/span><button type="button" id="cntelse" class="cntelse" hidden><\/button>/);
+  assert.match(page, /@media \(max-width:760px\)\{header \.count \.ofw,header \.count \.onmap,header \.count \.cword\{display:none\}header \.count \.ofs\{display:inline\}/, 'on phones "15 / 166" and "+1"');
+  assert.match(page, /header \.count \.cntelse\[hidden\]\{display:none\}/);
+  assert.match(html, /more\.replaceChildren\(el\('span','cnum','\+'\+k\),el\('span','cword',word\)\);/);
+  assert.match(page, /\.lang\{display:flex;flex:0 0 auto;/, 'never squeezed, both languages stay visible');
+  const T = vm.runInNewContext(`(${html.slice(html.indexOf('{', html.indexOf('const T=')), html.indexOf('\n};', html.indexOf('const T=')) + 2)})`);
+  assert.equal(T.cs.onMap, 'na mapě'); assert.equal(T.en.onMap, 'on the map');
+  assert.equal(T.cs.countTitle(15, 166), '15 přistání z 166 letišť na mapě');
+  assert.equal(T.en.countTitle(1, 166), '1 landing of 166 airfields on the map');
+  assert.equal(T.cs.elsewhere(1), '+1 jinde'); assert.equal(T.en.elsewhere(2), '+2 elsewhere');
+  assert.equal(T.cs.ccLandings(14), '14 přistání'); assert.equal(T.en.ccLandings(1), '1 landing');
+  // title and aria-label carry the sentence; the button opens the country picker
+  const labels = html.slice(html.indexOf('function countLabels('), html.indexOf('function render(){'));
+  assert.match(labels, /sum\.title=t\('countTitle'\)\(n,data\.length\); sum\.setAttribute\('aria-label',sum\.title\);/);
+  assert.match(labels, /more\.hidden=!k;/);
+  assert.match(html, /ccBtn\.onclick=openCC; ccChips\.onclick=openCC;\r?\n.*\r?\ndocument\.getElementById\('cntelse'\)\.onclick=\(\)=>openCC\(\);/);
+  // which landings count as elsewhere: not shown, not custom, and not in a selected country still loading
+  const fn = html.slice(html.indexOf('function landingsElsewhere('), html.indexOf('function countLabels('));
+  const run = (visited, custom, selCC, ccData) => vm.runInNewContext(`${fn}; landingsElsewhere(data)`, {
+    visited, custom, selCC, ccData, ccIndex: null, data: [{ code: 'LKLB' }, { code: 'C1' }],
+    countryOfCode: c => (c.startsWith('LK') ? 'CZ' : c.startsWith('LF') ? 'FR' : c.startsWith('ED') ? 'DE' : ''),
+  });
+  assert.equal(run({ LKLB: {}, C1: {} }, { C1: {} }, ['CZ'], { CZ: [] }), 0, '14 CZ + 1 custom: nothing elsewhere');
+  assert.equal(run({ LKLB: {}, LFOE: {} }, {}, ['CZ'], { CZ: [] }), 1, 'a French landing with France not shown');
+  assert.equal(run({ LKLB: {}, EDXX: {} }, {}, ['CZ', 'DE'], { CZ: [] }), 0, 'Germany selected but still loading');
+  assert.equal(run({ LKLB: {}, ZZZZ: {} }, {}, ['CZ'], { CZ: [] }), 1, 'a code of no known country');
+});
+
+test('the country panel says "14 přistání" at the tick', () => {
+  assert.match(html, /const m=el\('span','ccmine','✓ '\+mine\[c\]\); m\.title=t\('ccLandings'\)\(mine\[c\]\); m\.setAttribute\('aria-label',m\.title\); m\.setAttribute\('role','img'\);/);
+});
+
 test('the home country clusters like every other country, custom strips stay single', () => {
   assert.match(html, /function clustered\(a\)\{ return !!a\.cc; \}/);
   assert.ok(!/HOME_FLAT_MAX/.test(html));
@@ -938,7 +971,7 @@ test('with a mouse the account button is as tall as the CZ/EN switch; touch keep
   const fine = page.slice(page.indexOf('@media (pointer:fine) and (min-width:761px){'));
   assert.match(fine, /\.acctbtn\{position:relative;min-width:0;min-height:28px;height:28px;[^}]*border-radius:6px;font:600 12px Barlow/);
   assert.match(page, /\.lang button\{font:600 12px Barlow,sans-serif;padding:6px 9px;/, 'the switch it follows');
-  assert.match(page, /\.lang\{display:flex;border:1px solid var\(--line\);border-radius:6px;/);
+  assert.match(page, /\.lang\{display:flex;flex:0 0 auto;border:1px solid var\(--line\);border-radius:6px;/);
   assert.match(fine, /\.acctbtn \.acctav\{width:20px;height:20px;/);
   assert.match(fine, /header\{box-sizing:border-box;min-height:60px\}/, 'the logo keeps some air');
   assert.match(page, /@media \(pointer:fine\) and \(min-width:761px\) and \(any-pointer:coarse\)\{\n  \.acctbtn::after\{content:'';position:absolute;left:0;right:0;top:-8px;bottom:-8px\}/, '28 + 2 × 8 = 44 px');

@@ -29,9 +29,11 @@
   const STATS = [
     ['users', 'účtů'], ['users_new_7d', 'nových za 7 dní'], ['users_new_30d', 'nových za 30 dní'],
     ['users_active_7d', 'aktivních za 7 dní'], ['users_active_30d', 'aktivních za 30 dní'], ['profiles', 's přezdívkou'],
-    ['landings', 'přistání'], ['custom_airfields', 'vlastních ploch'], ['comments', 'komentářů'],
-    ['comments_public', 'veřejných komentářů'], ['photos', 'fotek'], ['photos_public', 'veřejných fotek'],
-    ['reviews', 'hodnocení'], ['reviews_hidden', 'skrytých hodnocení'],
+    // totals of every account, not the admin's own numbers (those are in the app header and the country panel)
+    ['landings', 'přistání – všechny účty'], ['custom_airfields', 'vlastních ploch – všechny účty'],
+    ['comments', 'komentářů – všechny účty'], ['comments_public', 'veřejných komentářů'],
+    ['photos', 'fotek – všechny účty'], ['photos_public', 'veřejných fotek'],
+    ['reviews', 'hodnocení – všechny účty'], ['reviews_hidden', 'skrytých hodnocení'],
     ['reports_open', 'otevřených hlášení'], ['feedback_new', 'nových vzkazů'],
   ];
 

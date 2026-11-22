@@ -57,6 +57,14 @@ test('stats show totals and the sign-up days', async () => {
   assert.equal(main.all().filter(n => n.title === '2026-11-01: 2').length, 1);
 });
 
+test('totals say they cover every account, so they are not taken for the admin\'s own numbers', async () => {
+  const { main } = await load({});
+  for (const label of ['přistání – všechny účty', 'vlastních ploch – všechny účty', 'komentářů – všechny účty',
+    'fotek – všechny účty', 'hodnocení – všechny účty']) {
+    assert.ok(main.all().some(n => n.textContent === label), label);
+  }
+});
+
 test('reported content stays text and both decisions reach the database function', async () => {
   const item = {
     comment_id: 'c2', photo_id: null, airfield_code: 'LKBE', author: ATTACK, body: ATTACK, url: null, thumb: 'javascript:x',
