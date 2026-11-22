@@ -223,10 +223,13 @@
         nodes.push(el('div', 'h4', t('factsHead')));
         const grid = el('div', 'fxgrid');
         for (const f of sum.facts) {
-          const cell = el('div');
+          // the count is a small green badge on the icon; a screen reader hears one sentence instead
+          const cell = el('div', 'fx');
+          cell.setAttribute('role', 'img');
+          cell.setAttribute('aria-label', t('factConfirmed')(t(`fact_${f.key}`), f.n));
           const ring = el('span', 'ring');
-          ring.append(icon(f.key));
-          cell.append(ring, el('span', '', t(`fact_${f.key}`)), el('b', '', `✓ ${f.n}`));
+          ring.append(icon(f.key), el('b', 'fxn', String(f.n)));
+          cell.append(ring, el('span', '', t(`fact_${f.key}`)));
           grid.append(cell);
         }
         nodes.push(grid);

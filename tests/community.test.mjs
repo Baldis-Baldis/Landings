@@ -54,7 +54,7 @@ function load({ signedIn = false, landed = null, mine = null, data = { reviews: 
   vm.createContext(ctx);
   vm.runInContext(readFileSync(join(root, 'community.js'), 'utf8'), ctx);
   const opts = {
-    t: k => (/^(nRatings|starsOf|rateLanded|landedOn|moreReviews)$/.test(k) ? v => `${k}(${v})` : k),
+    t: k => (/^(nRatings|starsOf|rateLanded|landedOn|moreReviews|factConfirmed)$/.test(k) ? (...v) => `${k}(${v.join(',')})` : k),
     lang: () => 'cs', fmtDate: d => `D${d}`, fmtMonth: m => `M${m}`, signedIn: () => signedIn, nickname: () => (signedIn ? 'Me' : null),
     landedOn: () => landed, myReview: () => mine, onResize() {}, openPhoto: (...a) => calls.push(['photo', ...a]),
     onRate: r => calls.push(['rate', r && r.id]), onChanged: () => calls.push(['changed']),
@@ -189,7 +189,14 @@ test('facilities in the opened section show how many pilots confirmed them', asy
   const { box } = load();
   await open(box);
   const grid = byClass(box, 'fxgrid');
-  assert.deepEqual(grid.children.map(c => c.text().replace(/\s+/g, ' ').trim()), ['fact_wc ✓ 2', 'fact_fee ✓ 1']);
+  // the count is a badge on the icon, only the label under it; one sentence for screen readers
+  assert.deepEqual(grid.children.map(c => c.find(n => n.className === 'fxn').textContent), ['2', '1']);
+  assert.ok(grid.children.every(c => c.find(n => n.className === 'ring').children.some(n => n.className === 'fxn')));
+  assert.deepEqual(grid.children.map(c => c.children.filter(n => n.tag === 'span' && !n.className).map(n => n.textContent)), [['fact_wc'], ['fact_fee']]);
+  assert.ok(!/✓/.test(grid.text()), 'no tick any more');
+  assert.deepEqual(grid.children.map(c => [c.getAttribute('role'), c.getAttribute('aria-label')]),
+    [['img', 'factConfirmed(fact_wc,2)'], ['img', 'factConfirmed(fact_fee,1)']]);
+  assert.equal(byClass(box, 'minifx').findAll(n => n.className === 'fxn').length, 0, 'the collapsed row stays without badges');
   assert.match(box.text(), /pilotsFoot/);
 });
 

@@ -861,6 +861,22 @@ test('From pilots: hidden buttons stay hidden, the report flag sits on the right
   assert.ok(page.includes('.pop .rvh>div:not(.commreport){flex:1;min-width:0}'));
 });
 
+test('facility counts: a green badge on the icon, the right Czech and English forms for screen readers', () => {
+  const T = vm.runInNewContext(`(${html.slice(html.indexOf('{', html.indexOf('const T=')), html.indexOf('\n};', html.indexOf('const T=')) + 2)})`);
+  const cs = T.cs.factConfirmed, en = T.en.factConfirmed;
+  assert.equal(cs('WC', 1), 'WC, potvrdil 1 pilot');
+  assert.equal(cs('WC', 3), 'WC, potvrdili 3 piloti');
+  assert.equal(cs('WC', 4), 'WC, potvrdili 4 piloti');
+  assert.equal(cs('WC', 5), 'WC, potvrdilo 5 pilotů');
+  assert.equal(cs('WC', 12), 'WC, potvrdilo 12 pilotů');
+  assert.equal(en('Toilets', 1), 'Toilets, confirmed by 1 pilot');
+  assert.equal(en('Toilets', 3), 'Toilets, confirmed by 3 pilots');
+  assert.match(page, /\.pop \.fxgrid \.ring\{position:relative;/);
+  // small, only informative: a 16 px circle, 10 px digits, an oval from two digits
+  assert.ok(page.includes('.pop .fxgrid .fxn{position:absolute;top:-4px;right:-7px;box-sizing:border-box;min-width:16px;height:16px;padding:0 3px;border-radius:8px;border:1.5px solid #fff;background:var(--done);color:#fff;font:700 10px/13px Barlow,sans-serif;'));
+  assert.match(page, /--done:#1E7B4B/);
+});
+
 test('a public review shows the month and year of the visit, 11/2026 in both languages', () => {
   const fmt = vm.runInNewContext(`(${html.match(/fmtMonth:(m=>\{[^}]*\})/)[1]})`);
   assert.equal(fmt('2026-11'), '11/2026');
