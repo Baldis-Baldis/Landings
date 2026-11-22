@@ -843,6 +843,13 @@ test('my log: landing, note and photos under one heading, each photo with a shar
   assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
 });
 
+test('the about page opens with landings and visited airfields, in both languages', () => {
+  const about = readFileSync(join(root, 'about.html'), 'utf8').replace(/\s+/g, ' ');
+  assert.ok(about.includes('<p>MyLandings je aplikace pro piloty, kteří chtějí mít všechna svá přistání a navštívená letiště přehledně na jednom místě.'));
+  assert.ok(about.includes('<p>MyLandings is an app for pilots who want to keep all their landings and visited airfields neatly in one place.'));
+  assert.ok(!/své lety přehledně|their flying neatly/.test(about), 'the old wording is gone');
+});
+
 test('the privacy notice and the about page describe airfield ratings in both languages', () => {
   const privacy = readFileSync(join(root, 'privacy.html'), 'utf8').replace(/\s+/g, ' ');
   const about = readFileSync(join(root, 'about.html'), 'utf8').replace(/\s+/g, ' ');
