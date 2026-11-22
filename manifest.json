@@ -1,6 +1,7 @@
 {
  "name": "Kde jsem přistál",
  "short_name": "Přistání",
+ "description": "MyLandings – a landing logbook for pilots: map of airfields in Czechia and Europe, landing records, photos and airfield ratings from pilots.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

@@ -843,6 +843,21 @@ test('my log: landing, note and photos under one heading, each photo with a shar
   assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
 });
 
+test('the app and the about page describe themselves the same way, the about page says "My logbook"', () => {
+  const desc = 'MyLandings – deník přistání pro piloty. Mapa letišť a ploch SLZ v Česku a Evropě, záznamy přistání, fotky a hodnocení letišť od pilotů.';
+  assert.ok(desc.length <= 160, 'about 150 characters');
+  for (const f of ['index.html', 'about.html']) {
+    const html = readFileSync(join(root, f), 'utf8');
+    assert.equal((html.match(/<meta name="description" content="([^"]*)">/) || [])[1], desc, f);
+    assert.ok(html.indexOf('<meta name="description"') < html.indexOf('</head>'), f);
+  }
+  const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
+  assert.equal(manifest.description, 'MyLandings – a landing logbook for pilots: map of airfields in Czechia and Europe, landing records, photos and airfield ratings from pilots.');
+  const about = readFileSync(join(root, 'about.html'), 'utf8');
+  assert.ok(about.includes('<h3>Můj deník</h3>') && about.includes('<h3>My logbook</h3>'));
+  assert.ok(!/Moje lety|My flying/.test(about));
+});
+
 test('the about page opens with landings and visited airfields, in both languages', () => {
   const about = readFileSync(join(root, 'about.html'), 'utf8').replace(/\s+/g, ' ');
   assert.ok(about.includes('<p>MyLandings je aplikace pro piloty, kteří chtějí mít všechna svá přistání a navštívená letiště přehledně na jednom místě.'));
