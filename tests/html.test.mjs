@@ -843,6 +843,18 @@ test('my log: landing, note and photos under one heading, each photo with a shar
   assert.match(page, /\.pop \.gal div\.shared\{outline:2px solid var\(--done\)/);
 });
 
+test('one name everywhere: MyLandings in the manifest, on the iPhone home screen and in every page title', () => {
+  const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
+  assert.equal(manifest.name, 'MyLandings');
+  assert.equal(manifest.short_name, 'MyLandings');
+  assert.match(page, /<meta name="apple-mobile-web-app-title" content="MyLandings">/);
+  assert.match(page, /<title>MyLandings – deník přistání<\/title>/);
+  for (const f of ['index.html', 'about.html', 'privacy.html', 'terms.html', 'admin.html']) {
+    assert.match(readFileSync(join(root, f), 'utf8'), /<title>MyLandings[ ·–]/, f);
+  }
+  assert.ok(!/Kde jsem přistál|Přistání"/.test(page.slice(0, page.indexOf('</head>'))), 'the old names are gone from the head');
+});
+
 test('the app and the about page describe themselves the same way, the about page says "My logbook"', () => {
   const desc = 'MyLandings – deník přistání pro piloty. Mapa letišť a ploch SLZ v Česku a Evropě, záznamy přistání, fotky a hodnocení letišť od pilotů.';
   assert.ok(desc.length <= 160, 'about 150 characters');
